@@ -4,7 +4,7 @@ export const quoteProjectTypes: QuoteProjectTypeOption[] = [
   {
     key: "landing",
     label: "Landing page",
-    description: "Una página enfocada en captar leads, validar una oferta o impulsar una campaña puntual.",
+    description: "Una pagina enfocada en captar leads, validar una oferta o impulsar una campana puntual.",
     base: { min: 12000, max: 22000 },
     timelineWeeks: { min: 2, max: 4 }
   },
@@ -18,78 +18,78 @@ export const quoteProjectTypes: QuoteProjectTypeOption[] = [
   {
     key: "ecommerce",
     label: "Ecommerce",
-    description: "Una tienda en línea con catálogo, carrito, checkout y operación comercial.",
+    description: "Una tienda en linea con catalogo, carrito, checkout y operacion comercial.",
     base: { min: 50000, max: 120000 },
     timelineWeeks: { min: 8, max: 14 }
   },
   {
     key: "admin-system",
     label: "Sistema administrativo",
-    description: "Una plataforma para organizar operaciones, información y procesos internos.",
+    description: "Una plataforma para organizar operaciones, informacion y procesos internos.",
     base: { min: 65000, max: 140000 },
     timelineWeeks: { min: 8, max: 16 }
   },
   {
     key: "web-app",
-    label: "Aplicación web a medida",
-    description: "Un producto digital con flujos personalizados, lógica propia y espacio para crecer.",
+    label: "Aplicacion web a medida",
+    description: "Un producto digital con flujos personalizados, logica propia y espacio para crecer.",
     base: { min: 80000, max: 220000 },
     timelineWeeks: { min: 10, max: 20 }
   },
   {
     key: "automation",
-    label: "Automatización o integración",
+    label: "Automatizacion o integracion",
     description: "Conexiones y automatizaciones entre herramientas para ahorrar tiempo operativo.",
     base: { min: 28000, max: 90000 },
     timelineWeeks: { min: 4, max: 10 }
   },
   {
     key: "redesign",
-    label: "Rediseño o mejora",
-    description: "Una evolución visual, funcional o estratégica sobre una plataforma existente.",
+    label: "Rediseno o mejora",
+    description: "Una evolucion visual, funcional o estrategica sobre una plataforma existente.",
     base: { min: 18000, max: 70000 },
     timelineWeeks: { min: 3, max: 8 }
   }
 ];
 
 export const quoteModules: QuoteModuleOption[] = [
-  { key: "custom-design", group: "feature", label: "Diseño personalizado", description: "Dirección visual y pantallas alineadas con tu marca.", price: { min: 6000, max: 16000 }, timelineWeeks: { min: 1, max: 2 } },
-  { key: "admin-panel", group: "feature", label: "Panel administrador", description: "Un espacio interno para gestionar contenido y operación diaria.", price: { min: 9000, max: 24000 }, timelineWeeks: { min: 1, max: 3 } },
-  { key: "auth", group: "feature", label: "Login y usuarios", description: "Acceso con cuentas, recuperación de contraseña y perfiles básicos.", price: { min: 7000, max: 18000 }, timelineWeeks: { min: 1, max: 2 } },
+  { key: "custom-design", group: "feature", label: "Diseno personalizado", description: "Direccion visual y pantallas alineadas con tu marca.", price: { min: 6000, max: 16000 }, timelineWeeks: { min: 1, max: 2 } },
+  { key: "admin-panel", group: "feature", label: "Panel administrador", description: "Un espacio interno para gestionar contenido y operacion diaria.", price: { min: 9000, max: 24000 }, timelineWeeks: { min: 1, max: 3 } },
+  { key: "auth", group: "feature", label: "Login y usuarios", description: "Acceso con cuentas, recuperacion de contrasena y perfiles basicos.", price: { min: 7000, max: 18000 }, timelineWeeks: { min: 1, max: 2 } },
   { key: "roles", group: "feature", label: "Roles y permisos", description: "Niveles de acceso para distintos tipos de usuario.", price: { min: 8000, max: 20000 }, timelineWeeks: { min: 1, max: 2 } },
-  { key: "blog", group: "feature", label: "Blog", description: "Sección de artículos, novedades o contenido editorial.", price: { min: 4000, max: 12000 }, timelineWeeks: { min: 1, max: 1 } },
-  { key: "catalog", group: "feature", label: "Catálogo", description: "Listado organizado de productos, servicios o inventario.", price: { min: 6000, max: 16000 }, timelineWeeks: { min: 1, max: 2 } },
-  { key: "payments", group: "feature", label: "Pagos en línea", description: "Cobro con tarjeta, links de pago o pasarelas especializadas.", price: { min: 12000, max: 32000 }, timelineWeeks: { min: 1, max: 3 } },
-  { key: "multilang", group: "feature", label: "Multi idioma", description: "Contenido y navegación disponibles en más de un idioma.", price: { min: 5000, max: 14000 }, timelineWeeks: { min: 1, max: 2 } },
-  { key: "integrations", group: "feature", label: "Integraciones con terceros", description: "Conexión con CRM, ERP, APIs, pagos o herramientas externas.", price: { min: 10000, max: 30000 }, timelineWeeks: { min: 1, max: 3 } },
-  { key: "reports", group: "feature", label: "Reportes", description: "Paneles, exportables y seguimiento con datos útiles para operar.", price: { min: 8000, max: 22000 }, timelineWeeks: { min: 1, max: 2 } },
-  { key: "notifications", group: "feature", label: "Notificaciones", description: "Correos, alertas o avisos automáticos dentro del flujo.", price: { min: 5000, max: 12000 }, timelineWeeks: { min: 1, max: 2 } },
-  { key: "chat", group: "feature", label: "Chat o mensajería", description: "Conversación dentro del producto para clientes o equipo.", price: { min: 9000, max: 26000 }, timelineWeeks: { min: 1, max: 3 } },
-  { key: "maintenance", group: "service", label: "Mantenimiento mensual", description: "Acompañamiento continuo para soporte, ajustes y mejoras menores.", price: { min: 0, max: 0 }, monthly: { min: 3000, max: 10000 } }
+  { key: "blog", group: "feature", label: "Blog", description: "Seccion de articulos, novedades o contenido editorial.", price: { min: 4000, max: 12000 }, timelineWeeks: { min: 1, max: 1 } },
+  { key: "catalog", group: "feature", label: "Catalogo", description: "Listado organizado de productos, servicios o inventario.", price: { min: 6000, max: 16000 }, timelineWeeks: { min: 1, max: 2 } },
+  { key: "payments", group: "feature", label: "Pagos en linea", description: "Cobro con tarjeta, links de pago o pasarelas especializadas.", price: { min: 12000, max: 32000 }, timelineWeeks: { min: 1, max: 3 } },
+  { key: "multilang", group: "feature", label: "Multi idioma", description: "Contenido y navegacion disponibles en mas de un idioma.", price: { min: 5000, max: 14000 }, timelineWeeks: { min: 1, max: 2 } },
+  { key: "integrations", group: "feature", label: "Integraciones con terceros", description: "Conexion con CRM, ERP, APIs, pagos o herramientas externas.", price: { min: 10000, max: 30000 }, timelineWeeks: { min: 1, max: 3 } },
+  { key: "reports", group: "feature", label: "Reportes", description: "Paneles, exportables y seguimiento con datos utiles para operar.", price: { min: 8000, max: 22000 }, timelineWeeks: { min: 1, max: 2 } },
+  { key: "notifications", group: "feature", label: "Notificaciones", description: "Correos, alertas o avisos automaticos dentro del flujo.", price: { min: 5000, max: 12000 }, timelineWeeks: { min: 1, max: 2 } },
+  { key: "chat", group: "feature", label: "Chat o mensajeria", description: "Conversacion dentro del producto para clientes o equipo.", price: { min: 9000, max: 26000 }, timelineWeeks: { min: 1, max: 3 } },
+  { key: "maintenance", group: "service", label: "Mantenimiento mensual", description: "Acompanamiento continuo para soporte, ajustes y mejoras menores.", price: { min: 0, max: 0 }, monthly: { min: 3000, max: 10000 } }
 ];
 
 export const dashboardNav: Record<Role, DashboardNavItem[]> = {
   client: [
-    { key: "summary", label: "Resumen", href: "/dashboard/client" },
-    { key: "quotes", label: "Mis cotizaciones", href: "/dashboard/client/quotes" },
-    { key: "projects", label: "Mis proyectos", href: "/dashboard/client/projects" },
-    { key: "messages", label: "Mensajes", href: "/dashboard/client/messages" },
+    { key: "overview", label: "Inicio", href: "/dashboard/client" },
+    { key: "milestones", label: "Hitos", href: "/dashboard/client/milestones" },
+    { key: "docs", label: "Documentos", href: "/dashboard/client/docs" },
+    { key: "changes", label: "Cambios", href: "/dashboard/client/changes" },
+    { key: "chat", label: "Chat", href: "/dashboard/client/chat" },
+    { key: "payments", label: "Pagos", href: "/dashboard/client/payments" },
     { key: "profile", label: "Perfil", href: "/dashboard/client/profile" }
   ],
   pm: [
-    { key: "summary", label: "Resumen", href: "/dashboard/pm" },
-    { key: "projects", label: "Proyectos asignados", href: "/dashboard/pm/projects" },
-    { key: "timeline", label: "Avances", href: "/dashboard/pm/timeline" },
+    { key: "overview", label: "Inicio", href: "/dashboard/pm" },
+    { key: "projects", label: "Proyectos", href: "/dashboard/pm/projects" },
+    { key: "timeline", label: "Timeline", href: "/dashboard/pm/timeline" },
     { key: "messages", label: "Mensajes", href: "/dashboard/pm/messages" },
-    { key: "tasks", label: "Pendientes", href: "/dashboard/pm/tasks" }
+    { key: "status", label: "Estado", href: "/dashboard/pm/status" }
   ],
   admin: [
-    { key: "summary", label: "Resumen general", href: "/dashboard/admin" },
+    { key: "overview", label: "Inicio", href: "/dashboard/admin" },
     { key: "quotes", label: "Cotizaciones", href: "/dashboard/admin/quotes" },
     { key: "projects", label: "Proyectos", href: "/dashboard/admin/projects" },
-    { key: "users", label: "Usuarios", href: "/dashboard/admin/users" },
-    { key: "assignments", label: "Asignaciones", href: "/dashboard/admin/assignments" },
-    { key: "settings", label: "Configuración", href: "/dashboard/admin/settings" }
+    { key: "team", label: "PMs", href: "/dashboard/admin/team" }
   ]
 };
 

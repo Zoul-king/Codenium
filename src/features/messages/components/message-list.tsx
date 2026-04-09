@@ -1,5 +1,5 @@
+import { DashboardCard, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
 import { getVisibleMessages } from "@/features/dashboard/lib/selectors";
-import { getMessageStatusLabel } from "@/lib/presenters";
 import type { Role } from "@/lib/types/domain";
 
 interface MessageListProps {
@@ -10,22 +10,31 @@ export function MessageList({ role }: MessageListProps) {
   const items = getVisibleMessages(role);
 
   return (
-    <div className="grid grid-cols-1 gap-4">
-      {items.map((message) => (
-        <article key={message.id} className="rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)]">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div>
-              <h3 className="text-xl font-bold text-body-color">{message.thread}</h3>
-              <p className="mt-2 text-sm font-semibold text-primary-500">{message.senderName}</p>
-              <p className="type-body mt-3">{message.preview}</p>
-            </div>
-            <div className="text-right">
-              <span className="tag">{getMessageStatusLabel(message.status)}</span>
-              <p className="mt-3 text-sm text-body-color">{message.sentAt}</p>
-            </div>
+    <div className="grid h-full gap-5 xl:grid-cols-[0.84fr_1.16fr]">
+      <DashboardMutedCard>
+        <SectionHeading eyebrow="Mensajes" title="Pendientes con contexto de proyecto" description="Se eliminan las tarjetas genericas; cada mensaje conserva hilo, remitente y estado." />
+      </DashboardMutedCard>
+
+      <DashboardCard>
+        <div className="flex h-full flex-col">
+          <SectionHeading eyebrow="Bandeja" title={role === "pm" ? "Conversaciones asignadas" : "Mensajes visibles"} />
+          <div className="mt-6 flex-1 space-y-4">
+            {items.map((message) => (
+              <div key={message.id} className="rounded-[22px] border border-slate-200 bg-slate-50 p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-lg font-semibold text-slate-950">{message.thread}</p>
+                    <p className="mt-1 text-sm text-slate-500">{message.senderName}</p>
+                  </div>
+                  <StatusBadge tone={message.status === "unread" ? "warning" : "neutral"}>{message.status === "unread" ? "Pendiente" : "Leido"}</StatusBadge>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-slate-600">{message.preview}</p>
+                <p className="mt-3 text-sm font-medium text-slate-500">{message.sentAt}</p>
+              </div>
+            ))}
           </div>
-        </article>
-      ))}
+        </div>
+      </DashboardCard>
     </div>
   );
 }

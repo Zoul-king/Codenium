@@ -41,6 +41,10 @@ export type ProjectStatus = "discovery" | "design" | "build" | "qa" | "done";
 
 export type MessageStatus = "unread" | "read";
 
+export type MilestoneStatus = "done" | "current" | "next";
+
+export type PaymentStatus = "paid" | "pending" | "scheduled";
+
 export interface EstimateRange {
   min: number;
   max: number;
@@ -124,6 +128,34 @@ export interface MessageRecord {
   preview: string;
   sentAt: string;
   status: MessageStatus;
+}
+
+export interface ProjectMilestoneRecord {
+  id: string;
+  projectId: string;
+  title: string;
+  summary: string;
+  date: string;
+  status: MilestoneStatus;
+}
+
+export interface ProjectDocumentRecord {
+  id: string;
+  projectId: string;
+  title: string;
+  kind: string;
+  updatedAt: string;
+  href: string;
+}
+
+export interface PaymentRecord {
+  id: string;
+  projectId: string;
+  label: string;
+  amount: number;
+  dueDate: string;
+  provider: "Mercado Pago";
+  status: PaymentStatus;
 }
 
 export interface UserRecord {

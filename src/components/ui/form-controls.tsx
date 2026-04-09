@@ -24,7 +24,7 @@ interface TextAreaFieldProps extends BaseFieldProps {
 }
 
 const controlClassName =
-  "w-full rounded-[14px] border border-black/10 bg-foreground px-4 py-3 text-body-color outline-none transition placeholder:text-body-color/55 focus:border-primary-500 focus:bg-white disabled:cursor-not-allowed disabled:opacity-70";
+  "w-full rounded-[16px] border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary-300 focus:bg-white disabled:cursor-not-allowed disabled:opacity-70";
 
 export function TextField({ label, placeholder, type = "text", value, onChange, className, disabled = false }: TextFieldProps) {
   return (
@@ -52,7 +52,7 @@ export function TextAreaField({ label, placeholder, value, onChange, rows = 6, c
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className={cn(controlClassName, "resize-y")}
+        className={cn(controlClassName, "resize-none")}
       />
     </div>
   );

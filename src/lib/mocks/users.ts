@@ -9,10 +9,34 @@ export const mockUsers: UserRecord[] = [
     name: "Valeria Ríos",
     email: "client@codenium.com",
     phone: "+52 55 2100 4500",
-    company: "Codenium Client",
+    company: "Valeria Capital",
     role: "client",
     title: "Dirección de producto",
-    activeProjects: 3
+    activeProjects: 1
+  },
+  {
+    id: "user-client-2",
+    firstName: "Daniel",
+    lastName: "Ortega",
+    name: "Daniel Ortega",
+    email: "daniel@nutrilab.mx",
+    phone: "+52 55 3301 2008",
+    company: "Nutrition Lab",
+    role: "client",
+    title: "Coordinación comercial",
+    activeProjects: 1
+  },
+  {
+    id: "user-client-3",
+    firstName: "Laura",
+    lastName: "Medina",
+    name: "Laura Medina",
+    email: "laura@aurumtage.com",
+    phone: "+52 55 1887 4120",
+    company: "Aurumtage",
+    role: "client",
+    title: "Dirección operativa",
+    activeProjects: 0
   },
   {
     id: "user-pm-1",

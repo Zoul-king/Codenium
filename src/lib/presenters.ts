@@ -1,4 +1,4 @@
-import type { MessageStatus, ProjectStatus, QuoteStatus, Role } from "@/lib/types/domain";
+import type { MessageStatus, PaymentStatus, ProjectStatus, QuoteStatus, Role } from "@/lib/types/domain";
 
 const longDateFormatter = new Intl.DateTimeFormat("es-MX", {
   day: "numeric",
@@ -38,6 +38,12 @@ const roleLabels: Record<Role, string> = {
   admin: "Admin"
 };
 
+const paymentStatusLabels: Record<PaymentStatus, string> = {
+  paid: "Pagado",
+  pending: "Pendiente",
+  scheduled: "Programado"
+};
+
 export function formatLongDate(value: string) {
   return formatDate(value, longDateFormatter);
 }
@@ -60,6 +66,10 @@ export function getMessageStatusLabel(status: MessageStatus) {
 
 export function getRoleLabel(role: Role) {
   return roleLabels[role];
+}
+
+export function getPaymentStatusLabel(status: PaymentStatus) {
+  return paymentStatusLabels[status];
 }
 
 function formatDate(value: string, formatter: Intl.DateTimeFormat) {

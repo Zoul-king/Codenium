@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 import { site } from "@/features/marketing/data/site";
@@ -18,7 +19,7 @@ export function Faq({ items }: FaqProps) {
       <div className="absolute left-1/2 top-0 h-40 w-40 -translate-x-1/2 rounded-full bg-primary-200/50 blur-3xl" aria-hidden="true" />
       <div className="site-shell px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 lg:py-16">
         <div className="faqs-info mb-10 text-center" data-animate="fadeInFromTop">
-          <span className="type-kicker">Dudas de nuestros usuarios</span>
+          <span className="type-kicker">Dudas frecuentes</span>
           <h2 className="type-section-title mt-4">
             Preguntas más <span className="text-secondary-500">frecuentes</span>
           </h2>
@@ -30,7 +31,7 @@ export function Faq({ items }: FaqProps) {
                 <div className="accordion" data-open={openIndex === index} data-animate="fadeInFromBottomSm" data-delay={String(index * 0.04)}>
                   <button type="button" className="accordion__title" onClick={() => setOpenIndex((current) => (current === index ? -1 : index))}>
                     <span>{item.question}</span>
-                    <span className="arrow">v</span>
+                    <ChevronDown className="arrow" strokeWidth={2.2} aria-hidden="true" />
                   </button>
                   <div className="details__content">
                     <p className="accordion__description">{item.answer}</p>

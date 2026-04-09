@@ -59,6 +59,34 @@ export function calculateQuoteEstimate(draft: QuoteDraft): QuoteEstimate {
   };
 }
 
+export function getQuoteViability(draft: QuoteDraft, estimate: QuoteEstimate) {
+  const featureCount = draft.modules.filter((item) => item !== "maintenance").length;
+  const timelineMax = estimate.timelineWeeks.max;
+  const buildMax = estimate.build.max;
+
+  if (buildMax <= 70000 && timelineMax <= 8 && featureCount <= 3) {
+    return {
+      tone: "favorable" as const,
+      label: "Favorable",
+      description: "El alcance está bien acotado y se puede avanzar con una definición relativamente rápida."
+    };
+  }
+
+  if (buildMax <= 140000 && timelineMax <= 14 && featureCount <= 6) {
+    return {
+      tone: "media" as const,
+      label: "Media",
+      description: "El proyecto es viable, pero conviene priorizar módulos y revisar dependencias antes de cerrar tiempos."
+    };
+  }
+
+  return {
+    tone: "complex" as const,
+    label: "Compleja",
+    description: "El alcance combina varias piezas críticas. Necesita una definición más detallada para aterrizar fases y riesgos."
+  };
+}
+
 export function formatCurrency(value: number) {
   return new Intl.NumberFormat("es-MX", {
     style: "currency",
