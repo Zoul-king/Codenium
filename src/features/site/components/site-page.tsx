@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, type InputHTMLAttributes } from "react";
-import { ArrowRightIcon, BrandLogo, CheckIcon, ContactIcon, MenuIcon, ServiceIcon, SocialIcon, WhatsAppIcon } from "@/components/ui/icons";
+import { ArrowRightIcon, CheckIcon, ContactIcon, ServiceIcon, WhatsAppIcon } from "@/components/ui/icons";
 import { ReferenceFooter } from "@/features/site/components/reference-footer";
 import { ReferenceHeader } from "@/features/site/components/reference-header";
 import { referenceAssets } from "@/features/site/content/reference-assets";
@@ -24,158 +24,6 @@ import type { ContactIconType, PortfolioCard, SitePageDefinition } from "@/featu
 
 const MAP_EMBED_URL =
   "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3763.1536937650258!2d-99.01649832596578!3d19.405764241539625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d1fd95427949d1%3A0xa5e068376bf62c07!2sCentro%20operativo%20Axolotlcode%2FDesarrollo%20de%20software!5e0!3m2!1ses!2smx!4v1754600848731!5m2!1ses!2smx";
-
-const services = [
-  {
-    title: "Desarrollo de software",
-    body: "Creación de aplicaciones y sistemas personalizados, escalables e innovadores para optimizar tu negocio.",
-    icon: "code"
-  },
-  {
-    title: "Consultorías",
-    body: "Asesoría tecnológica estratégica para mejorar procesos, productividad y transformación digital empresarial.",
-    icon: "consulting"
-  },
-  {
-    title: "Profesionales a tu disposición",
-    body: "Expertos en TI listos para potenciar proyectos con soluciones eficientes y personalizadas.",
-    icon: "team"
-  },
-  {
-    title: "Desarrollo a la medida",
-    body: "Software a medida, adaptado a tus necesidades, con alta calidad y seguridad.",
-    icon: "spark"
-  },
-  {
-    title: "Soporte técnico",
-    body: "Servicio técnico especializado en mantenimiento, resolución de problemas y optimización de sistemas informáticos.",
-    icon: "support"
-  },
-  {
-    title: "Incubadora",
-    body: "MentorÃ­a y apoyo para startups, acelerando su crecimiento con estrategias digitales innovadoras.",
-    icon: "idea"
-  }
-];
-
-const logos = ["Aurumtage", "Disver Uniformes", "Nutrition Lab", "Larezza", "Master Clean", "Chess IQ", "Aurum Living", "Mobility Guard"];
-
-const benefitBullets = [
-  ["Innovación constante", "Utilizamos tecnologías de vanguardia"],
-  ["Seguridad garantizada", "Protegemos tus datos y proyectos"],
-  ["Resultados tangibles", "Diseñamos soluciones orientadas al éxito"]
-];
-
-const gallery = [
-  "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80"
-];
-
-const aboutCards = [
-  {
-    title: "Nuestra historia",
-    body:
-      "AxolotlCode nació con la misión de transformar las ideas de nuestros clientes en soluciones tecnológicas de alto impacto."
-  },
-  {
-    title: "Nuestro enfoque",
-    body:
-      "Desde nuestros inicios, hemos priorizado la innovación, la calidad y la seguridad en cada proyecto."
-  }
-];
-
-const missionVision = [
-  {
-    title: "Misión",
-    body:
-      "Desarrollamos tecnologÃ­a con sello mexicano, creando soluciones innovadoras que transforman vidas y elevan el potencial de personas, empresas y comunidades."
-  },
-  {
-    title: "Visión",
-    body:
-      "Ser una empresa tecnológica mexicana reconocida a nivel mundial por la calidad de sus soluciones, su capacidad de innovar y un ambiente laboral que promueve el crecimiento individual del equipo."
-  }
-];
-
-const timeline = [
-  "Investigación y recopilación de información",
-  "Planificación (mapa del sitio, wireframes, etc.)",
-  "Diseño visual y prototipos",
-  "Creación de contenido",
-  "Desarrollo frontend y backend",
-  "Pruebas, calidad y despliegue",
-  "Mantenimiento y actualizaciones"
-];
-
-const faqs = [
-  [
-    "¿Qué tipo de software pueden desarrollar para mi empresa?",
-    "Desarrollamos soluciones de software personalizadas, incluyendo aplicaciones web, móviles y sistemas empresariales. Nuestro enfoque se basa en comprender tus necesidades y crear herramientas innovadoras que optimicen tus procesos, mejoren la eficiencia y aumenten la productividad de tu empresa."
-  ],
-  [
-    "¿Cómo puedo contratar una consultoría tecnológica con ustedes?",
-    "Es muy fácil. Solo contáctanos a través de nuestro sitio web o por teléfono, y programaremos una reunión para entender tus objetivos y desafÃ­os. Nuestro equipo de expertos te brindará asesorÃ­a estratégica basada en las mejores prácticas del sector para ayudarte a tomar decisiones tecnológicas acertadas."
-  ],
-  [
-    "¿Qué beneficios tiene contar con profesionales a disposición?",
-    "Contar con nuestros profesionales en TI te permite disponer de expertos altamente capacitados en diversas áreas de tecnologÃ­a sin la necesidad de contratar personal adicional. Esto reduce costos operativos, agiliza procesos y garantiza soluciones eficientes adaptadas a las necesidades de tu negocio."
-  ],
-  [
-    "¿Cuál es la diferencia entre software estándar y software a medida?",
-    "El software estándar es genérico y diseñado para un público amplio, lo que puede generar limitaciones en su funcionalidad. En cambio, el software a medida se desarrolla especÃ­ficamente para tu empresa, permitiéndote automatizar procesos, optimizar recursos y garantizar una mayor eficiencia sin restricciones."
-  ],
-  [
-    "¿Cuánto tiempo tarda el desarrollo de un software?",
-    "El tiempo de desarrollo depende de la complejidad del proyecto y sus funcionalidades. Antes de iniciar, realizamos un análisis detallado para estimar plazos realistas y garantizar las entregas dentro del tiempo acordado. Nos aseguramos de ofrecer calidad sin comprometer la rapidez."
-  ],
-  [
-    "¿Ofrecen mantenimiento y actualizaciones para los sistemas desarrollados?",
-    "Ofrecemos soporte continuo para garantizar el óptimo funcionamiento de su software. Nuestras actualizaciones incluyen mejoras de seguridad, compatibilidad con nuevas tecnologías y optimización de rendimiento, asegurando que su sistema esté siempre actualizado y protegido."
-  ],
-  [
-    "¿Puedo escalar mi software a futuro si mi empresa crece?",
-    "Diseñamos soluciones escalables que pueden evolucionar junto con tu empresa. Ya sea agregando nuevas funcionalidades, optimizando rendimiento o integrando herramientas adicionales, nuestro software se adapta al crecimiento de tu negocio sin necesidad de reemplazarlo."
-  ],
-  [
-    "¿El software o servicio contratado tiene garantía?",
-    "Ofrecemos garantía en todos nuestros desarrollos y servicios. Mientras el software o sistema se encuentre bajo nuestra administración, corregiremos de forma GRATUITA cualquier error técnico que pueda surgir, siempre que no sea causado por un mal uso por parte del cliente."
-  ]
-];
-
-const plans = [
-  {
-    title: "Plan básico",
-    price: "Pago inicial de $2,000 MXN",
-    subtitle: "Mensualidad de $500 MXN",
-    items: [
-      "Desarrollo de landing page (one-page)",
-      "Hosting",
-      "SEO básico onsite",
-      "Cambios básicos ilimitados (información, imágenes, etc.)"
-    ]
-  },
-  {
-    title: "Plan Pymes",
-    price: "Pago inicial de $5,000 MXN",
-    subtitle: "Mensualidad de $1,500 MXN",
-    note: "Todo lo del Plan Básico, más...",
-    items: [
-      "Página de dos a tres vistas internas",
-      "SEO Avanzado onsite",
-      "Control de clientes",
-      "Cambios avanzados (dos máximos al mes, cambio de funcionamiento o agregar secciones)"
-    ]
-  },
-  {
-    title: "Plan E-commerce",
-    price: "Pago inicial de $10,000 MXN",
-    subtitle: "Mensualidad de $2,500 MXN",
-    note: "Todo lo del Plan Pymes, más...",
-    items: ["Página web + tienda", "Control de clientes", "Administración de productos", "Integración de pasarelas de pago"]
-  }
-];
 
 interface SitePageProps {
   page: SitePageDefinition;
@@ -230,132 +78,6 @@ export function SitePage({ page }: SitePageProps) {
       <ReferenceFooter />
       <StickyWhatsApp />
     </div>
-  );
-}
-
-function Header({ page, open, setOpen }: { page: SitePageDefinition; open: boolean; setOpen: (value: boolean | ((current: boolean) => boolean)) => void }) {
-  const whiteHeader = page.headerVariant === "white";
-
-  return (
-    <>
-      <header className="absolute inset-x-0 top-0 z-30 h-28">
-        <div className="site-shell flex items-center justify-between px-3 py-2 text-white">
-          <Link href="/" aria-label="Inicio" className="flex items-center gap-3">
-            <div className={`logo-mark ${whiteHeader ? "white-mark" : ""}`}>{sharedSite.brand.short}</div>
-            <span className="text-xl font-normal text-white">{sharedSite.brand.name}</span>
-          </Link>
-          <button
-            type="button"
-            className="group flex items-center gap-2 font-normal leading-7 text-white transition-colors hover:text-primary-500"
-            aria-expanded={open}
-            aria-label="Abrir menú"
-            onClick={() => setOpen((current) => !current)}
-          >
-            <MenuIcon />
-            Menú
-          </button>
-        </div>
-      </header>
-
-      <div
-        className={`fixed inset-0 z-40 bg-[#EFEFEF] transition-opacity duration-700 ease-in-out ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
-        onClick={() => setOpen(false)}
-      />
-
-      <div
-        className={`fixed inset-x-0 bottom-0 z-50 h-full transition-transform duration-700 ease-in-out ${open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0"}`}
-      >
-        <div className="absolute inset-0 bg-white">
-          <header className="absolute inset-x-0 top-0 z-10 h-28 text-body-color">
-            <div className="site-shell flex items-center justify-between px-3 py-2">
-              <Link href="/" aria-label="Inicio" className="flex items-center gap-3" onClick={() => setOpen(false)}>
-                <div className="logo-mark white-mark">{sharedSite.brand.short}</div>
-                <span className="text-xl font-normal text-body-color">{sharedSite.brand.name}</span>
-              </Link>
-              <button
-                type="button"
-                className="group flex items-center gap-2 font-normal leading-7 text-body-color transition-colors hover:text-primary-500"
-                aria-expanded={open}
-                aria-label="Cerrar menú"
-                onClick={() => setOpen(false)}
-              >
-                <MenuIcon />
-                Menú
-              </button>
-            </div>
-          </header>
-
-          <div
-            className={`site-shell mt-[90px] flex h-[calc(90vh-50px)] flex-col items-center justify-start overflow-y-scroll px-4 pb-8 transition-all duration-700 ease-in-out md:mt-[115px] md:overflow-y-hidden xl:h-[calc(80vh)] ${open ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"}`}
-          >
-            <div className="flex h-[calc(100dvh-20px)] w-full flex-col items-center justify-start divide-y divide-body-color pb-8 sm:h-[calc(80dvh-50px)] sm:flex-row sm:divide-x sm:divide-y-0 md:justify-between">
-              <div className="w-full">
-                <nav className="mx-auto w-full p-4 md:max-w-[400px]">
-                  <ol className="flex flex-col justify-center gap-y-5 lg:gap-y-12">
-                    {sharedSite.menu.map((item, index) => (
-                      <li key={item.href} className="flex items-end gap-x-2">
-                    <span className="inline-block text-base text-primary-500 md:text-xl lg:text-2xl xl:text-3xl">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                        <Link
-                          href={item.href}
-                          className="text-2xl transition-colors hover:text-primary-500 md:text-3xl lg:text-4xl"
-                          onClick={() => setOpen(false)}
-                        >
-                          {item.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ol>
-                </nav>
-              </div>
-
-              <div className="w-full">
-                <div className="mx-auto w-full p-4 md:max-w-[400px]">
-                  <div className="mb-8 flex flex-col gap-y-[5px] lg:mb-[68px]">
-                    <span className="text-2xl font-normal lg:text-[32px] lg:leading-9">{sharedSite.overlay.location}</span>
-                    <span className="text-lg font-light lg:text-xl">{sharedSite.overlay.city}</span>
-                  </div>
-                  <div className="mb-4 flex flex-col gap-y-[5px] lg:mb-[26px]">
-                    <span className="text-2xl text-primary-500 lg:text-[32px] lg:leading-9">Contacto</span>
-                    <ul className="mb-[15px] text-lg font-light lg:text-xl lg:leading-9">
-                      <li>
-                        <a href={`mailto:${sharedSite.overlay.email}`} className="hover:underline">
-                          {sharedSite.overlay.email}
-                        </a>
-                      </li>
-                      <li>
-                        <a href={`tel:${sharedSite.overlay.phoneRaw}`} className="hover:underline">
-                          {sharedSite.overlay.phone}
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="flex flex-col gap-y-2">
-                    <span className="mb-2 text-2xl leading-9 text-primary-500 lg:text-[32px]">Redes sociales</span>
-                    <ul className="flex gap-x-[15px] text-sm">
-                      {sharedSite.socials.map((social) => (
-                        <li key={social.label} className="rounded-[5px] transition-all duration-300 ease-in-out hover:scale-105 hover:bg-primary-100/50">
-                          <a
-                            href={social.href}
-                            target="_blank"
-                            rel="noreferrer"
-                            aria-label={social.label}
-                            className="grid size-[50px] place-content-center rounded-[5px] border border-primary-100 text-primary-500"
-                          >
-                            <SocialIcon type={social.icon} className="size-5" />
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
   );
 }
 
@@ -639,59 +361,7 @@ function MissionVisionSection() {
   );
 }
 
-function TimelineSection() {
-  return (
-    <section className="soft-section relative overflow-hidden bg-foreground">
-        <div className="timeline section site-shell relative z-20 py-14 text-center">
-        <span className="text-base leading-5 text-primary-500 lg:text-[24px]" data-animate="fadeIn">
-          Nuestro proceso de trabajo
-        </span>
-        <h2 className="mt-4 text-[21px] font-normal leading-8 lg:text-[32px] lg:leading-[38px]" data-animate="fadeIn">
-          ¿Cómo lo <span className="text-secondary-500">hacemos</span>?
-        </h2>
-        <div className="relative mx-auto mt-10 flex max-w-[596px] flex-col gap-4">
-          <div className="absolute top-[78px] flex h-full w-full justify-center">
-            <svg className="block h-[1630px] w-[356px]" viewBox="0 0 274 2238" fill="none">
-              <path d="M46.5838 1H273V385.981H1V745.054H273V1141.234H1V1464.04H273V1847.34H1V2178" stroke="#212529" strokeDasharray="16 16" />
-            </svg>
-          </div>
-          <div className="flex w-full flex-col gap-4">
-            {timelineData.map((step, index) => (
-              <article
-                key={step}
-                className={`flex max-w-[275px] flex-col items-center gap-4 text-center sm:max-w-[356px] lg:p-2 ${index % 2 === 0 ? "self-start" : "self-end"}`}
-                data-animate="fadeInFromBottom"
-              >
-                <div className="relative h-[108px] w-[108px] rounded-full border border-primary-400 bg-white p-1.5">
-                  <div className="h-[94px] w-[94px] rounded-full bg-gradient-to-br from-primary-100 to-secondary-500/40" />
-                  <span className="absolute right-1 bottom-1 inline-grid size-[42px] place-content-center rounded-full bg-primary-500 text-[20px] font-normal text-white">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
-                <span className="text-[18px] font-normal leading-8">{step}</span>
-                <p className="text-sm leading-[26px] lg:text-base lg:leading-7">
-                  Este paso nos permite dar estructura, claridad y una base real para una ejecución ordenada.
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function TimelineSectionFixed() {
-  const stepDescriptions = [
-    "Descubrimos juntos lo que requiere tu proyecto y cómo podemos lograr una solución clara desde el inicio.",
-    "Estructuramos tus ideas para darle vida a tu proyecto con una base funcional y ordenada.",
-    "Convertimos la estructura en una propuesta visual consistente con tu marca y tus objetivos.",
-    "Definimos textos, mensajes y recursos que ayudan a comunicar mejor el valor del producto.",
-    "Construimos la solución con foco en rendimiento, escalabilidad y experiencia de usuario.",
-    "Validamos cada detalle antes del lanzamiento para asegurar estabilidad y calidad.",
-    "Damos seguimiento para mantener la solución actualizada y lista para crecer."
-  ];
-
   return (
     <section className="soft-section relative overflow-hidden bg-foreground">
       <div className="timeline section site-shell relative z-20 py-14 text-center lg:py-20">
@@ -706,7 +376,7 @@ function TimelineSectionFixed() {
           <div className="grid grid-cols-1 gap-y-8 lg:grid-cols-2">
             {timelineData.map((step, index) => (
               <article
-                key={step}
+                key={step.title}
                 className={`relative flex flex-col items-center gap-4 text-center lg:max-w-[300px] ${index % 2 === 0 ? "lg:justify-self-start lg:pr-8" : "lg:justify-self-end lg:pl-8"} ${index % 2 === 0 ? "lg:mt-0" : "lg:mt-10"}`}
                 data-animate="fadeInFromBottom"
                 data-delay={String(index * 0.05)}
@@ -723,8 +393,8 @@ function TimelineSectionFixed() {
                     {String(index + 1).padStart(2, "0")}
                   </span>
                 </div>
-                <span className="max-w-[280px] text-base font-bold leading-5 lg:text-[1.75rem] lg:leading-7">{step}</span>
-                <p className="max-w-[280px] text-sm leading-[26px] text-body-color lg:text-base lg:leading-7">{stepDescriptions[index]}</p>
+                <span className="max-w-[280px] text-base font-bold leading-5 lg:text-[1.75rem] lg:leading-7">{step.title}</span>
+                <p className="max-w-[280px] text-sm leading-[26px] text-body-color lg:text-base lg:leading-7">{step.body}</p>
               </article>
             ))}
           </div>
@@ -807,7 +477,7 @@ function PricingPlans() {
                 </span>
               </div>
               <ul className="mb-20 list-disc">
-                <li className="ml-5 text-sm leading-6 lg:text-base lg:leading-7">ConsultorÃ­a personalizada</li>
+                <li className="ml-5 text-sm leading-6 lg:text-base lg:leading-7">Consultoría personalizada</li>
               </ul>
             </div>
             <Link href="/contact" className="secondary-button !justify-center">
@@ -842,7 +512,7 @@ function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
                 </div>
               </div>
             <div className="portfolio-info">
-              <div className="project-logo">{card.name}</div>
+              {card.logo ? <img src={card.logo} alt={card.name} className="project-logo" /> : <div className="project-logo">{card.name}</div>}
               <p className="portfolio-year">{card.year}</p>
               <p className="portfolio-text">{card.description}</p>
               <div className="portfolio-tags">
@@ -989,57 +659,6 @@ function CtaCard({ dual = false }: CtaCardProps) {
         </article>
       </div>
     </section>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="bg-[#212529]">
-      <div className="section mx-auto flex max-w-7xl flex-col justify-between md:flex-row md:flex-wrap md:pt-[90px] md:pb-6 xl:flex-nowrap lg:pb-[76px]">
-        <div className="min-w-0 flex-1 md:min-w-[530px]">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="logo-mark white-mark">{sharedSite.brand.short}</div>
-            <span className="text-xl font-normal text-white">{sharedSite.brand.name}</span>
-          </div>
-          <p className="text-sm leading-6 text-white">{sharedSite.footer.body}</p>
-        </div>
-        <div className="grow pt-5">
-          <span className="mb-[15px] inline-block text-xl font-normal leading-6 text-primary-300">Menú</span>
-          <ul className="flex flex-col gap-y-[15px]">
-            {sharedSite.footerMenu.map((item) => (
-              <li key={item.href}>
-                <Link href={item.href} className="text-sm text-white transition-colors hover:text-primary-200">
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="grow pt-5 py-[23px]">
-          <span className="mb-[15px] inline-block text-xl font-normal leading-6 text-primary-300">Contacto</span>
-          <ul className="mb-[15px] flex flex-col gap-y-[15px] text-sm text-white">
-            <li>{sharedSite.overlay.email}</li>
-            <li>
-              <a href={`tel:${sharedSite.overlay.phoneRaw}`} className="hover:underline">
-                {sharedSite.overlay.phone}
-              </a>
-            </li>
-          </ul>
-          <ul className="flex gap-x-5">
-            {sharedSite.socials.map((social) => (
-              <li key={social.label} className="rounded-[5px] transition-all duration-300 ease-in-out hover:scale-105 hover:bg-white/20">
-                <a href={social.href} target="_blank" rel="noreferrer" aria-label={social.label} className="grid size-[29px] place-content-center text-white">
-                  <SocialIcon type={social.icon} className="size-4" />
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-      <div className="section border-t border-[#DADADA]">
-        <p className="py-[30px] text-center text-white">{sharedSite.footer.legal}</p>
-      </div>
-    </footer>
   );
 }
 

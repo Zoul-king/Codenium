@@ -1,5 +1,5 @@
 import { referenceAssets, referenceLogoSlides } from "@/features/site/content/reference-assets";
-import type { AboutCard, BenefitBullet, ClientLogo, FaqItem, PlanItem, ServiceItem } from "@/features/site/types";
+import type { AboutCard, BenefitBullet, ClientLogo, FaqItem, PlanItem, ServiceItem, TimelineStep } from "@/features/site/types";
 
 export const servicesData: ServiceItem[] = [
   {
@@ -47,33 +47,58 @@ export const galleryData: string[] = [...referenceAssets.gallery];
 export const aboutCardsData: AboutCard[] = [
   {
     title: "Nuestra historia",
-    body: "AxolotlCode nació con la misión de transformar las ideas de nuestros clientes en soluciones tecnológicas de alto impacto."
+    body:
+      "AxolotlCode nació con la misión de transformar las ideas de nuestros clientes en soluciones tecnológicas de alto impacto. Desde nuestros inicios, hemos priorizado la innovación, la calidad y la seguridad en cada proyecto, trabajando con un equipo comprometido y apasionado."
   },
   {
     title: "Nuestro enfoque",
-    body: "Desde nuestros inicios, hemos priorizado la innovación, la calidad y la seguridad en cada proyecto."
+    body:
+      "A lo largo de nuestra trayectoria, hemos ayudado a empresas de diversos sectores a modernizar sus procesos y alcanzar sus objetivos en un mundo digital en constante evolución. Nos enorgullece ser aliados estratégicos en la transformación tecnológica de nuestros clientes."
   }
 ];
 
 export const missionVisionData: AboutCard[] = [
   {
     title: "Misión",
-    body: "Desarrollamos tecnología con sello mexicano, creando soluciones innovadoras que transforman vidas y elevan el potencial de personas, empresas y comunidades."
+    body:
+      "Desarrollamos tecnología con sello mexicano, creando soluciones innovadoras que transforman vidas y elevan el potencial de personas, empresas y comunidades."
   },
   {
     title: "Visión",
-    body: "Ser una empresa tecnológica mexicana reconocida a nivel mundial por la calidad de sus soluciones, su capacidad de innovar y un ambiente laboral que promueve el crecimiento individual del equipo."
+    body:
+      "Ser una empresa tecnológica mexicana reconocida a nivel mundial por la calidad de sus soluciones, su capacidad de innovar y un ambiente laboral que promueve el crecimiento individual del equipo."
   }
 ];
 
-export const timelineData: string[] = [
-  "Investigación y recopilación de información",
-  "Planificación (mapa del sitio, wireframes, etc.)",
-  "Diseño visual y prototipos",
-  "Creación de contenido",
-  "Desarrollo frontend y backend",
-  "Pruebas, calidad y despliegue",
-  "Mantenimiento y actualizaciones"
+export const timelineData: TimelineStep[] = [
+  {
+    title: "Investigación y recopilación de información",
+    body: "Descubramos juntos lo que necesitas y cómo podemos lograrlo."
+  },
+  {
+    title: "Planificación (mapa del sitio, wireframes, etc.)",
+    body: "Estructuramos tus ideas para darle vida a tu proyecto."
+  },
+  {
+    title: "Diseño y prototipos del sitio web",
+    body: "Creamos bocetos atractivos que reflejen tu visión."
+  },
+  {
+    title: "Creación de contenido",
+    body: "Damos voz a tu sitio con textos e imágenes impactantes."
+  },
+  {
+    title: "Desarrollo frontend y backend",
+    body: "Construimos tu sitio para que funcione perfecto y luzca increíble."
+  },
+  {
+    title: "Pruebas de calidad y despliegue",
+    body: "Ajustamos los últimos detalles para un lanzamiento sin problemas."
+  },
+  {
+    title: "Mantenimiento y actualizaciones",
+    body: "Nos aseguramos de que tu sitio siga siendo espectacular con el tiempo."
+  }
 ];
 
 export const faqsData: FaqItem[] = [
@@ -86,7 +111,7 @@ export const faqsData: FaqItem[] = [
     "Es muy fácil. Solo contáctanos a través de nuestro sitio web o por teléfono, y programaremos una reunión para entender tus objetivos y desafíos. Nuestro equipo de expertos te brindará asesoría estratégica basada en las mejores prácticas del sector para ayudarte a tomar decisiones tecnológicas acertadas."
   ],
   [
-    "¿Qué beneficios tiene contar con profesionales a tu disposición?",
+    "¿Qué beneficios tiene contar con profesionales a disposición?",
     "Contar con nuestros profesionales en TI te permite disponer de expertos altamente capacitados en diversas áreas de tecnología sin la necesidad de contratar personal adicional. Esto reduce costos operativos, agiliza procesos y garantiza soluciones eficientes adaptadas a las necesidades de tu negocio."
   ],
   [
@@ -107,7 +132,7 @@ export const faqsData: FaqItem[] = [
   ],
   [
     "¿El software o servicio contratado tiene garantía?",
-    "Ofrecemos garantía en todos nuestros desarrollos y servicios. Mientras el software o sistema se encuentre bajo nuestra administración, corregiremos de forma gratuita cualquier error técnico que pueda surgir, siempre que no sea causado por un mal uso por parte del cliente."
+    "Ofrecemos garantía en todos nuestros desarrollos y servicios. Mientras el software o sistema se encuentre bajo nuestra administración, corregiremos de forma GRATUITA cualquier error técnico que pueda surgir, siempre que no sea causado por un mal uso por parte del cliente."
   ]
 ];
 
@@ -130,7 +155,7 @@ export const plansData: PlanItem[] = [
     note: "Todo lo del Plan Básico, más...",
     items: [
       "Página de dos a tres vistas internas",
-      "SEO avanzado onsite",
+      "SEO Avanzado onsite",
       "Control de clientes",
       "Cambios avanzados (dos máximos al mes, cambio de funcionamiento o agregar secciones)"
     ]

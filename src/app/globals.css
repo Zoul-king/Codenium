@@ -1,59 +1,7 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: "Poppins";
-  src: url("/fonts/poppins/poppins-300.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Poppins";
-  src:
-    url("/template-assets/axolotl/fonts/poppins-devanagari-400-normal.woff2") format("woff2"),
-    url("/template-assets/axolotl/fonts/poppins-latin-ext-400-normal.woff2") format("woff2"),
-    url("/template-assets/axolotl/fonts/poppins-latin-400-normal.woff2") format("woff2"),
-    url("/fonts/poppins/poppins-400.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Poppins";
-  src: url("/fonts/poppins/poppins-500.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Poppins";
-  src: url("/fonts/poppins/poppins-600.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Poppins";
-  src: url("/fonts/poppins/poppins-700.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Poppins";
-  src: url("/fonts/poppins/poppins-800.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-}
-
 @theme {
-  --font-sans: "Poppins", sans-serif;
+  --font-sans: var(--font-poppins), sans-serif;
   --color-primary: #f23d6d;
   --color-primary-50: #feecf0;
   --color-primary-100: #fbc3d2;
@@ -84,6 +32,7 @@
   body {
     min-height: 100dvh;
     font-family: var(--font-sans);
+    font-size: 1rem;
     overflow-x: hidden;
     font-weight: 400;
     line-height: 1.5;

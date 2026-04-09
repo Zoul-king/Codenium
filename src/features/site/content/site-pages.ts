@@ -1,6 +1,17 @@
 import { referenceAssets } from "@/features/site/content/reference-assets";
 import type { SharedSite, SitePagesMap } from "@/features/site/types";
 
+const portfolioLogos = {
+  sittycia: "/template-assets/axolotl/logos/icon-7.png",
+  valhui: "/template-assets/axolotl/logos/valhui.png",
+  chessIq: "/portfolio-assets/chess-logo.png",
+  nutritionLab: "/template-assets/axolotl/logos/icon-8.png",
+  larezza: "/template-assets/axolotl/logos/larezza.svg",
+  masterClean: "/template-assets/axolotl/logos/master-clean.svg",
+  aurumtage: "/template-assets/axolotl/logos/icon-5.png",
+  disver: "/template-assets/axolotl/logos/icon-2.png"
+} as const;
+
 export const sharedSite: SharedSite = {
   brand: {
     name: "AxolotlCode",
@@ -43,7 +54,7 @@ export const sharedSite: SharedSite = {
   footer: {
     body:
       "En AxolotlCode transformamos ideas en realidades digitales. Creamos aplicaciones innovadoras, seguras y personalizadas que impulsan tu negocio hacia el éxito.",
-    legal: "©2026 AxolotlCode. Todos los derechos reservados."
+    legal: "© 2026 AxolotlCode. Todos los derechos reservados."
   }
 };
 
@@ -52,7 +63,7 @@ export const sitePages: SitePagesMap = {
     key: "home",
     title: "AxolotlCode - Desarrollo de software y soluciones digitales",
     description:
-      "AxolotlCode: desarrollo de software y soluciones digitales personalizadas. Creamos aplicaciones innovadoras que transforman tu negocio.",
+      "AxolotlCode: Desarrollo de software y soluciones digitales personalizadas. Creamos aplicaciones innovadoras que transforman tu negocio.",
     headerVariant: "pink",
     hero: {
       kind: "home",
@@ -68,7 +79,7 @@ export const sitePages: SitePagesMap = {
     key: "about",
     title: "Sobre nosotros - AxolotlCode",
     description:
-      "Conoce la historia, misión, visión y proceso de trabajo de AxolotlCode para crear soluciones digitales innovadoras.",
+      "AxolotlCode: Desarrollo de software y soluciones digitales personalizadas. Creamos aplicaciones innovadoras que transforman tu negocio.",
     headerVariant: "white",
     hero: {
       kind: "image",
@@ -84,7 +95,7 @@ export const sitePages: SitePagesMap = {
     key: "plans",
     title: "Planes y servicios - AxolotlCode",
     description:
-      "Descubre nuestros planes y servicios personalizados para impulsar tu presencia digital y el crecimiento de tu negocio.",
+      "AxolotlCode: Desarrollo de software y soluciones digitales personalizadas. Creamos aplicaciones innovadoras que transforman tu negocio.",
     headerVariant: "white",
     hero: {
       kind: "image",
@@ -109,20 +120,24 @@ export const sitePages: SitePagesMap = {
         "Aquí encontrarás una selección de proyectos en los que AxolotlCode ha trabajado, desde desarrollos web hasta aplicaciones móviles. Cada proyecto refleja nuestra dedicación y pasión por crear soluciones digitales innovadoras.",
       cards: [
         {
-          name: "Mobility Guard",
+          name: "Sittycia",
           year: "2025",
           description:
             "Plataforma inteligente para monitorear vehículos y peatones en tiempo real, generando reportes detallados y visualizaciones para la toma de decisiones en movilidad y seguridad.",
           tags: ["Monitoreo", "Vehículos", "Peatones", "Reportes", "Análisis de Datos"],
-          image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80"
+          image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80",
+          logo: portfolioLogos.sittycia,
+          href: "https://www.axolotlcode.tech/portfolio/sittycia"
         },
         {
-          name: "Aurum Living",
+          name: "ValHui",
           year: "2025",
           description:
             "Empresa dedicada a la renta de espacios e inmuebles privados. Desarrollamos su sitio web, gestionamos campañas de marketing digital e instalamos la infraestructura de red para potenciar su operación y visibilidad.",
           tags: ["Renta de Espacios", "Inmuebles", "Sitio Web", "Marketing", "Infraestructura de Red"],
-          image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1600&q=80"
+          image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1600&q=80",
+          logo: portfolioLogos.valhui,
+          href: "https://www.axolotlcode.tech/portfolio/valhui"
         },
         {
           name: "Chess IQ",
@@ -130,7 +145,9 @@ export const sitePages: SitePagesMap = {
           description:
             "Plataforma para el seguimiento y gestión de cobranza de pagos de clientes de un banco, optimizando la recuperación de cartera mediante tecnología y análisis de datos.",
           tags: ["Cobranza Bancaria", "Seguimiento de Pagos", "Gestión de Cartera", "Análisis de Datos", "Optimización"],
-          image: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80"
+          image: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80",
+          logo: portfolioLogos.chessIq,
+          href: "https://www.axolotlcode.tech/portfolio/chess-iq"
         },
         {
           name: "Nutrition Lab",
@@ -138,7 +155,9 @@ export const sitePages: SitePagesMap = {
           description:
             "Landing page informativa sobre la empresa, acompañada de una plataforma de videos sobre nutrición, entrenamiento personal y uso de herramientas para ejercitarse.",
           tags: ["Nutrición", "Entrenamiento", "Videos", "Educación", "Salud"],
-          image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1600&q=80"
+          image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1600&q=80",
+          logo: portfolioLogos.nutritionLab,
+          href: "https://www.axolotlcode.tech/portfolio/nutrition-lab"
         },
         {
           name: "Larezza",
@@ -146,7 +165,9 @@ export const sitePages: SitePagesMap = {
           description:
             "Empresa especializada en masajes faciales. Desarrollamos una landing page atractiva y gestionamos campañas de marketing digital para potenciar su presencia y captar nuevos clientes.",
           tags: ["Masajes Faciales", "Landing Page", "Marketing", "Bienestar", "Salud"],
-          image: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80"
+          image: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80",
+          logo: portfolioLogos.larezza,
+          href: "https://www.axolotlcode.tech/portfolio/larezza"
         },
         {
           name: "Master Clean",
@@ -154,7 +175,19 @@ export const sitePages: SitePagesMap = {
           description:
             "Empresa dedicada a ofrecer servicios de limpieza profesional para empresas privadas. Trabajamos con ellos en el desarrollo de una landing page moderna y campañas de marketing digital para potenciar su presencia y captar nuevos clientes.",
           tags: ["Limpieza Empresarial", "Landing Page", "Marketing Digital", "Servicios", "Empresas Privadas"],
-          image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80"
+          image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80",
+          logo: portfolioLogos.masterClean,
+          href: "https://www.axolotlcode.tech/portfolio/master-clean"
+        },
+        {
+          name: "Aurumtage",
+          year: "2025",
+          description:
+            "Empresa que buscaba optimizar sus procesos de cobro y pagos. Les ofrecimos soluciones de integración con procesadores de pago, facilitando la gestión de transacciones y mejorando la experiencia de sus clientes.",
+          tags: ["Procesadores de Pago", "Pagos", "Integración", "Fintech", "Optimización"],
+          image: "https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1600&q=80",
+          logo: portfolioLogos.aurumtage,
+          href: "https://www.axolotlcode.tech/portfolio/aurumtage"
         },
         {
           name: "Disver Uniformes",
@@ -162,7 +195,9 @@ export const sitePages: SitePagesMap = {
           description:
             "Tienda en línea especializada en la venta de uniformes para empresas, escuelas y negocios. Desarrollamos su ecommerce, facilitando la compra y personalización de uniformes desde cualquier lugar.",
           tags: ["Ecommerce", "Uniformes", "Tienda en Línea", "Personalización", "Venta Online"],
-          image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1600&q=80"
+          image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1600&q=80",
+          logo: portfolioLogos.disver,
+          href: "https://www.axolotlcode.tech/portfolio/disver-uniformes"
         }
       ]
     },
@@ -172,7 +207,7 @@ export const sitePages: SitePagesMap = {
     key: "contact",
     title: "Contacto - AxolotlCode",
     description:
-      "¿Tienes dudas o necesitas más información sobre nuestros servicios? Contáctanos o consulta nuestra sección de preguntas frecuentes.",
+      "AxolotlCode: Desarrollo de software y soluciones digitales personalizadas. Creamos aplicaciones innovadoras que transforman tu negocio.",
     headerVariant: "white",
     hero: {
       kind: "image",

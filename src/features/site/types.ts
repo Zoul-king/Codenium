@@ -81,6 +81,8 @@ export interface PortfolioCard {
   description: string;
   tags: string[];
   image: string;
+  logo?: string;
+  href?: string;
 }
 
 export interface HomeHero {
@@ -128,6 +130,11 @@ export interface ServiceItem {
 export type BenefitBullet = [title: string, body: string];
 
 export interface AboutCard {
+  title: string;
+  body: string;
+}
+
+export interface TimelineStep {
   title: string;
   body: string;
 }

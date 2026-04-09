@@ -1,7 +1,15 @@
+import { Poppins } from "next/font/google";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import "./globals.css";
+
+const poppins = Poppins({
+  subsets: ["latin", "latin-ext"],
+  weight: ["300", "400", "500", "700", "800"],
+  display: "swap",
+  variable: "--font-poppins"
+});
 
 export const metadata: Metadata = {
   title: "AxolotlCode",
@@ -14,7 +22,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="es">
+    <html lang="es" className={poppins.variable}>
       <body>{children}</body>
     </html>
   );
