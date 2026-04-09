@@ -1,3 +1,4 @@
+export * from "@/lib/mocks/auth";
 export * from "@/lib/mocks/catalogs";
 export * from "@/lib/mocks/messages";
 export * from "@/lib/mocks/projects";

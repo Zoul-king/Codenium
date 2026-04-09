@@ -1,4 +1,4 @@
-import type { DashboardNavItem, QuoteModuleOption, QuoteProjectTypeOption, Role } from "@/lib/types/domain";
+import type { DashboardNavItem, PermissionKey, QuoteModuleOption, QuoteProjectTypeOption, Role } from "@/lib/types/domain";
 
 export const quoteProjectTypes: QuoteProjectTypeOption[] = [
   {
@@ -91,4 +91,16 @@ export const dashboardNav: Record<Role, DashboardNavItem[]> = {
     { key: "assignments", label: "Asignaciones", href: "/dashboard/admin/assignments" },
     { key: "settings", label: "Configuracion", href: "/dashboard/admin/settings" }
   ]
+};
+
+export const rolePermissions: Record<Role, PermissionKey[]> = {
+  client: ["quotes:read", "quotes:write", "projects:read", "messages:read", "messages:write"],
+  pm: ["quotes:read", "projects:read", "projects:write", "messages:read", "messages:write"],
+  admin: ["quotes:read", "quotes:write", "projects:read", "projects:write", "messages:read", "messages:write", "users:read", "users:write", "settings:read"]
+};
+
+export const dashboardHomeByRole: Record<Role, string> = {
+  client: "/dashboard/client",
+  pm: "/dashboard/pm",
+  admin: "/dashboard/admin"
 };

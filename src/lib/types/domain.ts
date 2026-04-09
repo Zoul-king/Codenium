@@ -1,5 +1,16 @@
 export type Role = "client" | "pm" | "admin";
 
+export type PermissionKey =
+  | "quotes:read"
+  | "quotes:write"
+  | "projects:read"
+  | "projects:write"
+  | "messages:read"
+  | "messages:write"
+  | "users:read"
+  | "users:write"
+  | "settings:read";
+
 export type QuoteProjectType =
   | "landing"
   | "corporate"
@@ -107,11 +118,49 @@ export interface MessageRecord {
 
 export interface UserRecord {
   id: string;
+  firstName: string;
+  lastName: string;
   name: string;
   email: string;
+  phone: string;
+  company?: string;
   role: Role;
   title: string;
   activeProjects: number;
+}
+
+export interface AuthAccountRecord {
+  userId: string;
+  email: string;
+  password: string;
+  role: Role;
+}
+
+export interface MockSession {
+  userId: string;
+  role: Role;
+  name: string;
+  email: string;
+  permissions: PermissionKey[];
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
+export interface RegisterInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  company?: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface ForgotPasswordInput {
+  email: string;
 }
 
 export interface DashboardNavItem {

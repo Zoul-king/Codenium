@@ -8,8 +8,8 @@
     "dev:turbopack": "next dev --turbopack --port 3000",
     "dev:webpack": "next dev --port 3000",
     "prebuild": "tsx scripts/clear-build-cache.ts",
-    "build": "next build",
-    "start": "next start",
+    "build": "tsx scripts/build-next.ts",
+    "start": "tsx scripts/start-next.ts",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev"
