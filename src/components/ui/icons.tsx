@@ -1,11 +1,9 @@
-"use client";
-
+import Image from "next/image";
 import type { SVGProps } from "react";
 
 import { ArrowRight, Check } from "lucide-react";
 
-import { referenceAssets } from "@/features/site/content/reference-assets";
-import type { ContactIconType, ServiceIconType, SocialIconType } from "@/features/site/types";
+import type { ContactIconType, ServiceIconType, SocialIconType } from "@/features/marketing/types";
 
 interface IconProps {
   className?: string;
@@ -23,9 +21,37 @@ interface SocialIconProps extends IconProps {
   type: SocialIconType;
 }
 
+interface BrandLogoProps extends IconProps {
+  variant?: "pink" | "white";
+  priority?: boolean;
+}
+
 function SvgIcon(props: SVGProps<SVGSVGElement>) {
   return <svg fill="none" aria-hidden="true" {...props} />;
 }
+
+const serviceIcons: Record<ServiceIconType, { src: string; width: number; height: number; alt: string }> = {
+  code: { src: "/icons/services/code.svg", width: 52, height: 42, alt: "Desarrollo de software" },
+  consulting: { src: "/icons/services/consulting.svg", width: 42, height: 42, alt: "Consultorías" },
+  team: { src: "/icons/services/team.svg", width: 36, height: 40, alt: "Profesionales a tu disposición" },
+  spark: { src: "/icons/services/spark.svg", width: 42, height: 41, alt: "Desarrollo a la medida" },
+  support: { src: "/icons/services/support.svg", width: 41, height: 42, alt: "Soporte técnico" },
+  idea: { src: "/icons/services/idea.svg", width: 26, height: 36, alt: "Incubadora" }
+};
+
+const contactIcons: Record<ContactIconType, { src: string; width: number; height: number; alt: string }> = {
+  mail: { src: "/icons/contact/mail.svg", width: 32, height: 32, alt: "Correo electrónico" },
+  phone: { src: "/icons/contact/phone.svg", width: 33, height: 34, alt: "Teléfono" },
+  location: { src: "/icons/contact/location.svg", width: 20, height: 32, alt: "Ubicación" }
+};
+
+const socialIcons: Record<SocialIconType, { src: string; alt: string }> = {
+  instagram: { src: "/icons/social/instagram.svg", alt: "Instagram" },
+  x: { src: "/icons/social/x.svg", alt: "X" },
+  facebook: { src: "/icons/social/facebook.svg", alt: "Facebook" },
+  linkedin: { src: "/icons/social/linkedin.svg", alt: "LinkedIn" },
+  tiktok: { src: "/icons/social/tiktok.svg", alt: "TikTok" }
+};
 
 export function MenuIcon() {
   return (
@@ -43,41 +69,21 @@ export function CheckIcon() {
 }
 
 export function ServiceIcon({ type }: ServiceIconProps) {
-  const icons: Record<ServiceIconType, { src: string; width: number; height: number; alt: string }> = {
-    code: { src: referenceAssets.serviceIcons.code, width: 52, height: 42, alt: "Desarrollo de software" },
-    consulting: { src: referenceAssets.serviceIcons.consulting, width: 42, height: 42, alt: "Consultorías" },
-    team: { src: referenceAssets.serviceIcons.team, width: 36, height: 40, alt: "Profesionales a tu disposición" },
-    spark: { src: referenceAssets.serviceIcons.spark, width: 42, height: 41, alt: "Desarrollo a la medida" },
-    support: { src: referenceAssets.serviceIcons.support, width: 41, height: 42, alt: "Soporte técnico" },
-    idea: { src: referenceAssets.serviceIcons.idea, width: 26, height: 36, alt: "Incubadora" }
-  };
-  const icon = icons[type];
+  const icon = serviceIcons[type];
 
-  return <img src={icon.src} width={icon.width} height={icon.height} alt={icon.alt} className="h-auto w-auto" />;
+  return <Image src={icon.src} width={icon.width} height={icon.height} alt={icon.alt} className="h-auto w-auto" />;
 }
 
 export function ContactIcon({ type }: ContactIconProps) {
-  const icons: Record<ContactIconType, { src: string; width: number; height: number; alt: string }> = {
-    mail: { src: referenceAssets.contactIcons.mail, width: 32, height: 32, alt: "Correo electrónico" },
-    phone: { src: referenceAssets.contactIcons.phone, width: 33, height: 34, alt: "Teléfono" },
-    location: { src: referenceAssets.contactIcons.location, width: 20, height: 32, alt: "Ubicación" }
-  };
-  const icon = icons[type];
+  const icon = contactIcons[type];
 
-  return <img src={icon.src} width={icon.width} height={icon.height} alt={icon.alt} className="size-8 transition-transform hover:scale-105" />;
+  return <Image src={icon.src} width={icon.width} height={icon.height} alt={icon.alt} className="size-8 transition-transform hover:scale-105" />;
 }
 
 export function SocialIcon({ type, className = "size-4" }: SocialIconProps) {
-  const icons: Record<SocialIconType, { src: string; alt: string }> = {
-    instagram: { src: referenceAssets.socialIcons.instagram, alt: "Instagram" },
-    x: { src: referenceAssets.socialIcons.x, alt: "X Twitter" },
-    facebook: { src: referenceAssets.socialIcons.facebook, alt: "Facebook" },
-    linkedin: { src: referenceAssets.socialIcons.linkedin, alt: "LinkedIn" },
-    tiktok: { src: referenceAssets.socialIcons.tiktok, alt: "TikTok" }
-  };
-  const icon = icons[type];
+  const icon = socialIcons[type];
 
-  return <img src={icon.src} alt={icon.alt} className={className} />;
+  return <Image src={icon.src} width={50} height={50} alt={icon.alt} className={className} />;
 }
 
 export function ArrowRightIcon({ className = "size-4" }: IconProps) {
@@ -85,15 +91,11 @@ export function ArrowRightIcon({ className = "size-4" }: IconProps) {
 }
 
 export function WhatsAppIcon({ className = "size-8" }: IconProps) {
-  return <img src={referenceAssets.whatsapp} alt="WhatsApp" className={className} />;
+  return <Image src="/icons/whatsapp.svg" width={32} height={32} alt="WhatsApp" className={className} />;
 }
 
-interface BrandLogoProps extends IconProps {
-  variant?: "pink" | "white";
-}
+export function BrandLogo({ variant = "pink", className = "w-[112px]", priority = false }: BrandLogoProps) {
+  const src = variant === "white" ? "/images/brand/logo-white.webp" : "/images/brand/logo-pink.webp";
 
-export function BrandLogo({ variant = "pink", className = "w-[112px]" }: BrandLogoProps) {
-  const src = variant === "white" ? referenceAssets.logos.white : referenceAssets.logos.pink;
-
-  return <img src={src} width={284} height={249} alt="AxolotlCode" className={className} />;
+  return <Image src={src} width={284} height={249} alt="AxolotlCode" className={className} priority={priority} />;
 }

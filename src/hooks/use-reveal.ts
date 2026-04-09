@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { gsap } from "gsap";
 
-import type { AnimationName } from "@/features/site/types";
+import type { AnimationName } from "@/features/marketing/types";
 
 interface AnimationVariant {
   opacity: number;

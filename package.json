@@ -8,13 +8,18 @@
     "dev:turbopack": "next dev --turbopack --port 3000",
     "dev:webpack": "next dev --port 3000",
     "prebuild": "tsx scripts/clear-build-cache.ts",
-    "build": "set NEXT_DIST_DIR=.next-build&& next build",
-    "start": "set NEXT_DIST_DIR=.next-build&& next start"
+    "build": "next build",
+    "start": "next start",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:migrate": "prisma migrate dev"
   },
   "dependencies": {
+    "@prisma/client": "^6.6.0",
     "gsap": "^3.14.2",
     "lucide-react": "^1.7.0",
     "next": "^15.3.2",
+    "prisma": "^6.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
