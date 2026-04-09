@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { SVGProps } from "react";
 
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, X } from "lucide-react";
 
 import type { ContactIconType, ServiceIconType, SocialIconType } from "@/features/marketing/types";
 
@@ -62,6 +62,10 @@ export function MenuIcon() {
       />
     </SvgIcon>
   );
+}
+
+export function CloseIcon({ className = "size-4" }: IconProps) {
+  return <X className={className} strokeWidth={2.2} aria-hidden="true" />;
 }
 
 export function CheckIcon() {

@@ -1,4 +1,3 @@
-import { ContactStrip } from "@/features/marketing/components/contact-form";
 import { Hero } from "@/features/marketing/components/hero";
 import { MarketingShell } from "@/features/marketing/components/marketing-shell";
 import { quotePage } from "@/features/marketing/data/quote";
@@ -12,7 +11,6 @@ export default function QuotePage() {
     <MarketingShell headerVariant={quotePage.headerVariant}>
       <Hero hero={quotePage.hero} />
       <QuoteBuilder />
-      <ContactStrip />
     </MarketingShell>
   );
 }

@@ -15,68 +15,53 @@ export function QuoteSummaryCard({ draft, estimate }: QuoteSummaryCardProps) {
   const serviceModules = selectedModules.filter((item) => item.group === "service");
 
   return (
-    <article className="rounded-[24px] border border-white bg-gradient-to-br from-transparent to-white/80 p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)]">
-      <div className="mb-6 flex flex-col gap-2">
-        <span className="type-kicker">Estimado inicial</span>
-        <h3 className="text-2xl font-bold leading-8 text-body-color">{projectType?.label}</h3>
-        <p className="type-body">
-          Esta pre cotización te da un rango orientativo para conversar con claridad sobre alcance, tiempos y prioridades antes de una propuesta formal.
-        </p>
-      </div>
+    <aside className="rounded-[24px] border border-[#D8E2E7] bg-white p-5 shadow-[0_16px_30px_rgba(15,23,32,0.06)] lg:sticky lg:top-[120px]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#145C78]">Resumen</p>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-[18px] bg-primary-50 p-4">
-          <span className="mb-2 block text-sm font-semibold text-primary-500">Inversión estimada</span>
-          <strong className="block text-xl text-body-color">
+      <div className="mt-4 rounded-[18px] border border-[#D8E2E7] bg-[linear-gradient(180deg,#FBFDFE_0%,#F6FAFC_100%)] p-4">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#145C78]">Estimado inicial</p>
+          <p className="mt-1.5 text-2xl font-semibold tracking-[-0.04em] text-[#0F1720]">
             {formatCurrency(estimate.build.min)} - {formatCurrency(estimate.build.max)}
-          </strong>
+          </p>
+          <p className="mt-2 text-sm leading-6 text-[#42525D]">
+            Un rango orientativo para ayudarte a tomar la siguiente decisión con más claridad.
+          </p>
         </div>
-        <div className="rounded-[18px] bg-foreground p-4">
-          <span className="mb-2 block text-sm font-semibold text-primary-500">Tiempo estimado</span>
-          <strong className="block text-xl text-body-color">
-            {estimate.timelineWeeks.min} - {estimate.timelineWeeks.max} semanas
-          </strong>
-        </div>
-        <div className="rounded-[18px] bg-foreground p-4">
-          <span className="mb-2 block text-sm font-semibold text-primary-500">Acompañamiento mensual</span>
-          <strong className="block text-xl text-body-color">
-            {estimate.monthly.max > 0
-              ? `${formatCurrency(estimate.monthly.min)} - ${formatCurrency(estimate.monthly.max)}`
-              : "No incluido por ahora"}
-          </strong>
-        </div>
-      </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-[18px] bg-white/80 p-4">
-          <span className="mb-3 block text-sm font-semibold text-primary-500">Incluye en el alcance</span>
-          <div className="flex flex-wrap gap-2">
-            {featureModules.length > 0 ? (
-              featureModules.map((item) => (
-                <span key={item.key} className="tag">
-                  {item.label}
-                </span>
-              ))
-            ) : (
-              <span className="type-body">Sin módulos adicionales por ahora.</span>
-            )}
-          </div>
+        <div className="mt-5 grid gap-x-5 gap-y-4 sm:grid-cols-2">
+          <DetailItem label="Proyecto" value={projectType?.label ?? "Sin definir"} />
+          <DetailItem label="Tiempo estimado" value={`${estimate.timelineWeeks.min} - ${estimate.timelineWeeks.max} semanas`} />
+          <DetailItem
+            label="Funciones elegidas"
+            value={featureModules.length > 0 ? featureModules.map((item) => item.label).join(", ") : "Sin adicionales por ahora"}
+          />
+          <DetailItem
+            label="Acompañamiento"
+            value={
+              serviceModules.length > 0
+                ? `${serviceModules.map((item) => item.label).join(", ")} · ${formatCurrency(estimate.monthly.min)} - ${formatCurrency(estimate.monthly.max)} al mes`
+                : "No incluido por ahora"
+            }
+          />
         </div>
-        <div className="rounded-[18px] bg-white/80 p-4">
-          <span className="mb-3 block text-sm font-semibold text-primary-500">Servicios opcionales</span>
-          <div className="flex flex-wrap gap-2">
-            {serviceModules.length > 0 ? (
-              serviceModules.map((item) => (
-                <span key={item.key} className="tag">
-                  {item.label}
-                </span>
-              ))
-            ) : (
-              <span className="type-body">Puedes sumarlos más adelante si lo necesitas.</span>
-            )}
-          </div>
+
+        <div className="mt-5 border-t border-[#D8E2E7] pt-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#145C78]">Qué obtienes aquí</p>
+          <p className="mt-2 text-sm leading-6 text-[#42525D]">
+            Este resumen te ayuda a aterrizar el alcance antes de compartir tus datos. El precio final puede ajustarse según contenidos, integraciones y nivel de detalle.
+          </p>
         </div>
       </div>
-    </article>
+    </aside>
+  );
+}
+
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#7A8993]">{label}</p>
+      <p className="mt-1.5 text-sm font-semibold leading-6 text-[#0F1720]">{value}</p>
+    </div>
   );
 }

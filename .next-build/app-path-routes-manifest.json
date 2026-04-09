@@ -1,16 +1,16 @@
 {
-  "/api/health/route": "/api/health",
   "/_not-found/page": "/_not-found",
+  "/api/health/route": "/api/health",
   "/dashboard/[role]/[[...section]]/page": "/dashboard/[role]/[[...section]]",
   "/(marketing)/legals/privacy/page": "/legals/privacy",
-  "/(auth)/login/page": "/login",
-  "/(auth)/forgot-password/page": "/forgot-password",
   "/(auth)/register/page": "/register",
-  "/(marketing)/plans/page": "/plans",
-  "/(marketing)/contact/page": "/contact",
-  "/(marketing)/about/page": "/about",
-  "/(marketing)/page": "/",
-  "/(marketing)/privacy/page": "/privacy",
+  "/(auth)/forgot-password/page": "/forgot-password",
+  "/(auth)/login/page": "/login",
   "/(marketing)/portfolio/page": "/portfolio",
-  "/(marketing)/quote/page": "/quote"
+  "/(marketing)/contact/page": "/contact",
+  "/(marketing)/quote/page": "/quote",
+  "/(marketing)/privacy/page": "/privacy",
+  "/(marketing)/page": "/",
+  "/(marketing)/about/page": "/about",
+  "/(marketing)/plans/page": "/plans"
 }

@@ -10,7 +10,6 @@ export const site: SiteConfig = {
     { label: "Sobre nosotros", href: "/about" },
     { label: "Planes y servicios", href: "/plans" },
     { label: "Cotizador", href: "/quote" },
-    { label: "Acceso", href: "/login" },
     { label: "Portafolio", href: "/portfolio" },
     { label: "Contacto", href: "/contact" }
   ],
@@ -19,7 +18,6 @@ export const site: SiteConfig = {
     { label: "Sobre nosotros", href: "/about" },
     { label: "Planes y servicios", href: "/plans" },
     { label: "Cotizador", href: "/quote" },
-    { label: "Acceso", href: "/login" },
     { label: "Portafolio", href: "/portfolio" },
     { label: "Contacto", href: "/contact" },
     { label: "Aviso de privacidad", href: "/privacy" }
@@ -95,5 +93,5 @@ export const site: SiteConfig = {
     }
   },
   mapEmbedUrl:
-    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3763.1536937650258!2d-99.01649832596578!3d19.405764241539625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d1fd95427949d1%3A0xa5e068376bf62c07!2sCentro%20operativo%20Axolotlcode%2FDesarrollo%20de%20software!5e0!3m2!1ses!2smx!4v1754600848731!5m2!1ses!2smx"
+    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3763.1536937650258!2d-99.01649832596578!3d19.405764241539625!2m3!1f0!2f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d1fd95427949d1%3A0xa5e068376bf62c07!2sCentro%20operativo%20Axolotlcode%2FDesarrollo%20de%20software!5e0!3m2!1ses!2smx!4v1754600848731!5m2!1ses!2smx"
 };
