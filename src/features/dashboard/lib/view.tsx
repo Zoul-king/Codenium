@@ -47,5 +47,5 @@ export function renderDashboardSection(role: Role, section: string) {
     return <SettingsPanel />;
   }
 
-  return <SummaryPanels />;
+  return <SummaryPanels role={role} />;
 }

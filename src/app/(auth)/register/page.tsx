@@ -14,7 +14,7 @@ export default function RegisterPage() {
       <AuthCard
         kicker="Registro"
         title="Crear cuenta cliente"
-        description="Este registro público solo crea cuentas tipo cliente. PM y admin quedan reservados para gestión interna posterior."
+        description="El registro público está pensado para clientes que quieren dar seguimiento a solicitudes, proyectos y mensajes desde un solo lugar."
         footer={
           <div className="text-sm text-body-color">
             ¿Ya tienes acceso?{" "}

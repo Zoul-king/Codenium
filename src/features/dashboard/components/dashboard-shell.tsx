@@ -2,13 +2,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { dashboardNav } from "@/lib/mocks";
+import { getRoleLabel } from "@/lib/presenters";
 import type { Role } from "@/lib/types/domain";
-
-const roleLabels: Record<Role, string> = {
-  client: "Cliente",
-  pm: "Project Manager",
-  admin: "Admin"
-};
 
 interface DashboardShellProps {
   role: Role;
@@ -24,14 +19,15 @@ export function DashboardShell({ role, activeKey, title, description, metrics, c
     <section className="section soft-section pt-[130px]">
       <div className="site-shell py-10">
         <div className="mb-8" data-animate="fadeInFromTop">
-          <span className="type-kicker">Espacio {roleLabels[role]}</span>
+          <span className="type-kicker">Espacio {getRoleLabel(role)}</span>
           <h1 className="type-section-title mt-4">{title}</h1>
           <p className="type-body mt-4 max-w-3xl">{description}</p>
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
           <aside className="rounded-[28px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)]" data-animate="fadeInFromLeft">
-            <nav className="flex flex-col gap-3">
+            <span className="type-kicker">Navegación</span>
+            <nav className="mt-5 flex flex-col gap-3">
               {dashboardNav[role].map((item) => (
                 <Link
                   key={item.key}

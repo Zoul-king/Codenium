@@ -20,7 +20,7 @@ export const mockQuotes: QuoteRecord[] = [
   {
     id: "quote-2",
     code: "AX-24002",
-    title: "Tienda con catalogo y pagos",
+    title: "Tienda con catálogo y pagos",
     role: "client",
     status: "sent",
     createdAt: "2026-03-28",

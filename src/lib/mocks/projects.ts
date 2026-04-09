@@ -11,7 +11,7 @@ export const mockProjects: ProjectRecord[] = [
     dueDate: "2026-05-08",
     pmId: "user-pm-1",
     quoteCode: "AX-24001",
-    summary: "Portal corporativo con modulo comercial y seguimiento interno."
+    summary: "Sitio corporativo con módulo comercial, seguimiento interno y enfoque en captación."
   },
   {
     id: "project-2",
@@ -22,7 +22,7 @@ export const mockProjects: ProjectRecord[] = [
     dueDate: "2026-05-28",
     pmId: "user-pm-1",
     quoteCode: "AX-24002",
-    summary: "Experiencia ecommerce con catalogo, checkout y panel de contenido."
+    summary: "Experiencia ecommerce con catálogo, checkout y panel de administración."
   },
   {
     id: "project-3",
@@ -33,6 +33,6 @@ export const mockProjects: ProjectRecord[] = [
     dueDate: "2026-04-22",
     pmId: "user-pm-2",
     quoteCode: "AX-24003",
-    summary: "Panel interno para operaciones, reportes y trazabilidad."
+    summary: "Plataforma operativa con reportes, trazabilidad y seguimiento interno."
   }
 ];

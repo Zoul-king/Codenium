@@ -50,7 +50,7 @@ export function LoginForm() {
         <Link href="/forgot-password" className="hover:text-primary-500">
           Olvidé mi contraseña
         </Link>
-        <span>Credenciales mock sugeridas: `paola@valhui.mx`, `javier@axolotlcode.tech`, `admin@axolotlcode.tech`.</span>
+        <span>Cuentas de prueba: `paola@valhui.mx`, `javier@axolotlcode.tech`, `admin@axolotlcode.tech`.</span>
       </div>
     </form>
   );

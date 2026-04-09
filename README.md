@@ -1,13 +1,15 @@
 # Codenium
 
-Sitio corporativo construido con Next.js App Router, React y TypeScript. La base actual ya incluye marketing, auth mock, cotizador inicial y dashboards mock por rol sin backend real todavía.
+Sitio corporativo construido con Next.js App Router, React y TypeScript. La base actual integra marketing público, acceso con sesión de prueba, cotizador interactivo y dashboards por rol, todo listo para conectarse más adelante con backend y persistencia real.
 
 ## Estado actual
 
-- Marketing público con rutas de contenido, contacto y cotizador.
-- Auth mock con `/login`, `/register` y `/forgot-password`.
-- Dashboards mock para `client`, `pm` y `admin`.
-- Prisma preparado a nivel estructural, pero sin persistencia conectada a estas nuevas capas.
+- Marketing público con páginas de contenido, contacto y cotizador.
+- Flujo de acceso con `/login`, `/register` y `/forgot-password`.
+- Registro público limitado a cuentas cliente.
+- Dashboards visuales para `client`, `pm` y `admin`.
+- Mocks centralizados para cotizaciones, proyectos, mensajes, usuarios y sesión.
+- Prisma preparado a nivel estructural, pero todavía sin integrarse a estas capas.
 
 ## Estructura real
 
@@ -15,24 +17,25 @@ Sitio corporativo construido con Next.js App Router, React y TypeScript. La base
 src/
   app/
     (marketing)/        # Sitio público
-    (auth)/             # Login, registro y recuperación mock
+    (auth)/             # Acceso, registro y recuperación
     dashboard/          # Dashboards por rol
     api/                # Endpoints internos simples
   components/
     layout/             # Header y footer compartidos
     ui/                 # Iconos y piezas base
   features/
-    auth/               # UI y lógica mock de acceso
-    dashboard/          # Shell, resolución y vistas del dashboard
+    auth/               # UI y lógica de acceso
+    dashboard/          # Shell, contenido y vistas del dashboard
     marketing/          # Contenido y componentes del sitio público
-    messages/           # Vistas mock de mensajes
-    projects/           # Vistas mock de proyectos
-    quotes/             # Cotizador y cotizaciones mock
-    users/              # Vistas mock de usuarios
+    messages/           # Vistas de mensajes
+    projects/           # Vistas de proyectos
+    quotes/             # Cotizador y cotizaciones
+    users/              # Vistas de usuarios
   hooks/
   lib/
-    mocks/              # Catálogos y datos mock centralizados
+    mocks/              # Catálogos y datos centralizados
     types/              # Tipos de dominio
+    presenters.ts       # Labels y formatos visibles en UI
     utils.ts
     env.ts
     db.ts
@@ -41,7 +44,7 @@ src/
     services/
 ```
 
-## Flujos mock
+## Flujos disponibles
 
 ### Marketing
 
@@ -64,7 +67,7 @@ src/
 - `/dashboard/pm`
 - `/dashboard/admin`
 
-Las secciones internas del dashboard se resuelven desde catálogos mock y quedan listas para sustituirse por permisos y datos reales.
+Las secciones internas del dashboard se resuelven desde catálogos y vistas desacopladas para que el cambio a datos reales sea lo más directo posible.
 
 ## Desarrollo
 
@@ -80,8 +83,9 @@ npm run build
 npm run start
 ```
 
-## Próximos puntos de integración real
+## Siguientes integraciones reales
 
-- Reemplazar `src/features/auth/lib/session-store.ts` por Auth.js o la estrategia real de sesión.
-- Sustituir `src/lib/mocks/*` por repositorios conectados a Prisma.
-- Mover validaciones mock de formularios a endpoints/server actions cuando se habilite backend real.
+- Sustituir `src/features/auth/lib/session-store.ts` por la estrategia real de sesión.
+- Conectar `src/features/auth/lib/auth-service.ts` a endpoints o server actions.
+- Reemplazar `src/lib/mocks/*` por repositorios conectados a Prisma.
+- Mover validaciones y envíos de formularios a backend cuando se habilite la siguiente fase.

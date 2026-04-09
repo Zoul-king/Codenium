@@ -1,0 +1,73 @@
+import type { MessageStatus, ProjectStatus, QuoteStatus, Role } from "@/lib/types/domain";
+
+const longDateFormatter = new Intl.DateTimeFormat("es-MX", {
+  day: "numeric",
+  month: "long",
+  year: "numeric"
+});
+
+const shortDateFormatter = new Intl.DateTimeFormat("es-MX", {
+  day: "numeric",
+  month: "short",
+  year: "numeric"
+});
+
+const quoteStatusLabels: Record<QuoteStatus, string> = {
+  draft: "Borrador",
+  sent: "Recibida",
+  review: "En revisión",
+  approved: "Aprobada"
+};
+
+const projectStatusLabels: Record<ProjectStatus, string> = {
+  discovery: "Definición",
+  design: "Diseño",
+  build: "En desarrollo",
+  qa: "Pruebas",
+  done: "Entregado"
+};
+
+const messageStatusLabels: Record<MessageStatus, string> = {
+  unread: "No leído",
+  read: "Respondido"
+};
+
+const roleLabels: Record<Role, string> = {
+  client: "Cliente",
+  pm: "PM",
+  admin: "Admin"
+};
+
+export function formatLongDate(value: string) {
+  return formatDate(value, longDateFormatter);
+}
+
+export function formatShortDate(value: string) {
+  return formatDate(value, shortDateFormatter);
+}
+
+export function getQuoteStatusLabel(status: QuoteStatus) {
+  return quoteStatusLabels[status];
+}
+
+export function getProjectStatusLabel(status: ProjectStatus) {
+  return projectStatusLabels[status];
+}
+
+export function getMessageStatusLabel(status: MessageStatus) {
+  return messageStatusLabels[status];
+}
+
+export function getRoleLabel(role: Role) {
+  return roleLabels[role];
+}
+
+function formatDate(value: string, formatter: Intl.DateTimeFormat) {
+  const date = new Date(`${value}T12:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return formatter.format(date);
+}

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { clearSession, readSession } from "@/features/auth/lib/session-store";
 import { dashboardHomeByRole } from "@/lib/mocks";
+import { getRoleLabel } from "@/lib/presenters";
 import type { MockSession } from "@/lib/types/domain";
 
 export function SessionStatus() {
@@ -17,20 +18,20 @@ export function SessionStatus() {
   if (!session) {
     return (
       <div className="rounded-[18px] bg-foreground p-4">
-        <p className="text-sm text-body-color">Sin sesión mock activa.</p>
+        <p className="text-sm text-body-color">Todavía no has iniciado sesión.</p>
       </div>
     );
   }
 
   return (
     <div className="rounded-[18px] bg-foreground p-4">
-      <p className="text-sm font-semibold text-primary-500">Sesión mock activa</p>
+      <p className="text-sm font-semibold text-primary-500">Ya tienes una sesión activa</p>
       <p className="mt-2 text-sm text-body-color">
-        {session.name} · {session.role}
+        {session.name} · {getRoleLabel(session.role)}
       </p>
       <div className="mt-3 flex flex-wrap gap-3 text-sm">
         <Link href={dashboardHomeByRole[session.role]} className="hover:text-primary-500">
-          Ir al dashboard
+          Ir a mi panel
         </Link>
         <button
           type="button"
@@ -40,7 +41,7 @@ export function SessionStatus() {
             setSession(null);
           }}
         >
-          Cerrar sesión mock
+          Cerrar sesión
         </button>
       </div>
     </div>

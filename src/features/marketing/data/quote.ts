@@ -6,14 +6,13 @@ export const quotePage: MarketingPageData = {
   headerVariant: "white",
   meta: {
     title: "Cotizador - AxolotlCode",
-    description: "Flujo inicial de cotizacion para estimar inversion y alcance de tu proyecto con AxolotlCode."
+    description: "Genera un estimado inicial para tu proyecto y continúa con una solicitud más precisa."
   },
   hero: {
     kind: "image",
-    title: "Pre",
-    accent: "cotizacion",
-    body:
-      "Responde unas cuantas preguntas para generar un estimado inicial y conectar esa informacion con nuestro flujo de contacto.",
+    title: "Estimado",
+    accent: "inicial",
+    body: "Cuéntanos qué quieres construir, elige lo que necesitas y revisa un rango orientativo antes de enviarnos tu solicitud.",
     image: site.assets.hero.plans
   }
 };

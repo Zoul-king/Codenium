@@ -30,7 +30,7 @@ export function ForgotPasswordForm() {
       <AuthField label="Correo electrónico" placeholder="tu@empresa.com" type="email" value={email} onChange={setEmail} />
       {message ? <AuthMessage tone={success ? "success" : "error"}>{message}</AuthMessage> : null}
       <button type="submit" className="primary-button w-fit">
-        Enviar instrucciones mock
+        Continuar
       </button>
     </form>
   );

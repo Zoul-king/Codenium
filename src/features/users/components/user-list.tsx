@@ -1,4 +1,5 @@
 import { mockUsers } from "@/lib/mocks";
+import { getRoleLabel } from "@/lib/presenters";
 
 export function UserList() {
   return (
@@ -12,7 +13,7 @@ export function UserList() {
               <p className="type-body mt-3">{user.email}</p>
             </div>
             <div className="text-right">
-              <span className="tag">{user.role}</span>
+              <span className="tag">{getRoleLabel(user.role)}</span>
               <p className="mt-3 text-sm text-body-color">{user.activeProjects} proyectos activos</p>
             </div>
           </div>

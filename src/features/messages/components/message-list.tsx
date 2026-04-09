@@ -1,4 +1,5 @@
 import { mockMessages } from "@/lib/mocks";
+import { getMessageStatusLabel } from "@/lib/presenters";
 import type { Role } from "@/lib/types/domain";
 
 interface MessageListProps {
@@ -19,7 +20,7 @@ export function MessageList({ role }: MessageListProps) {
               <p className="type-body mt-3">{message.preview}</p>
             </div>
             <div className="text-right">
-              <span className="tag">{message.status}</span>
+              <span className="tag">{getMessageStatusLabel(message.status)}</span>
               <p className="mt-3 text-sm text-body-color">{message.sentAt}</p>
             </div>
           </div>

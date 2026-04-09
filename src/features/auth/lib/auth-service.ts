@@ -13,19 +13,19 @@ function buildSession(user: UserRecord, role: Role): MockSession {
 
 export function validateLogin(input: LoginInput) {
   if (!input.email.trim() || !input.password.trim()) {
-    return "Completa correo y contraseña.";
+    return "Completa tu correo y contraseña.";
   }
 
   const account = mockAuthAccounts.find((item) => item.email.toLowerCase() === input.email.trim().toLowerCase());
 
   if (!account || account.password !== input.password) {
-    return "Las credenciales mock no coinciden.";
+    return "No pudimos validar esos datos. Revisa tu correo y contraseña.";
   }
 
   const user = mockUsers.find((item) => item.id === account.userId);
 
   if (!user) {
-    return "No encontramos un usuario mock asociado a esa cuenta.";
+    return "No encontramos una cuenta disponible con esa información.";
   }
 
   return buildSession(user, account.role);
@@ -48,7 +48,7 @@ export function validateRegister(input: RegisterInput) {
   }
 
   if (input.password.length < 8) {
-    return "La contraseña debe tener al menos 8 caracteres.";
+    return "Tu contraseña debe tener al menos 8 caracteres.";
   }
 
   if (input.password !== input.confirmPassword) {
@@ -80,7 +80,7 @@ export function validateForgotPassword(input: ForgotPasswordInput) {
     return "Ingresa un correo válido.";
   }
 
-  return `En una integración real enviaríamos instrucciones de recuperación a ${input.email.trim()}.`;
+  return `Listo. Prepararemos instrucciones de recuperación para ${input.email.trim()}.`;
 }
 
 export function getDashboardRoute(role: Role) {

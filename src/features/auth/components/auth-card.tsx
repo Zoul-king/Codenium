@@ -18,12 +18,12 @@ export function AuthCard({ kicker, title, description, children, footer }: AuthC
         <p className="type-body mt-4">{description}</p>
         <div className="mt-8 space-y-4">
           <div className="rounded-[18px] bg-foreground p-4">
-            <span className="text-sm font-semibold text-primary-500">Cliente</span>
-            <p className="mt-2 text-sm text-body-color">Puede registrarse públicamente y acceder a sus cotizaciones, proyectos y mensajes.</p>
+            <span className="text-sm font-semibold text-primary-500">Cuenta cliente</span>
+            <p className="mt-2 text-sm text-body-color">Desde aquí puedes dar seguimiento a tus cotizaciones, proyectos y mensajes en un solo lugar.</p>
           </div>
           <div className="rounded-[18px] bg-foreground p-4">
-            <span className="text-sm font-semibold text-primary-500">PM y admin</span>
-            <p className="mt-2 text-sm text-body-color">Se contemplan como cuentas internas para una etapa posterior con permisos reales.</p>
+            <span className="text-sm font-semibold text-primary-500">Cuentas internas</span>
+            <p className="mt-2 text-sm text-body-color">Los perfiles de PM y administración se gestionan por separado para mantener el control operativo.</p>
           </div>
         </div>
       </article>

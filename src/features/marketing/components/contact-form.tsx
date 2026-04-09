@@ -50,10 +50,10 @@ const defaultValues: ContactFormValues = {
 export function ContactForm({
   kicker = "Contáctanos",
   title = "¿Tienes algún proyecto en mente?",
-  description = "Nosotros podemos ayudarte. Abarcamos gran parte de la Ciudad de México y alrededores.",
+  description = "Cuéntanos lo que necesitas y te ayudaremos a aterrizarlo con claridad.",
   submitLabel = "Enviar mensaje",
   summary,
-  successMessage = "Recibimos tu mensaje. En una siguiente etapa este punto se conectará con backend real.",
+  successMessage = "Recibimos tu mensaje. Muy pronto daremos seguimiento para continuar contigo.",
   initialValues
 }: ContactFormProps) {
   const [values, setValues] = useState<ContactFormValues>({ ...defaultValues, ...initialValues });
@@ -139,7 +139,7 @@ export function ContactForm({
                   <label className="mb-2 block text-sm font-medium text-gray-700">Mensaje *</label>
                   <textarea
                     rows={6}
-                    placeholder="Mensaje"
+                    placeholder="Cuéntanos brevemente qué necesitas"
                     value={values.message}
                     onChange={(event) => updateValue("message", event.target.value)}
                     className="w-full rounded-[14px] border border-gray-300 px-4 py-3 text-[15px] outline-none transition-colors duration-200 focus:border-primary-500"
@@ -183,7 +183,7 @@ export function ContactStrip() {
             ¿Tienes algún <span className="text-secondary-500">proyecto</span> en mente?
           </h2>
           <p className="max-w-2xl text-sm text-body-color sm:text-base">
-            Nosotros podemos ayudarte. Abarcamos gran parte de la Ciudad de México y alrededores.
+            Cuéntanos lo que necesitas y te ayudaremos a aterrizarlo con claridad.
           </p>
           <Link href="/contact" className="contact-button">
             Enviar mensaje

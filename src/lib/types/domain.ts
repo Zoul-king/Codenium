@@ -56,6 +56,7 @@ export interface QuoteProjectTypeOption {
 
 export interface QuoteModuleOption {
   key: QuoteModuleKey;
+  group: "feature" | "service";
   label: string;
   description: string;
   price: EstimateRange;

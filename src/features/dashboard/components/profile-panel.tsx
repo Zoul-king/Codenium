@@ -18,7 +18,7 @@ export function ProfilePanel() {
         </div>
         <div>
           <span className="text-sm font-semibold text-primary-500">Empresa</span>
-          <p className="mt-1 text-body-color">{user?.company ?? "Pendiente"}</p>
+          <p className="mt-1 text-body-color">{user?.company ?? "Pendiente de confirmar"}</p>
         </div>
         <div>
           <span className="text-sm font-semibold text-primary-500">Proyectos activos</span>

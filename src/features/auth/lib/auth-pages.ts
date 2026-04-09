@@ -6,13 +6,13 @@ export const loginPage: MarketingPageData = {
   headerVariant: "white",
   meta: {
     title: "Acceso - AxolotlCode",
-    description: "Accede a tu espacio mock dentro de AxolotlCode."
+    description: "Ingresa a tu espacio para revisar cotizaciones, proyectos y seguimiento."
   },
   hero: {
     kind: "image",
     title: "Acceso",
-    accent: "mock",
-    body: "Ingresa con una cuenta simulada para revisar la base de dashboards y el flujo preparado para autenticación real.",
+    accent: "seguro",
+    body: "Ingresa con tu correo y contraseña para continuar con tu seguimiento dentro de AxolotlCode.",
     image: site.assets.hero.contact
   }
 };
@@ -22,13 +22,13 @@ export const registerPage: MarketingPageData = {
   headerVariant: "white",
   meta: {
     title: "Registro - AxolotlCode",
-    description: "Registro público mock para cuentas cliente dentro del ecosistema de AxolotlCode."
+    description: "Crea tu cuenta cliente para dar seguimiento a cotizaciones, proyectos y mensajes."
   },
   hero: {
     kind: "image",
     title: "Crear cuenta",
     accent: "cliente",
-    body: "El registro público está reservado para clientes. Más adelante se conectará con autenticación y persistencia reales.",
+    body: "Abre tu cuenta para centralizar tu información, dar seguimiento a tus solicitudes y mantener la comunicación en un solo lugar.",
     image: site.assets.hero.plans
   }
 };
@@ -38,13 +38,13 @@ export const forgotPasswordPage: MarketingPageData = {
   headerVariant: "white",
   meta: {
     title: "Recuperar acceso - AxolotlCode",
-    description: "Vista mock para recuperación de contraseña preparada para futura conexión real."
+    description: "Solicita instrucciones para recuperar el acceso a tu cuenta."
   },
   hero: {
     kind: "image",
     title: "Recuperar",
     accent: "acceso",
-    body: "Esta vista ya deja el flujo visual listo para integrarse con envío real de correos y validación de tokens más adelante.",
+    body: "Déjanos tu correo y te mostraremos el siguiente paso para volver a entrar a tu cuenta.",
     image: site.assets.hero.contact
   }
 };

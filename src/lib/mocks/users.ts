@@ -5,8 +5,8 @@ export const mockUsers: UserRecord[] = [
   {
     id: "user-client-1",
     firstName: "Paola",
-    lastName: "Hernandez",
-    name: "Paola Hernandez",
+    lastName: "Hernández",
+    name: "Paola Hernández",
     email: "paola@valhui.mx",
     phone: "+52 55 2100 4500",
     company: "ValHui",
@@ -39,12 +39,12 @@ export const mockUsers: UserRecord[] = [
   {
     id: "user-admin-1",
     firstName: "Equipo",
-    lastName: "Direccion",
-    name: "Equipo Direccion",
+    lastName: "Dirección",
+    name: "Equipo Dirección",
     email: "admin@axolotlcode.tech",
     phone: "+52 55 1111 0000",
     role: "admin",
-    title: "Administracion general",
+    title: "Administración general",
     activeProjects: 7
   }
 ];

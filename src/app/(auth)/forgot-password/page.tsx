@@ -14,7 +14,7 @@ export default function ForgotPasswordPage() {
       <AuthCard
         kicker="Recuperación"
         title="Solicita restablecer tu acceso"
-        description="La lógica es mock por ahora, pero la estructura ya está lista para integrarse con envío de correos y tokens reales."
+        description="Comparte tu correo y te mostraremos el siguiente paso para volver a entrar a tu cuenta."
         footer={
           <div className="text-sm text-body-color">
             Volver a{" "}
