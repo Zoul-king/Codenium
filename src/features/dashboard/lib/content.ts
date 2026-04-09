@@ -1,208 +1,163 @@
-import { mockMessages, mockProjects, mockQuotes, mockUsers } from "@/lib/mocks";
-import { formatShortDate, getProjectStatusLabel } from "@/lib/presenters";
-import type { DashboardMetric, Role } from "@/lib/types/domain";
+import { getPrimaryUser, getPmUsers, getVisibleMessages, getVisibleProjects, getVisibleQuotes } from "@/features/dashboard/lib/selectors";
+import { formatShortDate } from "@/lib/presenters";
+import type { Role } from "@/lib/types/domain";
 
-export function getDashboardMetrics(role: Role): DashboardMetric[] {
+interface DashboardMetric {
+  label: string;
+  value: string;
+  helper: string;
+}
+
+interface SummaryCard {
+  kicker: string;
+  title: string;
+  items: string[];
+}
+
+interface DashboardHeader {
+  title: string;
+  description: string;
+  metrics: DashboardMetric[];
+}
+
+export function getDashboardContent(role: Role, activeKey: string): DashboardHeader {
+  const quotes = getVisibleQuotes(role);
+  const projects = getVisibleProjects(role);
+  const messages = getVisibleMessages(role);
+  const user = getPrimaryUser(role);
+
   if (role === "client") {
-    return [
-      {
-        label: "Cotizaciones activas",
-        value: String(mockQuotes.filter((item) => item.role === "client").length),
-        helper: "Estimados y propuestas que siguen en movimiento"
-      },
-      {
-        label: "Proyectos en curso",
-        value: String(mockProjects.slice(0, 2).length),
-        helper: "Frentes que ya están avanzando contigo"
-      },
-      {
-        label: "Respuestas pendientes",
-        value: String(mockMessages.filter((item) => item.role === "client" && item.status === "unread").length),
-        helper: "Conversaciones que conviene atender hoy"
-      }
-    ];
+    const nextProject = projects.slice().sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
+
+    return {
+      title: activeKey === "summary" ? "Tu espacio de seguimiento" : getClientSectionTitle(activeKey),
+      description:
+        activeKey === "summary"
+          ? "Consulta tu estimado inicial, revisa en qué va cada proyecto y detecta rápido qué necesita tu atención."
+          : "Toda la información visible aquí está organizada para ayudarte a seguir el proceso sin perder contexto.",
+      metrics: [
+        { label: "Cotizaciones", value: String(quotes.length), helper: "Solicitudes activas o recientes" },
+        { label: "Proyectos", value: String(projects.length), helper: "Frentes en curso para tu cuenta" },
+        { label: "Próximo hito", value: nextProject ? formatShortDate(nextProject.dueDate) : "Sin fecha", helper: nextProject ? nextProject.name : "Aún no hay proyecto activo" }
+      ]
+    };
   }
 
   if (role === "pm") {
-    return [
-      {
-        label: "Proyectos asignados",
-        value: String(mockProjects.length),
-        helper: "Frentes que requieren seguimiento continuo"
-      },
-      {
-        label: "Entregas cercanas",
-        value: String(mockProjects.filter((item) => item.progress >= 60).length),
-        helper: "Proyectos que ya entraron a fase de cierre"
-      },
-      {
-        label: "Mensajes por revisar",
-        value: String(mockMessages.filter((item) => item.role === "pm" && item.status === "unread").length),
-        helper: "Conversaciones que necesitan una respuesta"
-      }
-    ];
+    const blocked = projects.filter((project) => project.progress < 45).length;
+    const unread = messages.filter((message) => message.status === "unread").length;
+
+    return {
+      title: activeKey === "summary" ? "Panel de coordinación" : getPmSectionTitle(activeKey),
+      description:
+        activeKey === "summary"
+          ? "Prioriza entregables, revisa qué está por vencer y responde rápido a los mensajes que pueden frenar el avance."
+          : "Esta vista concentra lo que necesitas para mover proyectos y mantener claridad con clientes y dirección.",
+      metrics: [
+        { label: "Asignados", value: String(projects.length), helper: "Proyectos activos bajo tu coordinación" },
+        { label: "Requieren atención", value: String(blocked), helper: "Frentes que todavía necesitan definición o desbloqueo" },
+        { label: "Mensajes pendientes", value: String(unread), helper: "Conversaciones por revisar hoy" }
+      ]
+    };
   }
 
-  return [
-    {
-      label: "Cotizaciones por atender",
-      value: String(mockQuotes.filter((item) => item.status !== "approved").length),
-      helper: "Solicitudes que requieren seguimiento o decisión"
-    },
-    {
-      label: "Proyectos activos",
-      value: String(mockProjects.length),
-      helper: "Operación en curso dentro del estudio"
-    },
-    {
-      label: "PM con carga activa",
-      value: String(mockUsers.filter((item) => item.role === "pm").length),
-      helper: "Responsables con proyectos asignados"
-    }
-  ];
+  const pmUsers = getPmUsers();
+  const approvedQuotes = quotes.filter((quote) => quote.status === "approved").length;
+  const maxLoad = Math.max(...pmUsers.map((pm) => pm.activeProjects));
+
+  return {
+    title: activeKey === "summary" ? "Visión general del negocio" : getAdminSectionTitle(activeKey),
+    description:
+      activeKey === "summary"
+        ? "Observa lo que está entrando, qué proyectos necesitan decisión y cómo está distribuida la carga del equipo."
+        : "Aquí se concentra la operación visible para revisar demanda, carga interna y continuidad del servicio.",
+    metrics: [
+      { label: "Cotizaciones activas", value: String(quotes.length), helper: `${approvedQuotes} ya están aprobadas` },
+      { label: "Proyectos en curso", value: String(projects.length), helper: "Frentes visibles en operación" },
+      { label: "Carga más alta", value: `${maxLoad}`, helper: user ? `${user.name} monitorea la distribución` : "Seguimiento general" }
+    ]
+  };
 }
 
-export function getDashboardCopy(role: Role, section: string) {
-  const sectionCopy = {
-    client: {
-      summary: {
-        title: "Tu espacio de seguimiento",
-        description: "Aquí puedes ver qué has solicitado, cómo avanzan tus proyectos y qué necesitas revisar para seguir avanzando."
-      },
-      quotes: {
-        title: "Mis cotizaciones",
-        description: "Consulta tus estimados activos, revisa su rango y ubica cuáles ya están en revisión."
-      },
-      projects: {
-        title: "Mis proyectos",
-        description: "Sigue el avance, las fechas estimadas y el estado actual de cada frente activo."
-      },
-      messages: {
-        title: "Mensajes",
-        description: "Revisa conversaciones recientes y detecta rápido lo que necesita respuesta."
-      },
-      profile: {
-        title: "Perfil",
-        description: "Mantén a la mano tus datos de contacto y la información principal de tu cuenta."
-      }
-    },
-    pm: {
-      summary: {
-        title: "Resumen operativo",
-        description: "Prioriza lo asignado, ubica riesgos y mantén claridad sobre lo que vence pronto."
-      },
-      projects: {
-        title: "Proyectos asignados",
-        description: "Consulta el estado actual, el avance y la próxima entrega de cada proyecto a tu cargo."
-      },
-      timeline: {
-        title: "Avances",
-        description: "Visualiza el progreso de los proyectos y detecta rápido cuáles requieren impulso."
-      },
-      messages: {
-        title: "Mensajes",
-        description: "Mantén ordenada la comunicación con clientes y equipo para evitar bloqueos."
-      },
-      tasks: {
-        title: "Pendientes",
-        description: "Ten claras las acciones que destraban entregas, validaciones y coordinación interna."
-      }
-    },
-    admin: {
-      summary: {
-        title: "Resumen general",
-        description: "Ten visibilidad de cotizaciones, proyectos y carga del equipo para tomar decisiones a tiempo."
-      },
-      quotes: {
-        title: "Cotizaciones",
-        description: "Revisa lo que entró, qué sigue en revisión y qué ya puede avanzar a la siguiente etapa."
-      },
-      projects: {
-        title: "Proyectos",
-        description: "Monitorea el portafolio activo con foco en estado, fechas y capacidad operativa."
-      },
-      users: {
-        title: "Usuarios",
-        description: "Consulta quiénes participan en la operación y cuántos frentes sostienen actualmente."
-      },
-      assignments: {
-        title: "Asignaciones",
-        description: "Ubica responsables, distribuye carga y detecta proyectos que requieren una decisión."
-      },
-      settings: {
-        title: "Configuración",
-        description: "Centraliza criterios visibles del servicio, operación y organización interna."
-      }
-    }
-  }[role];
+export function getSummaryCards(role: Role): SummaryCard[] {
+  const quotes = getVisibleQuotes(role);
+  const projects = getVisibleProjects(role);
+  const messages = getVisibleMessages(role);
 
-  return sectionCopy[section as keyof typeof sectionCopy] ?? sectionCopy.summary;
-}
-
-export function getSummaryCards(role: Role) {
   if (role === "client") {
-    const nextProject = mockProjects[0];
-    const pendingQuote = mockQuotes.find((item) => item.role === "client");
-
     return [
       {
-        kicker: "Qué requiere tu atención",
-        title: "Lo más importante para seguir avanzando",
-        items: [
-          `${pendingQuote?.code ?? "Tu cotización"} sigue en revisión comercial.`,
-          "Tienes una conversación pendiente sobre prioridades del proyecto.",
-          `La próxima fecha clave está proyectada para el ${formatShortDate(nextProject.dueDate)}.`
-        ]
+        kicker: "Qué ya pediste",
+        title: "Tus solicitudes siguen el mismo hilo",
+        items: quotes.map((quote) => `${quote.code} · ${quote.title}`)
       },
       {
         kicker: "Qué sigue",
-        title: "Tus siguientes pasos con nosotros",
+        title: "Tus próximos pasos visibles",
         items: [
-          "Confirmar ajustes de alcance si cambió alguna prioridad.",
-          "Validar entregables de la siguiente etapa antes del cierre.",
-          `Tu proyecto principal está en ${getProjectStatusLabel(nextProject.status).toLowerCase()}.`
+          projects[0] ? `${projects[0].name}: entrega estimada ${formatShortDate(projects[0].dueDate)}` : "Aún no hay proyecto activo.",
+          messages[0] ? `Responder conversación: ${messages[0].thread}` : "No tienes mensajes pendientes.",
+          "Si necesitas ajustar alcance, puedes retomarlo desde tu cotización."
         ]
       }
     ];
   }
 
   if (role === "pm") {
-    const urgentProjects = mockProjects.filter((item) => item.progress >= 60);
-
     return [
       {
-        kicker: "Prioridades de hoy",
-        title: "Frentes que necesitan seguimiento inmediato",
-        items: [
-          "Confirmar accesos de integración pendientes con el cliente.",
-          `Acompañar el cierre de ${urgentProjects[0]?.name ?? "los proyectos activos"} esta semana.`,
-          "Responder mensajes operativos antes del siguiente corte interno."
-        ]
+        kicker: "Prioridades",
+        title: "Lo que más presión tiene hoy",
+        items: projects.map((project) => `${project.name} · ${project.progress}% de avance`)
       },
       {
-        kicker: "Entregas cercanas",
-        title: "Proyectos que conviene vigilar de cerca",
-        items: urgentProjects.map((project) => `${project.name}: ${getProjectStatusLabel(project.status)} con entrega estimada para ${formatShortDate(project.dueDate)}.`)
+        kicker: "Seguimiento",
+        title: "Atención inmediata",
+        items: [
+          messages[0] ? `Responder: ${messages[0].thread}` : "No hay conversaciones urgentes.",
+          projects[0] ? `Revisar entregable de ${projects[0].name}` : "Sin entregables urgentes.",
+          "Mantén visibles bloqueos, dependencias y próximos hitos."
+        ]
       }
     ];
   }
 
   return [
     {
-      kicker: "Decisiones por tomar",
-      title: "Lo que requiere validación o seguimiento",
-      items: [
-        "Hay cotizaciones activas que todavía requieren una definición comercial.",
-        "Conviene revisar proyectos con entregas cercanas y alto avance.",
-        "La distribución de PM debe mantenerse balanceada esta semana."
-      ]
+      kicker: "Entrada comercial",
+      title: "Lo que está entrando al pipeline",
+      items: quotes.map((quote) => `${quote.code} · ${quote.clientName}`)
     },
     {
-      kicker: "Carga del equipo",
-      title: "Vista rápida de responsables y portafolio",
-      items: mockUsers
-        .filter((user) => user.role === "pm")
-        .map((user) => `${user.name}: ${user.activeProjects} proyectos activos.`)
+      kicker: "Operación",
+      title: "Decisiones por tomar",
+      items: [
+        projects[0] ? `Confirmar siguiente fase de ${projects[0].name}` : "Sin proyectos activos.",
+        messages[0] ? `Responder hilo: ${messages[0].thread}` : "Sin mensajes abiertos.",
+        "Distribuir carga y revisar riesgo antes del próximo corte."
+      ]
     }
   ];
+}
+
+function getClientSectionTitle(section: string) {
+  if (section === "quotes") return "Tus cotizaciones";
+  if (section === "projects") return "Tus proyectos";
+  if (section === "messages") return "Tus mensajes";
+  return "Tu perfil";
+}
+
+function getPmSectionTitle(section: string) {
+  if (section === "projects") return "Proyectos asignados";
+  if (section === "timeline") return "Avances y entregables";
+  if (section === "messages") return "Mensajes del equipo y clientes";
+  return "Pendientes del día";
+}
+
+function getAdminSectionTitle(section: string) {
+  if (section === "quotes") return "Cotizaciones activas";
+  if (section === "projects") return "Proyectos en curso";
+  if (section === "users") return "Usuarios y roles";
+  if (section === "assignments") return "Asignaciones del equipo";
+  return "Configuración visible";
 }

@@ -3,17 +3,15 @@ import type { BenefitItem, ClientLogo, MarketingPageData, ServiceItem } from "@/
 
 export const homePage: MarketingPageData = {
   slug: "/",
-  headerVariant: "pink",
+  headerVariant: "brand",
   meta: {
     title: "AxolotlCode - Software, plataformas y experiencias digitales",
-    description:
-      "Diseñamos sitios, plataformas y productos digitales con estimado inicial y seguimiento claro durante el proceso."
+    description: "Diseñamos sitios, plataformas y productos digitales con estimado inicial y seguimiento claro durante el proceso."
   },
   hero: {
     kind: "home",
     title: "Software y plataformas a tu medida",
-    body:
-      "Diseñamos y desarrollamos productos digitales con un proceso más claro desde el inicio: estimado inicial, continuidad comercial y seguimiento en cada etapa.",
+    body: "Diseñamos y desarrollamos productos digitales con un proceso más claro desde el inicio: estimado inicial, continuidad comercial y seguimiento en cada etapa.",
     primaryCta: { label: "Sobre nosotros", href: "/about" },
     secondaryCta: { label: "Obtener estimado", href: "/quote" }
   }

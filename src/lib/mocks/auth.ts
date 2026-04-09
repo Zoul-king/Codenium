@@ -4,20 +4,20 @@ import type { AuthAccountRecord } from "@/lib/types/domain";
 export const mockAuthAccounts: AuthAccountRecord[] = [
   {
     userId: "user-client-1",
-    email: "paola@valhui.mx",
-    password: "Client123!",
+    email: "client@codenium.com",
+    password: "123provisional",
     role: "client"
   },
   {
     userId: "user-pm-1",
-    email: "javier@axolotlcode.tech",
-    password: "Pm123456!",
+    email: "pm@codenium.com",
+    password: "123provisional",
     role: "pm"
   },
   {
     userId: "user-admin-1",
-    email: "admin@axolotlcode.tech",
-    password: "Admin123!",
+    email: "admin@codenium.com",
+    password: "123provisional",
     role: "admin"
   }
 ];

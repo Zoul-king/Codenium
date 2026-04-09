@@ -4,7 +4,7 @@ export type ServiceIconType = "code" | "consulting" | "team" | "spark" | "suppor
 
 export type ContactIconType = "mail" | "phone" | "location";
 
-export type HeaderVariant = "pink" | "white";
+export type HeaderVariant = "brand" | "white";
 
 export interface LinkItem {
   label: string;

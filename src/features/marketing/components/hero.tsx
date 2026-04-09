@@ -57,10 +57,7 @@ export function Hero({ hero }: HeroProps) {
 
   return (
     <section className="relative h-full w-full text-white">
-      <div
-        className="absolute inset-0 h-full w-full bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${hero.image})` }}
-      />
+      <div className="absolute inset-0 h-full w-full bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${hero.image})` }} />
       <div className="absolute inset-0 h-full w-full bg-black/75" />
       <div className="hero relative mx-auto flex w-full max-w-5xl flex-col items-center px-4 py-[186px] text-center md:py-[135px] xl:py-[276px]" data-animate="fadeIn">
         <h1 className="type-hero-inner mb-8">
@@ -104,19 +101,11 @@ function PortfolioGradients() {
   return (
     <>
       <svg width="910" height="678" viewBox="0 0 910 678" fill="none" className="fixed -top-70 -z-10 blur-2xl">
-        <rect
-          opacity="0.3"
-          x="-90.6299"
-          y="-243.33"
-          width="1155"
-          height="677.995"
-          transform="rotate(30 -90.6299 -243.33)"
-          fill="url(#portfolio-gradient-left)"
-        />
+        <rect opacity="0.3" x="-90.6299" y="-243.33" width="1155" height="677.995" transform="rotate(30 -90.6299 -243.33)" fill="url(#portfolio-gradient-left)" />
         <defs>
           <linearGradient id="portfolio-gradient-left" x1="190.872" y1="599.909" x2="782.863" y2="-408.578" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#FF80B5" />
-            <stop offset="1" stopColor="#9089FC" />
+            <stop stopColor="#68C3CF" />
+            <stop offset="1" stopColor="#6C4FD3" />
           </linearGradient>
         </defs>
       </svg>
@@ -124,8 +113,8 @@ function PortfolioGradients() {
         <rect opacity="0.3" x="718.5" y="64" width="1155" height="678" fill="url(#portfolio-gradient-right)" />
         <defs>
           <linearGradient id="portfolio-gradient-right" x1="1000" y1="907.245" x2="1592" y2="-101.245" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#FF80B5" />
-            <stop offset="1" stopColor="#9089FC" />
+            <stop stopColor="#68C3CF" />
+            <stop offset="1" stopColor="#6C4FD3" />
           </linearGradient>
         </defs>
       </svg>

@@ -27,7 +27,7 @@ export function Services({ items, compact = false }: ServicesProps) {
                     <p className="mt-6 text-sm leading-[26px] xl:text-base xl:leading-7">{service.body}</p>
                   </div>
                 </div>
-                <div className="absolute inset-0 rounded-lg bg-[radial-gradient(circle_at_45%_90%,rgba(86,202,204,0.35),transparent_35%)]" />
+                <div className="absolute inset-0 rounded-lg bg-[radial-gradient(circle_at_45%_90%,rgba(104,195,207,0.22),transparent_35%)]" />
               </article>
             ))}
           </div>

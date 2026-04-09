@@ -2,7 +2,7 @@ import type { MarketingPageData } from "@/features/marketing/types";
 
 export const privacyPage: MarketingPageData = {
   slug: "/privacy",
-  headerVariant: "pink",
+  headerVariant: "brand",
   meta: {
     title: "Aviso de privacidad - AxolotlCode",
     description: "Espacio preparado para publicar el aviso de privacidad final de AxolotlCode."

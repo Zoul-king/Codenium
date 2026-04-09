@@ -1,4 +1,4 @@
-import { mockProjects } from "@/lib/mocks";
+import { getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { formatLongDate, getProjectStatusLabel } from "@/lib/presenters";
 import type { Role } from "@/lib/types/domain";
 
@@ -7,7 +7,7 @@ interface ProjectListProps {
 }
 
 export function ProjectList({ role }: ProjectListProps) {
-  const items = role === "client" ? mockProjects.slice(0, 2) : mockProjects;
+  const items = getVisibleProjects(role);
 
   return (
     <div className="grid grid-cols-1 gap-4">

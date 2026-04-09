@@ -1,4 +1,4 @@
-import { mockQuotes } from "@/lib/mocks";
+import { getVisibleQuotes } from "@/features/dashboard/lib/selectors";
 import { formatLongDate, getQuoteStatusLabel } from "@/lib/presenters";
 import type { Role } from "@/lib/types/domain";
 
@@ -9,7 +9,7 @@ interface QuoteListProps {
 }
 
 export function QuoteList({ role }: QuoteListProps) {
-  const items = role ? mockQuotes.filter((item) => item.role === role || role === "admin") : mockQuotes;
+  const items = role ? getVisibleQuotes(role) : getVisibleQuotes("admin");
 
   return (
     <div className="grid grid-cols-1 gap-4">
@@ -17,9 +17,7 @@ export function QuoteList({ role }: QuoteListProps) {
         <article key={quote.id} className="rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)]">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
-              <span className="mb-2 inline-flex rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-500">
-                {quote.code}
-              </span>
+              <span className="mb-2 inline-flex rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-500">{quote.code}</span>
               <h3 className="text-xl font-bold text-body-color">{quote.title}</h3>
               <p className="type-body mt-2">Creada el {formatLongDate(quote.createdAt)}</p>
             </div>

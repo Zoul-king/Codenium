@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { DashboardShell } from "@/features/dashboard/components/dashboard-shell";
-import { getDashboardCopy, getDashboardMetrics } from "@/features/dashboard/lib/content";
+import { getDashboardContent } from "@/features/dashboard/lib/content";
 import { isValidDashboardSection, resolveRole } from "@/features/dashboard/lib/routes";
 import { renderDashboardSection } from "@/features/dashboard/lib/view";
 import { MarketingShell } from "@/features/marketing/components/marketing-shell";
@@ -27,12 +27,11 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     notFound();
   }
 
-  const copy = getDashboardCopy(role, activeSection);
-  const metrics = getDashboardMetrics(role);
+  const content = getDashboardContent(role, activeSection);
 
   return (
-    <MarketingShell headerVariant="pink">
-      <DashboardShell role={role} activeKey={activeSection} title={copy.title} description={copy.description} metrics={metrics}>
+    <MarketingShell headerVariant="brand">
+      <DashboardShell role={role} activeKey={activeSection} title={content.title} description={content.description} metrics={content.metrics}>
         {renderDashboardSection(role, activeSection)}
       </DashboardShell>
     </MarketingShell>

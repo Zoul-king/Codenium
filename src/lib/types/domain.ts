@@ -88,6 +88,9 @@ export interface QuoteRecord {
   code: string;
   title: string;
   role: Role;
+  clientId: string;
+  clientName: string;
+  pmId?: string;
   status: QuoteStatus;
   createdAt: string;
   projectType: QuoteProjectType;
@@ -98,18 +101,24 @@ export interface QuoteRecord {
 export interface ProjectRecord {
   id: string;
   name: string;
+  clientId: string;
   clientName: string;
   status: ProjectStatus;
   progress: number;
   dueDate: string;
   pmId: string;
   quoteCode: string;
+  quoteId: string;
   summary: string;
 }
 
 export interface MessageRecord {
   id: string;
   thread: string;
+  senderId: string;
+  recipientId?: string;
+  projectId?: string;
+  quoteId?: string;
   senderName: string;
   role: Role;
   preview: string;

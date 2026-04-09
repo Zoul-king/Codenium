@@ -1,19 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type InputHTMLAttributes, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 import { ContactIcon } from "@/components/ui/icons";
+import { TextAreaField, TextField } from "@/components/ui/form-controls";
 import { site } from "@/features/marketing/data/site";
 import type { ContactIconType } from "@/features/marketing/types";
-
-interface FormFieldProps {
-  label: string;
-  placeholder: string;
-  type?: InputHTMLAttributes<HTMLInputElement>["type"];
-  value: string;
-  onChange: (value: string) => void;
-}
 
 interface ContactInfoProps {
   label: string;
@@ -49,8 +42,8 @@ const defaultValues: ContactFormValues = {
 
 export function ContactForm({
   kicker = "Contáctanos",
-  title = "¿Tienes algún proyecto en mente?",
-  description = "Cuéntanos lo que necesitas y te ayudaremos a aterrizarlo con claridad.",
+  title = "Cuéntanos qué necesitas",
+  description = "Compártenos el contexto y te ayudaremos a aterrizar el siguiente paso.",
   submitLabel = "Enviar mensaje",
   summary,
   successMessage = "Recibimos tu mensaje. Muy pronto daremos seguimiento para continuar contigo.",
@@ -61,12 +54,7 @@ export function ContactForm({
   const hasSummary = Boolean(summary);
 
   const isDisabled = useMemo(
-    () =>
-      !values.firstName.trim() ||
-      !values.lastName.trim() ||
-      !values.email.trim() ||
-      !values.phone.trim() ||
-      !values.message.trim(),
+    () => !values.firstName.trim() || !values.lastName.trim() || !values.email.trim() || !values.phone.trim() || !values.message.trim(),
     [values]
   );
 
@@ -117,39 +105,15 @@ export function ContactForm({
                 onSubmit={handleSubmit}
               >
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <FormField label="Nombre *" placeholder="Nombre" value={values.firstName} onChange={(value) => updateValue("firstName", value)} />
-                  <FormField label="Apellidos *" placeholder="Apellidos" value={values.lastName} onChange={(value) => updateValue("lastName", value)} />
+                  <TextField label="Nombre *" placeholder="Nombre" value={values.firstName} onChange={(value) => updateValue("firstName", value)} />
+                  <TextField label="Apellidos *" placeholder="Apellidos" value={values.lastName} onChange={(value) => updateValue("lastName", value)} />
                 </div>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <FormField
-                    label="Correo electrónico *"
-                    placeholder="Correo electrónico"
-                    type="email"
-                    value={values.email}
-                    onChange={(value) => updateValue("email", value)}
-                  />
-                  <FormField
-                    label="Número de teléfono *"
-                    placeholder="Número de teléfono"
-                    value={values.phone}
-                    onChange={(value) => updateValue("phone", value)}
-                  />
+                  <TextField label="Correo electrónico *" placeholder="Correo electrónico" type="email" value={values.email} onChange={(value) => updateValue("email", value)} />
+                  <TextField label="Número de teléfono *" placeholder="Número de teléfono" value={values.phone} onChange={(value) => updateValue("phone", value)} />
                 </div>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">Mensaje *</label>
-                  <textarea
-                    rows={6}
-                    placeholder="Cuéntanos brevemente qué necesitas"
-                    value={values.message}
-                    onChange={(event) => updateValue("message", event.target.value)}
-                    className="w-full rounded-[14px] border border-gray-300 px-4 py-3 text-[15px] outline-none transition-colors duration-200 focus:border-primary-500"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isDisabled}
-                  className="w-fit rounded-[5px] border border-primary-500 bg-primary-500 px-6 py-2 font-bold text-primary-50 transition-all duration-500 ease-in-out hover:scale-105 hover:bg-white hover:text-primary-500 disabled:cursor-not-allowed disabled:opacity-70"
-                >
+                <TextAreaField label="Mensaje *" placeholder="Cuéntanos brevemente qué necesitas" value={values.message} onChange={(value) => updateValue("message", value)} />
+                <button type="submit" disabled={isDisabled} className="primary-button w-fit disabled:cursor-not-allowed disabled:opacity-70">
                   {submitLabel}
                 </button>
               </form>
@@ -159,13 +123,14 @@ export function ContactForm({
 
         <div className="contact-map mt-8 h-[250px] w-full overflow-hidden rounded-xl sm:mt-12 sm:h-[300px] md:h-[350px] lg:mt-16 lg:h-[400px]" data-animate="fadeIn" data-delay="0.2">
           <iframe
-            title="Ubicación"
+            title="Ubicación UPTex Texcoco"
             src={site.mapEmbedUrl}
             width="100%"
             height="100%"
             style={{ border: 0 }}
             loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
           />
         </div>
       </div>
@@ -182,9 +147,7 @@ export function ContactStrip() {
           <h2 className="type-section-title">
             ¿Tienes algún <span className="text-secondary-500">proyecto</span> en mente?
           </h2>
-          <p className="max-w-2xl text-sm text-body-color sm:text-base">
-            Cuéntanos lo que necesitas y te ayudaremos a aterrizarlo con claridad.
-          </p>
+          <p className="max-w-2xl text-sm text-body-color sm:text-base">Comparte tu idea y te ayudaremos a convertirla en un siguiente paso claro.</p>
           <Link href="/contact" className="contact-button">
             Enviar mensaje
           </Link>
@@ -192,13 +155,14 @@ export function ContactStrip() {
         <article className="map w-full" data-animate="fadeInFromRight" data-delay="0.12">
           <div className="h-[300px] overflow-hidden rounded-xl sm:h-[400px]">
             <iframe
-              title="Ubicación"
+              title="Ubicación UPTex Texcoco"
               src={site.mapEmbedUrl}
               width="100%"
               height="100%"
               style={{ border: 0 }}
               loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
             />
           </div>
           <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-2">
@@ -209,21 +173,6 @@ export function ContactStrip() {
         </article>
       </div>
     </section>
-  );
-}
-
-function FormField({ label, placeholder, type = "text", value, onChange }: FormFieldProps) {
-  return (
-    <div>
-      <label className="mb-2 block text-sm font-medium text-gray-700">{label}</label>
-      <input
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:ring-primary-500"
-      />
-    </div>
   );
 }
 

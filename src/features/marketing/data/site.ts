@@ -23,8 +23,8 @@ export const site: SiteConfig = {
     { label: "Aviso de privacidad", href: "/privacy" }
   ],
   contact: {
-    location: "Estado de México",
-    city: "Nezahualcóyotl",
+    location: "Texcoco",
+    city: "Estado de México",
     email: "admin@axolotlcode.tech",
     phone: "+(52) 56 2495 5086",
     phoneRaw: "+525624955086",
@@ -38,8 +38,7 @@ export const site: SiteConfig = {
     { label: "TikTok", href: "https://www.tiktok.com/@axolotl.code", icon: "tiktok" }
   ],
   footer: {
-    body:
-      "Diseñamos sitios, plataformas y productos digitales con un proceso claro desde el estimado inicial hasta el seguimiento del proyecto.",
+    body: "Diseñamos sitios, plataformas y productos digitales con un proceso claro, desde el estimado inicial hasta el seguimiento del proyecto.",
     legal: "© 2026 AxolotlCode. Todos los derechos reservados."
   },
   sticky: {
@@ -92,6 +91,5 @@ export const site: SiteConfig = {
       chessIq: "/images/portfolio/chess-iq-logo.png"
     }
   },
-  mapEmbedUrl:
-    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3763.1536937650258!2d-99.01649832596578!3d19.405764241539625!2m3!1f0!2f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d1fd95427949d1%3A0xa5e068376bf62c07!2sCentro%20operativo%20Axolotlcode%2FDesarrollo%20de%20software!5e0!3m2!1ses!2smx!4v1754600848731!5m2!1ses!2smx"
+  mapEmbedUrl: "https://www.google.com/maps?q=Universidad%20Polit%C3%A9cnica%20de%20Texcoco%2C%20Texcoco%2C%20Estado%20de%20M%C3%A9xico&z=15&output=embed"
 };

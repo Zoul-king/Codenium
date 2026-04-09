@@ -22,7 +22,7 @@ interface SocialIconProps extends IconProps {
 }
 
 interface BrandLogoProps extends IconProps {
-  variant?: "pink" | "white";
+  variant?: "brand" | "white";
   priority?: boolean;
 }
 
@@ -98,7 +98,7 @@ export function WhatsAppIcon({ className = "size-8" }: IconProps) {
   return <Image src="/icons/whatsapp.svg" width={32} height={32} alt="WhatsApp" className={className} />;
 }
 
-export function BrandLogo({ variant = "pink", className = "w-[112px]", priority = false }: BrandLogoProps) {
+export function BrandLogo({ variant = "brand", className = "w-[112px]", priority = false }: BrandLogoProps) {
   const src = variant === "white" ? "/images/brand/logo-white.webp" : "/images/brand/logo-pink.webp";
 
   return <Image src={src} width={284} height={249} alt="AxolotlCode" className={className} priority={priority} />;

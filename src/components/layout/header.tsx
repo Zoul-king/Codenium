@@ -25,7 +25,7 @@ export function Header({ variant }: HeaderProps) {
       <header className="absolute inset-x-0 top-0 z-30 h-28">
         <div className={cn("site-shell flex items-center justify-between px-3 py-6", textClassName)}>
           <Link href="/" aria-label="Inicio">
-            <BrandLogo variant={isLight ? "white" : "pink"} className="w-[112px] xl:ml-[-16px]" priority />
+            <BrandLogo variant={isLight ? "white" : "brand"} className="w-[112px] xl:ml-[-16px]" priority />
           </Link>
 
           <nav className="hidden items-center gap-7 lg:flex">
@@ -124,7 +124,7 @@ function MobileMenu({ open, onClose }: OverlayProps) {
       >
         <div className="flex items-center justify-between">
           <Link href="/" aria-label="Inicio" onClick={onClose}>
-            <BrandLogo variant="pink" className="w-[112px]" />
+            <BrandLogo variant="brand" className="w-[112px]" />
           </Link>
           <button type="button" onClick={onClose} className="group flex items-center gap-2 text-body-color transition-colors hover:text-primary-500 type-menu-trigger">
             <CloseIcon className="size-4" />

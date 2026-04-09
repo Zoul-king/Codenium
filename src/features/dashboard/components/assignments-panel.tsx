@@ -1,11 +1,14 @@
-import { mockProjects, mockUsers } from "@/lib/mocks";
+import { getPmUsers, getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { formatShortDate } from "@/lib/presenters";
 
 export function AssignmentsPanel() {
+  const projects = getVisibleProjects("admin");
+  const pmUsers = getPmUsers();
+
   return (
     <div className="grid grid-cols-1 gap-4">
-      {mockProjects.map((project) => {
-        const pm = mockUsers.find((user) => user.id === project.pmId);
+      {projects.map((project) => {
+        const pm = pmUsers.find((user) => user.id === project.pmId);
 
         return (
           <article key={project.id} className="rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)]">

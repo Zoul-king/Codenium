@@ -58,7 +58,9 @@ export function LoginForm({ onSuccess, onForgotPassword, showSupportText = false
         <button type="button" onClick={onForgotPassword} className="w-fit text-left transition-colors hover:text-primary-500">
           Olvidé mi contraseña
         </button>
-        {showSupportText ? <span>Prueba con `paola@valhui.mx`, `javier@axolotlcode.tech` o `admin@axolotlcode.tech`.</span> : null}
+        {showSupportText ? (
+          <span>Prueba con `client@codenium.com`, `pm@codenium.com` o `admin@codenium.com`. Contraseña: `123provisional`.</span>
+        ) : null}
       </div>
     </form>
   );

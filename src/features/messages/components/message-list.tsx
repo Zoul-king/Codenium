@@ -1,4 +1,4 @@
-import { mockMessages } from "@/lib/mocks";
+import { getVisibleMessages } from "@/features/dashboard/lib/selectors";
 import { getMessageStatusLabel } from "@/lib/presenters";
 import type { Role } from "@/lib/types/domain";
 
@@ -7,7 +7,7 @@ interface MessageListProps {
 }
 
 export function MessageList({ role }: MessageListProps) {
-  const items = role === "admin" ? mockMessages : mockMessages.filter((item) => item.role === role || item.role === "admin");
+  const items = getVisibleMessages(role);
 
   return (
     <div className="grid grid-cols-1 gap-4">

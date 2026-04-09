@@ -1,49 +1,21 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-
-import { clearSession, readSession } from "@/features/auth/lib/session-store";
-import { dashboardHomeByRole } from "@/lib/mocks";
+import { readSession } from "@/features/auth/lib/session-store";
 import { getRoleLabel } from "@/lib/presenters";
-import type { MockSession } from "@/lib/types/domain";
 
 export function SessionStatus() {
-  const [session, setSession] = useState<MockSession | null>(null);
-
-  useEffect(() => {
-    setSession(readSession());
-  }, []);
+  const session = readSession();
 
   if (!session) {
-    return (
-      <div className="rounded-[18px] bg-foreground p-4">
-        <p className="text-sm text-body-color">Todavía no has iniciado sesión.</p>
-      </div>
-    );
+    return <div className="rounded-[18px] border border-primary-500/15 bg-primary-50 px-4 py-3 text-sm text-primary-600">Aún no hay una sesión iniciada en este navegador.</div>;
   }
 
   return (
-    <div className="rounded-[18px] bg-foreground p-4">
-      <p className="text-sm font-semibold text-primary-500">Ya tienes una sesión activa</p>
-      <p className="mt-2 text-sm text-body-color">
-        {session.name} · {getRoleLabel(session.role)}
+    <div className="rounded-[18px] border border-secondary-500/15 bg-secondary-500/10 px-4 py-3 text-sm">
+      <p className="font-semibold text-body-color">{session.name}</p>
+      <p className="mt-1 text-sm text-body-color">
+        {session.email} · {getRoleLabel(session.role)}
       </p>
-      <div className="mt-3 flex flex-wrap gap-3 text-sm">
-        <Link href={dashboardHomeByRole[session.role]} className="hover:text-primary-500">
-          Ir a mi panel
-        </Link>
-        <button
-          type="button"
-          className="cursor-pointer text-body-color hover:text-primary-500"
-          onClick={() => {
-            clearSession();
-            setSession(null);
-          }}
-        >
-          Cerrar sesión
-        </button>
-      </div>
     </div>
   );
 }

@@ -1,7 +1,13 @@
-import { mockUsers } from "@/lib/mocks";
+import type { Role } from "@/lib/types/domain";
 
-export function ProfilePanel() {
-  const user = mockUsers.find((item) => item.role === "client");
+import { getPrimaryUser } from "@/features/dashboard/lib/selectors";
+
+interface ProfilePanelProps {
+  role: Role;
+}
+
+export function ProfilePanel({ role }: ProfilePanelProps) {
+  const user = getPrimaryUser(role);
 
   return (
     <article className="rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)]">

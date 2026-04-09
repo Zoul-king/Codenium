@@ -1,10 +1,12 @@
-import { mockProjects } from "@/lib/mocks";
+import { getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { formatShortDate, getProjectStatusLabel } from "@/lib/presenters";
 
 export function TimelinePanel() {
+  const projects = getVisibleProjects("pm");
+
   return (
     <div className="grid grid-cols-1 gap-4">
-      {mockProjects.map((project) => (
+      {projects.map((project) => (
         <article key={project.id} className="rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)]">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>

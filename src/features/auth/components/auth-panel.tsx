@@ -63,9 +63,7 @@ export function AuthPanel({ initialMode = "login", onSuccess, compact = false, s
         )}
       </div>
 
-      {mode === "login" ? (
-        <LoginForm onSuccess={onSuccess} onForgotPassword={() => setMode("forgot")} showSupportText />
-      ) : null}
+      {mode === "login" ? <LoginForm onSuccess={onSuccess} onForgotPassword={() => setMode("forgot")} showSupportText /> : null}
       {mode === "register" ? <RegisterForm onSuccess={onSuccess} /> : null}
       {mode === "forgot" ? <ForgotPasswordForm onBack={() => setMode("login")} /> : null}
 

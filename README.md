@@ -1,15 +1,21 @@
 # Codenium
 
-Sitio corporativo construido con Next.js App Router, React y TypeScript. La base actual integra marketing público, acceso con sesión de prueba, cotizador interactivo y dashboards por rol, todo listo para conectarse más adelante con backend y persistencia real.
+Sitio corporativo construido con Next.js App Router, React y TypeScript. La base actual integra marketing público, acceso con sesión de prueba, cotizador interactivo, portafolio, dashboards por rol y una estructura lista para conectarse más adelante con backend y persistencia real.
 
 ## Estado actual
 
-- Marketing público con páginas de contenido, contacto y cotizador.
-- Flujo de acceso con `/login`, `/register` y `/forgot-password`.
-- Registro público limitado a cuentas cliente.
+- Marketing público con páginas de contenido, contacto, portafolio y cotizador.
+- Acceso principal desde el overlay del header con login y registro.
+- Rutas `/login`, `/register` y `/forgot-password` como respaldo.
 - Dashboards visuales para `client`, `pm` y `admin`.
 - Mocks centralizados para cotizaciones, proyectos, mensajes, usuarios y sesión.
 - Prisma preparado a nivel estructural, pero todavía sin integrarse a estas capas.
+
+## Credenciales provisionales
+
+- `client@codenium.com` / `123provisional`
+- `pm@codenium.com` / `123provisional`
+- `admin@codenium.com` / `123provisional`
 
 ## Estructura real
 
@@ -17,15 +23,15 @@ Sitio corporativo construido con Next.js App Router, React y TypeScript. La base
 src/
   app/
     (marketing)/        # Sitio público
-    (auth)/             # Acceso, registro y recuperación
+    (auth)/             # Rutas de respaldo para acceso
     dashboard/          # Dashboards por rol
     api/                # Endpoints internos simples
   components/
     layout/             # Header y footer compartidos
-    ui/                 # Iconos y piezas base
+    ui/                 # Iconos y piezas base reutilizables
   features/
-    auth/               # UI y lógica de acceso
-    dashboard/          # Shell, contenido y vistas del dashboard
+    auth/               # UI y lógica de acceso mock
+    dashboard/          # Shell, selectores y paneles por rol
     marketing/          # Contenido y componentes del sitio público
     messages/           # Vistas de mensajes
     projects/           # Vistas de proyectos
@@ -42,6 +48,10 @@ src/
   server/
     repositories/
     services/
+public/
+  icons/
+  images/
+  fonts/
 ```
 
 ## Flujos disponibles
@@ -54,6 +64,7 @@ src/
 - `/portfolio`
 - `/contact`
 - `/quote`
+- `/privacy`
 
 ### Auth
 
@@ -67,7 +78,7 @@ src/
 - `/dashboard/pm`
 - `/dashboard/admin`
 
-Las secciones internas del dashboard se resuelven desde catálogos y vistas desacopladas para que el cambio a datos reales sea lo más directo posible.
+Las secciones internas del dashboard se resuelven desde catálogos, selectores y vistas desacopladas para que el cambio a datos reales sea lo más directo posible.
 
 ## Desarrollo
 
@@ -83,7 +94,7 @@ npm run build
 npm run start
 ```
 
-## Siguientes integraciones reales
+## Próximos puntos de integración real
 
 - Sustituir `src/features/auth/lib/session-store.ts` por la estrategia real de sesión.
 - Conectar `src/features/auth/lib/auth-service.ts` a endpoints o server actions.
