@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -6,6 +6,7 @@ import { useState, type InputHTMLAttributes } from "react";
 import { ArrowRightIcon, BrandLogo, CheckIcon, ContactIcon, MenuIcon, ServiceIcon, SocialIcon, WhatsAppIcon } from "@/components/ui/icons";
 import { ReferenceFooter } from "@/features/site/components/reference-footer";
 import { ReferenceHeader } from "@/features/site/components/reference-header";
+import { referenceAssets } from "@/features/site/content/reference-assets";
 import {
   aboutCardsData,
   benefitBulletsData,
@@ -20,6 +21,9 @@ import {
 import { useReveal } from "@/hooks/use-reveal";
 import { sharedSite } from "@/features/site/content/site-pages";
 import type { ContactIconType, PortfolioCard, SitePageDefinition } from "@/features/site/types";
+
+const MAP_EMBED_URL =
+  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3763.1536937650258!2d-99.01649832596578!3d19.405764241539625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d1fd95427949d1%3A0xa5e068376bf62c07!2sCentro%20operativo%20Axolotlcode%2FDesarrollo%20de%20software!5e0!3m2!1ses!2smx!4v1754600848731!5m2!1ses!2smx";
 
 const services = [
   {
@@ -44,12 +48,12 @@ const services = [
   },
   {
     title: "Soporte técnico",
-    body: "Servicio técnico especializado en mantenimiento, resolucion de problemas y optimización de sistemas informáticos.",
+    body: "Servicio técnico especializado en mantenimiento, resolución de problemas y optimización de sistemas informáticos.",
     icon: "support"
   },
   {
     title: "Incubadora",
-    body: "Mentoría y apoyo para startups, acelerando su crecimiento con estrategias digitales innovadoras.",
+    body: "MentorÃ­a y apoyo para startups, acelerando su crecimiento con estrategias digitales innovadoras.",
     icon: "idea"
   }
 ];
@@ -86,7 +90,7 @@ const missionVision = [
   {
     title: "Misión",
     body:
-      "Desarrollamos tecnología con sello mexicano, creando soluciones innovadoras que transforman vidas y elevan el potencial de personas, empresas y comunidades."
+      "Desarrollamos tecnologÃ­a con sello mexicano, creando soluciones innovadoras que transforman vidas y elevan el potencial de personas, empresas y comunidades."
   },
   {
     title: "Visión",
@@ -112,15 +116,15 @@ const faqs = [
   ],
   [
     "¿Cómo puedo contratar una consultoría tecnológica con ustedes?",
-    "Es muy fácil. Solo contáctanos a través de nuestro sitio web o por teléfono, y programaremos una reunión para entender tus objetivos y desafíos. Nuestro equipo de expertos te brindará asesoría estratégica basada en las mejores prácticas del sector para ayudarte a tomar decisiones tecnológicas acertadas."
+    "Es muy fácil. Solo contáctanos a través de nuestro sitio web o por teléfono, y programaremos una reunión para entender tus objetivos y desafÃ­os. Nuestro equipo de expertos te brindará asesorÃ­a estratégica basada en las mejores prácticas del sector para ayudarte a tomar decisiones tecnológicas acertadas."
   ],
   [
     "¿Qué beneficios tiene contar con profesionales a disposición?",
-    "Contar con nuestros profesionales en TI te permite disponer de expertos altamente capacitados en diversas áreas de tecnología sin la necesidad de contratar personal adicional. Esto reduce costos operativos, agiliza procesos y garantiza soluciones eficientes adaptadas a las necesidades de tu negocio."
+    "Contar con nuestros profesionales en TI te permite disponer de expertos altamente capacitados en diversas áreas de tecnologÃ­a sin la necesidad de contratar personal adicional. Esto reduce costos operativos, agiliza procesos y garantiza soluciones eficientes adaptadas a las necesidades de tu negocio."
   ],
   [
     "¿Cuál es la diferencia entre software estándar y software a medida?",
-    "El software estándar es genérico y diseñado para un público amplio, lo que puede generar limitaciones en su funcionalidad. En cambio, el software a medida se desarrolla específicamente para tu empresa, permitiéndote automatizar procesos, optimizar recursos y garantizar una mayor eficiencia sin restricciones."
+    "El software estándar es genérico y diseñado para un público amplio, lo que puede generar limitaciones en su funcionalidad. En cambio, el software a medida se desarrolla especÃ­ficamente para tu empresa, permitiéndote automatizar procesos, optimizar recursos y garantizar una mayor eficiencia sin restricciones."
   ],
   [
     "¿Cuánto tiempo tarda el desarrollo de un software?",
@@ -358,11 +362,11 @@ function Header({ page, open, setOpen }: { page: SitePageDefinition; open: boole
 function Hero({ page }: { page: SitePageDefinition }) {
   if (page.hero.kind === "home") {
     return (
-        <section className="section soft-section relative flex min-h-dvh items-center justify-center overflow-hidden pt-[96px]">
-          <div className="site-shell background__waves relative flex flex-col items-center gap-6 pt-8 pb-[120px] md:flex-row lg:gap-10 lg:pt-14 lg:pb-[160px]">
-            <article className="hero-text flex w-full max-w-[620px] flex-col items-center gap-6 text-center md:items-start md:gap-8 md:text-left" data-animate="fadeInFromLeft">
-              <h1 className="text-[40px] font-normal leading-[0.92] tracking-[-0.05em] md:text-[50px] lg:text-[68px] lg:leading-[56px]">{page.hero.title}</h1>
-              <p className="max-w-[640px] text-[18px] leading-8 font-normal lg:text-[19px]">{page.hero.body}</p>
+        <section className="section soft-section relative flex min-h-dvh items-center justify-center overflow-hidden pt-[114px]">
+          <div className="site-shell background__waves relative flex flex-col items-center gap-6 pt-12 pb-[155px] md:flex-row lg:gap-[50px] lg:pt-[76px] lg:pb-[190px]">
+            <article className="hero-text hero__content flex w-full flex-col items-center gap-6 text-center md:items-start md:gap-10 md:text-left" data-animate="fadeInFromLeft">
+              <h1 className="type-hero-home">{page.hero.title}</h1>
+              <p className="text-base leading-7 xl:text-xl xl:leading-9"><span className="font-bold text-primary-500">AxolotlCode</span> {page.hero.body.replace(/^En AxolotlCode\s*/,"")}</p>
               <div className="flex flex-row gap-4">
               <Link className="primary-button" href={page.hero.primaryCta.href}>
                 {page.hero.primaryCta.label}
@@ -372,7 +376,7 @@ function Hero({ page }: { page: SitePageDefinition }) {
               </Link>
             </div>
           </article>
-          <div className="hero-image hidden max-h-[400px] w-full max-w-[400px] md:block" data-animate="fadeInFromRight">
+          <div className="hero-image hidden w-full max-w-[432px] max-h-[432px] md:block" data-animate="fadeInFromRight">
             <HeroArtwork />
           </div>
           <OrbBackground />
@@ -389,10 +393,10 @@ function Hero({ page }: { page: SitePageDefinition }) {
           <PortfolioGradients />
         </div>
           <div className="site-shell">
-          <h1 className="mt-16 mb-5 text-center text-[40px] font-normal leading-[0.95] tracking-[-0.05em] lg:mt-28 lg:mb-7 lg:text-[76px]" data-animate="fadeIn">
+          <h1 className="type-hero-portfolio" data-animate="fadeIn">
                   {page.hero.title}
                 </h1>
-          <p className="mx-auto mb-16 max-w-4xl text-center text-[15px] leading-7 md:text-base lg:mb-24" data-animate="fadeIn" data-delay="0.1">
+          <p className="mx-auto mb-16 max-w-4xl text-center type-body lg:mb-24" data-animate="fadeIn" data-delay="0.1">
               {page.hero.body}
             </p>
           </div>
@@ -407,12 +411,12 @@ function Hero({ page }: { page: SitePageDefinition }) {
         style={{ backgroundImage: `url(${page.hero.image})` }}
       />
       <div className="absolute inset-0 h-full w-full bg-black/75" />
-        <div className="hero relative mx-auto flex w-full max-w-5xl flex-col items-center px-4 py-[170px] text-center md:py-[125px] xl:py-[220px]" data-animate="fadeIn">
-          <h1 className="mb-6 text-[40px] font-normal leading-[0.96] md:text-[52px] md:leading-[62px]">
+        <div className="hero relative mx-auto flex w-full max-w-5xl flex-col items-center px-4 py-[186px] text-center md:py-[135px] xl:py-[276px]" data-animate="fadeIn">
+          <h1 className="type-hero-inner mb-8">
             {page.hero.title}
             {page.hero.accent ? <span className="text-primary-200"> {page.hero.accent}</span> : null}
           </h1>
-          <p className="max-w-[900px] text-base font-normal leading-7 md:text-lg md:leading-8">{page.hero.body}</p>
+          <p className="max-w-[900px] type-hero-copy font-normal text-white md:font-light">{page.hero.body}</p>
         </div>
       </section>
     );
@@ -421,16 +425,16 @@ function Hero({ page }: { page: SitePageDefinition }) {
 function ServicesSection() {
   return (
     <section className="section soft-section">
-      <div className="site-shell py-16">
-        <div className="mb-14 text-center" data-animate="fadeInFromTop">
-          <span className="text-base leading-5 text-primary-500 lg:text-[24px]">Novedades</span>
-          <h2 className="text-[21px] font-normal leading-8 lg:text-[32px] lg:leading-[38px]">Que ofrecemos?</h2>
+      <div className="site-shell py-20">
+        <div className="mb-20 text-center offer-info" data-animate="fadeInFromTop">
+          <span className="type-kicker">Novedades</span>
+          <h2 className="type-section-title">¿Qué ofrecemos?</h2>
         </div>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {servicesData.map((service, index) => (
               <article key={service.title} className="service-card" data-animate="fadeInFromBottom" data-delay={String(index * 0.08)}>
               <ServiceIcon type={service.icon} />
-              <h3 className="text-[20px] font-normal leading-7 lg:text-[24px] lg:leading-[30px]">{service.title}</h3>
+              <h3 className="type-card-title">{service.title}</h3>
               <p className="text-center text-sm leading-6 text-gray-600 lg:text-base">{service.body}</p>
             </article>
           ))}
@@ -445,10 +449,10 @@ function LogosSection() {
 
   return (
     <section className="section relative bg-foreground">
-        <div className="site-shell flex min-h-[58vh] flex-col items-center justify-between gap-x-7 gap-y-12 py-14 md:flex-row">
+        <div className="site-shell flex min-h-[70vh] flex-col items-center justify-between gap-x-7 gap-y-12 py-16 md:flex-row">
         <article className="flex w-full flex-col gap-4" data-animate="fadeInFromTop">
-          <span className="text-base leading-5 text-primary-500 lg:text-[24px]">Clientes satisfechos</span>
-          <h2 className="text-[22px] font-normal leading-8 lg:text-[32px] lg:leading-[38px]">
+          <span className="type-kicker">Clientes satisfechos</span>
+          <h2 className="type-section-title">
             Marcas que <span className="text-secondary-500">confiaron</span> en nuestro trabajo
           </h2>
           <p className="max-w-2xl text-sm text-body-color sm:text-base">
@@ -458,8 +462,16 @@ function LogosSection() {
         <article className="slider" data-animate="fadeInFromBottom">
           <div className="track">
             {repeated.map((item, index) => (
-              <div key={`${item}-${index}`} className="item cursor-pointer">
-                <div className="logo-chip">{item}</div>
+              <div key={`${item.alt}-${index}`} className="item cursor-pointer">
+                {item.href ? (
+                  <a href={item.href} target="_blank" rel="noreferrer" className="block h-full w-full">
+                    <img src={item.src} alt={item.alt} className="logo-slide-image" />
+                  </a>
+                ) : (
+                  <span className="block h-full w-full">
+                    <img src={item.src} alt={item.alt} className="logo-slide-image" />
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -472,7 +484,7 @@ function LogosSection() {
 function BenefitsSection() {
   return (
     <section className="soft-section relative w-full">
-        <div className="section site-shell relative z-20 flex flex-col items-center gap-x-5 gap-y-10 py-14 sm:flex-row lg:gap-10 xl:py-14">
+        <div className="section site-shell relative z-20 flex min-h-[70vh] flex-col items-center gap-x-5 gap-y-[50px] py-16 sm:flex-row lg:gap-[50px]">
         <div className="grid w-full grid-cols-1 gap-5 min-[900px]:grid-cols-2">
           {galleryData.map((image, index) => (
             <div
@@ -487,21 +499,21 @@ function BenefitsSection() {
         </div>
         <article className="flex w-full flex-col items-start text-left" data-animate="fadeIn">
           <div className="mb-3 flex flex-col gap-4">
-            <span className="text-base leading-5 text-primary-500 lg:text-[24px]">Por que AxolotlCode?</span>
-            <h2 className="text-[21px] font-normal leading-8 lg:text-[32px] lg:leading-[38px]">
-              En AxolotlCode construimos <span className="text-secondary-500">mas que software</span>
+            <span className="type-kicker">¿Por qué AxolotlCode?</span>
+            <h2 className="type-section-title">
+              En AxolotlCode construimos <span className="text-secondary-500">más que software</span>
             </h2>
             <p className="max-w-2xl text-sm text-body-color sm:text-base">
-              Creamos soluciones que impulsan tu negocio hacia el exito. Nuestro equipo combina innovacion, calidad y compromiso para desarrollar herramientas tecnologicas personalizadas.
+              Creamos soluciones que impulsan tu negocio hacia el éxito. Nuestro equipo combina innovación, calidad y compromiso para desarrollar herramientas tecnológicas personalizadas.
             </p>
           </div>
           <div className="grid w-full grid-cols-1 gap-1">
             {benefitBulletsData.map(([lead, text]) => (
               <div key={lead} className="flex items-center gap-4 rounded-lg p-2 transition-colors duration-300 hover:bg-primary-500/10 md:p-1">
-                <div className="rounded-full bg-secondary-500/10 p-2 text-secondary-500">
+                <div className="p-2 text-secondary-500">
                   <CheckIcon />
                 </div>
-                <span className="text-[16px] font-normal text-gray-700 sm:text-sm lg:text-base">
+                <span className="text-[16px] font-bold text-gray-700 xs:text-xs sm:text-sm md:text-sm lg:text-base xl:text-base">
                   {lead}: <span className="font-normal">{text}</span>
                 </span>
               </div>
@@ -528,74 +540,66 @@ function BenefitsSection() {
 function ContactStrip() {
   return (
     <section className="section overflow-hidden bg-foreground">
-      <div className="site-shell flex flex-col gap-5 py-14 lg:flex-row lg:gap-10 xl:py-14">
-        <article className="flex w-full flex-col items-center gap-4 text-center lg:max-w-[500px] lg:items-start lg:gap-5 lg:text-left" data-animate="fadeInFromLeft">
-          <span className="text-base leading-5 text-primary-500 lg:text-[24px]">Contactanos</span>
-          <h2 className="text-[21px] font-normal leading-8 lg:text-[32px] lg:leading-[38px]">
-            Tienes algun <span className="text-secondary-500">proyecto</span> en mente?
+      <div className="site-shell flex flex-col gap-5 py-16 lg:flex-row lg:gap-[50px]">
+        <article className="contact flex w-full flex-col items-center gap-5 text-center lg:max-w-[540px] lg:items-start lg:gap-6 lg:text-left" data-animate="fadeInFromLeft">
+          <span className="type-kicker">Contáctanos</span>
+          <h2 className="type-section-title">
+            ¿Tienes algún <span className="text-secondary-500">proyecto</span> en mente?
           </h2>
-          <p className="max-w-[420px] text-sm leading-6 text-body-color sm:text-[15px] lg:leading-7">
-            Nosotros podemos ayudarte. Abarcamos gran parte de la Ciudad de Mexico y alrededores.
+          <p className="max-w-2xl text-sm text-body-color sm:text-base">
+            ¡Nosotros podemos ayudarte! Abarcamos gran parte de la Ciudad de México y alrededores.
           </p>
           <Link href="/contact" className="contact-button">
             Enviar mensaje
           </Link>
         </article>
-        <article className="grid w-full grid-cols-1 gap-4 md:grid-cols-2" data-animate="fadeInFromRight" data-delay="0.12">
-          <div className="overflow-hidden rounded-[20px] shadow-md md:col-span-2">
+        <article className="map w-full" data-animate="fadeInFromRight" data-delay="0.12">
+          <div className="h-[300px] overflow-hidden rounded-xl sm:h-[400px]">
             <iframe
-              title="Ubicacion"
-              src="https://www.google.com/maps?q=Nezahualcoyotl%20Estado%20de%20Mexico&z=11&output=embed"
+              title="Ubicación"
+              src={MAP_EMBED_URL}
               width="100%"
               height="100%"
-              className="min-h-[320px]"
               style={{ border: 0 }}
               loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
-          <div className="rounded-[20px] bg-white p-6 shadow-md">
-            <ContactInfo label="Correo electronico" value={sharedSite.overlay.email} icon="mail" />
-          </div>
-          <div className="rounded-[20px] bg-white p-6 shadow-md">
-            <ContactInfo label="Telefono" value={sharedSite.overlay.phone} icon="phone" />
-          </div>
-          <div className="rounded-[20px] bg-white p-6 shadow-md md:col-span-2">
-            <ContactInfo label="Ubicacion" value={`${sharedSite.overlay.location}, ${sharedSite.overlay.city}`} icon="location" />
+          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-2">
+            <div className="w-full flex items-start gap-4">
+              <ContactInfo label="Correo electrónico" value={sharedSite.overlay.email} icon="mail" />
+            </div>
+            <div className="w-full flex items-start gap-4">
+              <ContactInfo label="Teléfono" value={sharedSite.overlay.phone} icon="phone" />
+            </div>
+            <div className="w-full flex items-start gap-4">
+              <ContactInfo label="Ubicación" value={`${sharedSite.overlay.location}, ${sharedSite.overlay.city}`} icon="location" />
+            </div>
           </div>
         </article>
       </div>
     </section>
   );
 }
+
 function AboutStory() {
   return (
     <section className="section soft-section bg-foreground">
-        <div className="site-shell grid grid-cols-1 items-center gap-8 py-10 md:gap-10 xl:py-14 lg:grid-cols-[1.02fr_0.98fr]">
-          <article className="flex flex-col gap-5" data-animate="fadeInFromLeft">
-          <span className="text-base leading-5 text-primary-500 lg:text-[24px]">Sobre nosotros</span>
-          <h2 className="text-[22px] font-normal leading-8 lg:text-[32px] lg:leading-[38px]">
+      <div className="site-shell flex flex-col gap-10 py-10 md:flex-row md:items-center md:gap-[50px] xl:py-[71px]">
+        <article className="about-info w-full flex flex-col gap-4 text-center text-sm leading-6 md:text-left lg:text-base lg:leading-7" data-animate="fadeInFromLeft">
+          <span className="type-kicker">Sobre nosotros</span>
+          <h2 className="type-section-title">
             Conoce nuestra <span className="text-secondary-500">historia</span>
           </h2>
-          <p className="text-sm leading-6 text-body-color sm:text-base lg:leading-7">
-            Hoy seguimos trabajando con la misma pasion y determinacion, ayudando a empresas a alcanzar sus objetivos a traves de herramientas digitales innovadoras y personalizadas.
+          <p className="mb-2">
+            AxolotlCode nació con la misión de transformar las ideas de nuestros clientes en soluciones tecnológicas de alto impacto. Desde nuestros inicios, hemos priorizado la innovación, la calidad y la seguridad en cada proyecto, trabajando con un equipo comprometido y apasionado.
           </p>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {aboutCardsData.map((card, index) => (
-                <article key={card.title} className="rounded-lg bg-white px-5 py-4 text-body-color shadow-[0_4px_10px_0_rgba(148,148,148,0.13)] backdrop-blur-[20px]" data-animate="fadeInFromBottom" data-delay={String(index * 0.08)}>
-                <h3 className="mb-2 text-[20px] font-normal leading-7">{card.title}</h3>
-                <p className="text-sm leading-6 lg:text-[15px] lg:leading-7">{card.body}</p>
-              </article>
-            ))}
-          </div>
+          <p>
+            A lo largo de nuestra trayectoria, hemos ayudado a empresas de diversos sectores a modernizar sus procesos y alcanzar sus objetivos en un mundo digital en constante evolución. Nos enorgullece ser aliados estratégicos en la transformación tecnológica de nuestros clientes.
+          </p>
         </article>
-          <div className="relative min-h-[400px] overflow-hidden rounded-[28px]" data-animate="fadeInFromRight">
-          <Image
-            src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80"
-            alt="Equipo trabajando"
-            fill
-            className="object-cover"
-            sizes="(min-width: 1024px) 520px, 100vw"
-          />
+        <div className="about-image hidden w-full md:block" data-animate="fadeInFromRight">
+          <Image src={referenceAssets.about.story} alt="Sobre nosotros - Conoce nuestra historia" width={548} height={548} className="h-auto w-full" sizes="548px" />
         </div>
       </div>
     </section>
@@ -605,25 +609,30 @@ function AboutStory() {
 function MissionVisionSection() {
   return (
     <section className="soft-section bg-foreground">
-        <div className="section site-shell py-14 xl:py-14">
-          <div className="mb-8 text-center" data-animate="fadeInFromTop">
-          <span className="text-base leading-5 text-primary-500 lg:text-[24px]">Nuestros pilares</span>
-          <h2 className="mt-4 text-[21px] font-normal leading-8 lg:text-[32px] lg:leading-[38px]">
-            Conoce nuestra <span className="text-secondary-500">mision y vision</span>
-          </h2>
+      <div className="section site-shell flex flex-col items-center gap-y-2.5 gap-x-[40px] py-10 sm:flex-row xl:py-[66px] 2xl:py-[80px]">
+        <div className="company-image grid w-full place-content-center" data-animate="fadeInFromLeft">
+          <Image src={referenceAssets.about.company} alt="Sobre nosotros - Compañía" width={516} height={516} />
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {missionVisionData.map((item, index) => (
-            <article
-              key={item.title}
-              className="px-6 py-4 text-center text-body-color shadow-[0_4px_10px_0_rgba(148,148,148,0.13)] backdrop-blur-[20px] md:text-left"
-              data-animate="fadeInFromRight"
+        <div className="company-cards flex w-full flex-col gap-[50px]">
+          <div className="mb-8 text-center" data-animate="fadeInFromTop">
+            <span className="type-kicker">Nuestros pilares</span>
+            <h2 className="type-section-title mt-4">
+              Conoce nuestra <span className="text-secondary-500">misión y visión</span>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 gap-6">
+            {missionVisionData.map((item, index) => (
+              <article
+                key={item.title}
+                className="flex flex-col gap-4 px-6 py-4 text-center text-body-color shadow-[0_4px_10px_0_rgba(148,148,148,0.13)] backdrop-blur-[20px] md:text-left"
+                data-animate="fadeInFromRight"
                 data-delay={String(index * 0.12)}
               >
-              <h3 className="text-[20px] font-normal leading-7 xl:text-[24px] xl:leading-8">{item.title}</h3>
-              <span className="mt-3 inline-block text-sm leading-6 xl:text-[15px] xl:leading-7">{item.body}</span>
-            </article>
-          ))}
+                <h3 className="text-2xl font-bold leading-7 xl:text-[32px] xl:leading-10">{item.title}</h3>
+                <span className="text-sm leading-6 xl:text-base xl:leading-7">{item.body}</span>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -661,7 +670,7 @@ function TimelineSection() {
                 </div>
                 <span className="text-[18px] font-normal leading-8">{step}</span>
                 <p className="text-sm leading-[26px] lg:text-base lg:leading-7">
-                  Este paso nos permite dar estructura, claridad y una base real para una ejecucion ordenada.
+                  Este paso nos permite dar estructura, claridad y una base real para una ejecución ordenada.
                 </p>
               </article>
             ))}
@@ -674,25 +683,25 @@ function TimelineSection() {
 
 function TimelineSectionFixed() {
   const stepDescriptions = [
-    "Descubrimos juntos lo que requiere tu proyecto y como podemos lograr una solucion clara desde el inicio.",
+    "Descubrimos juntos lo que requiere tu proyecto y cómo podemos lograr una solución clara desde el inicio.",
     "Estructuramos tus ideas para darle vida a tu proyecto con una base funcional y ordenada.",
     "Convertimos la estructura en una propuesta visual consistente con tu marca y tus objetivos.",
     "Definimos textos, mensajes y recursos que ayudan a comunicar mejor el valor del producto.",
-    "Construimos la solucion con foco en rendimiento, escalabilidad y experiencia de usuario.",
+    "Construimos la solución con foco en rendimiento, escalabilidad y experiencia de usuario.",
     "Validamos cada detalle antes del lanzamiento para asegurar estabilidad y calidad.",
-    "Damos seguimiento para mantener la solucion actualizada y lista para crecer."
+    "Damos seguimiento para mantener la solución actualizada y lista para crecer."
   ];
 
   return (
     <section className="soft-section relative overflow-hidden bg-foreground">
-      <div className="timeline section site-shell relative z-20 py-14 text-center">
-        <span className="text-base font-normal leading-5 text-primary-500 lg:text-[24px]" data-animate="fadeIn">
+      <div className="timeline section site-shell relative z-20 py-14 text-center lg:py-20">
+        <span className="type-kicker" data-animate="fadeIn">
           Nuestro proceso de trabajo
         </span>
-        <h2 className="mt-4 text-[21px] font-normal leading-8 lg:text-[32px] lg:leading-[38px]" data-animate="fadeIn">
-          Como lo <span className="text-secondary-500">hacemos</span>?
+        <h2 className="type-section-title mt-4" data-animate="fadeIn">
+          ¿Cómo lo <span className="text-secondary-500">hacemos</span>?
         </h2>
-          <div className="relative mx-auto mt-8 max-w-[820px]">
+        <div className="relative mx-auto mt-8 max-w-[820px]">
           <div className="absolute left-1/2 top-0 hidden h-full -translate-x-1/2 border-l border-dashed border-black/40 lg:block" />
           <div className="grid grid-cols-1 gap-y-8 lg:grid-cols-2">
             {timelineData.map((step, index) => (
@@ -702,14 +711,20 @@ function TimelineSectionFixed() {
                 data-animate="fadeInFromBottom"
                 data-delay={String(index * 0.05)}
               >
-                <div className="relative h-[108px] w-[108px] rounded-full border border-primary-400 bg-white p-1.5 shadow-[0_10px_24px_rgba(242,61,109,0.08)]">
-                  <div className="h-[94px] w-[94px] rounded-full bg-gradient-to-br from-primary-100 to-secondary-500/35" />
-                  <span className="absolute right-0 bottom-0 inline-grid size-[42px] place-content-center rounded-full bg-primary-500 text-[20px] font-normal text-white">
+                <div className="relative h-[150px] w-[150px] rounded-full border border-primary-400 bg-white p-1.5">
+                  <Image
+                    src={referenceAssets.timeline[index]}
+                    alt={`Paso ${index + 1}`}
+                    width={136}
+                    height={136}
+                    className="h-[136px] w-[136px] rounded-full"
+                  />
+                  <span className="absolute right-0 bottom-0 inline-grid size-[52px] place-content-center rounded-full bg-primary-500 text-[28px] font-bold text-white">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                 </div>
-                <span className="max-w-[280px] text-[17px] font-normal leading-8">{step}</span>
-                <p className="max-w-[280px] text-[14px] leading-7">{stepDescriptions[index]}</p>
+                <span className="max-w-[280px] text-base font-bold leading-5 lg:text-[1.75rem] lg:leading-7">{step}</span>
+                <p className="max-w-[280px] text-sm leading-[26px] text-body-color lg:text-base lg:leading-7">{stepDescriptions[index]}</p>
               </article>
             ))}
           </div>
@@ -722,21 +737,21 @@ function TimelineSectionFixed() {
 function PlanServices() {
   return (
     <section className="soft-section bg-foreground">
-        <div className="services section site-shell py-14 text-center">
+        <div className="services section site-shell py-20 text-center">
         <div className="info" data-animate="fadeInFromTop">
-          <span className="text-base leading-5 text-primary-500 lg:text-2xl lg:leading-7">Nuestros servicios</span>
-          <h2 className="mt-4 mb-8 text-[21px] font-normal leading-8 lg:text-[32px] lg:leading-[38px]">
-            Como podemos <span className="text-secondary-500">ayudarte</span>?
+          <span className="type-kicker">Nuestros servicios</span>
+          <h2 className="type-section-title mt-4 mb-8">
+            ¿Cómo podemos <span className="text-secondary-500">ayudarte</span>?
           </h2>
         </div>
-        <div className="grid grid-cols-1 gap-6 text-left sm:grid-cols-2 lg:grid-cols-3">
+        <div className="items grid grid-cols-1 gap-8 text-left sm:grid-cols-2 lg:grid-cols-3">
           {servicesData.map((service, index) => (
-              <article key={service.title} className="relative w-full rounded-lg bg-white p-6 shadow-lg" data-animate="fadeInFromBottom" data-delay={String(index * 0.08)}>
-              <div className="relative z-10 flex items-start gap-5">
+              <article key={service.title} className="relative w-full rounded-lg bg-white p-8 shadow-lg" data-animate="fadeInFromBottom" data-delay={String(index * 0.08)}>
+              <div className="relative z-10 flex items-start gap-6">
                 <ServiceIcon type={service.icon} />
                 <div>
-                  <h3 className="text-lg font-normal leading-6 xl:text-[21px] xl:leading-7">{service.title}</h3>
-                  <p className="mt-4 text-sm leading-6 xl:text-[14px] xl:leading-7">{service.body}</p>
+                  <h3 className="text-xl font-bold leading-6 xl:text-2xl xl:leading-7">{service.title}</h3>
+                  <p className="mt-6 text-sm leading-[26px] xl:text-base xl:leading-7">{service.body}</p>
                 </div>
               </div>
               <div className="absolute inset-0 rounded-lg bg-[radial-gradient(circle_at_45%_90%,rgba(86,202,204,0.35),transparent_35%)]" />
@@ -751,25 +766,25 @@ function PlanServices() {
 function PricingPlans() {
   return (
     <section className="soft-section relative">
-      <div className="section site-shell relative z-20 py-14 text-black">
-        <div className="mb-10 text-center lg:text-left" data-animate="fadeInFromTop">
-          <span className="text-base leading-5 text-primary-500 lg:text-2xl lg:leading-7">Nuestros planes</span>
-          <h2 className="mt-4 text-[21px] font-normal leading-[32px] lg:text-[32px] lg:leading-[38px]">
-            Que <span className="text-secondary-500">ofrecemos</span>?
+      <div className="section site-shell relative z-20 py-20 text-black">
+        <div className="plan-info mb-12 text-center lg:text-left" data-animate="fadeInFromTop">
+          <span className="type-kicker">Nuestros planes</span>
+          <h2 className="type-section-title mt-4">
+            ¿Qué <span className="text-secondary-500">ofrecemos</span>?
           </h2>
         </div>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="items grid grid-cols-1 gap-[22px] md:grid-cols-2 xl:grid-cols-3">
           {plansData.map((plan, index) => (
-              <article key={plan.title} className="flex flex-col justify-between rounded-lg bg-white px-7 py-6 shadow-lg" data-animate="fadeInFromBottom" data-delay={String(index * 0.08)}>
+              <article key={plan.title} className="flex flex-col justify-between rounded-lg bg-white px-12 py-8 shadow-lg" data-animate="fadeInFromBottom" data-delay={String(index * 0.08)}>
               <div className="w-full">
                 <div className="mb-10">
-                  <h3 className="text-lg font-normal leading-6 lg:text-[21px] lg:leading-7">{plan.title}</h3>
+                  <h3 className="text-xl leading-6 lg:text-[28px] lg:leading-8">{plan.title}</h3>
                   <div className="my-2.5 h-[1px] w-[110px] bg-black" />
-                  <span className="mb-2.5 block text-[20px] font-normal leading-[28px] lg:text-[24px] lg:leading-[30px]">{plan.price}</span>
-                  {plan.subtitle ? <p className="text-[15px] leading-5 lg:text-[18px]">{plan.subtitle}</p> : null}
+                  <span className="mb-2.5 block text-[28px] font-bold leading-[34px] lg:text-[40px] lg:leading-[48px]">{plan.price}</span>
+                  {plan.subtitle ? <p className="text-base leading-5 lg:text-2xl lg:leading-7">{plan.subtitle}</p> : null}
                 </div>
-                {plan.note ? <span className="text-sm leading-6 text-primary-500 lg:text-base lg:leading-7">{plan.note}</span> : null}
-                <ul className="mb-14 list-disc">
+                {plan.note ? <span className="text-sm font-medium leading-6 text-primary-500 lg:text-base lg:leading-7">{plan.note}</span> : null}
+                <ul className="mb-20 list-disc">
                   {plan.items.map((item) => (
                     <li key={item} className="ml-5 text-sm leading-6 lg:text-base lg:leading-7">
                       {item}
@@ -778,25 +793,25 @@ function PricingPlans() {
                 </ul>
               </div>
               <Link href="/contact" className="secondary-button !justify-center">
-                Contactanos
+                Contáctanos
               </Link>
             </article>
           ))}
-            <article className="flex flex-col justify-between rounded-lg bg-white px-7 py-6 shadow-lg xl:col-span-3" data-animate="fadeInFromBottom" data-delay="0.24">
+            <article className="flex flex-col justify-between rounded-lg bg-white px-12 py-8 shadow-lg xl:col-span-3" data-animate="fadeInFromBottom" data-delay="0.24">
             <div className="w-full">
               <div className="mb-10">
-                <h3 className="text-lg font-normal leading-6 lg:text-[21px] lg:leading-7">Plan personalizado</h3>
+                <h3 className="text-xl leading-6 lg:text-[28px] lg:leading-8">Plan Personalizado</h3>
                 <div className="my-2.5 h-[1px] w-[110px] bg-black" />
-                <span className="mb-2.5 block text-[20px] font-normal leading-[28px] lg:text-[24px] lg:leading-[30px]">
-                  Contactanos para discutir un presupuesto
+                <span className="mb-2.5 block text-[28px] font-bold leading-[34px] lg:text-[40px] lg:leading-[48px]">
+                  ¡Contáctanos para discutir un presupuesto!
                 </span>
               </div>
-              <ul className="mb-14 list-disc">
-                <li className="ml-5 text-sm leading-6 lg:text-base lg:leading-7">Consultoria personalizada</li>
+              <ul className="mb-20 list-disc">
+                <li className="ml-5 text-sm leading-6 lg:text-base lg:leading-7">ConsultorÃ­a personalizada</li>
               </ul>
             </div>
             <Link href="/contact" className="secondary-button !justify-center">
-              Contactanos
+              Contáctanos
             </Link>
           </article>
         </div>
@@ -807,12 +822,12 @@ function PricingPlans() {
 
 function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
   return (
-      <section className="projects-scroller relative mt-2 mb-20 lg:min-h-[260vh]">
+      <section className="projects-scroller relative mt-4 mb-24 lg:mb-32 lg:min-h-[260vh]">
         <div id="projects-container" className="site-shell portfolio-stack rounded-2xl">
           {cards.map((card, index) => (
             <article
               key={card.name}
-              className="portfolio-card group/card flex flex-col justify-end p-4 lg:p-8"
+              className="portfolio-card group/card flex flex-col justify-end p-5 md:p-6 lg:p-8"
               style={{
                 backgroundImage: `linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)), url(${card.image})`,
                 zIndex: cards.length - index
@@ -851,19 +866,19 @@ function FaqSection() {
   return (
     <section className="relative overflow-hidden">
       <div className="absolute left-1/2 top-0 h-40 w-40 -translate-x-1/2 rounded-full bg-primary-200/50 blur-3xl" aria-hidden="true" />
-      <div className="site-shell px-4 py-8 sm:px-6 sm:py-10 md:px-6 lg:px-8 lg:py-12">
+      <div className="site-shell px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 lg:py-16">
         <div className="faqs-info mb-10 text-center" data-animate="fadeInFromTop">
-          <span className="text-base leading-5 text-primary-500 lg:text-2xl lg:leading-7">Dudas de nuestros usuarios</span>
-          <h2 className="mt-4 text-[21px] font-normal leading-[32px] lg:text-[32px] lg:leading-[38px]">
-            Preguntas mas <span className="text-secondary-500">frecuentes</span>
+          <span className="type-kicker">Dudas de nuestros usuarios</span>
+          <h2 className="type-section-title mt-4">
+            Preguntas más <span className="text-secondary-500">frecuentes</span>
           </h2>
         </div>
-          <div className="flex flex-col items-start justify-center gap-8 sm:flex-row lg:gap-10">
-            <div className="h-full w-full">
-              {faqsData.map(([question, answer], index) => (
-                <article key={question} className="mb-4 last:mb-0">
-                  <div className="accordion" data-open={openIndex === index} data-animate="fadeInFromBottomSm" data-delay={String(index * 0.04)}>
-                    <button type="button" className="accordion__title" onClick={() => setOpenIndex((current) => (current === index ? -1 : index))}>
+        <div className="flex flex-col items-start justify-center gap-8 sm:flex-row lg:gap-12">
+          <div className="h-full w-full lg:max-w-[620px]">
+            {faqsData.map(([question, answer], index) => (
+              <article key={question} className="mb-4 last:mb-0">
+                <div className="accordion" data-open={openIndex === index} data-animate="fadeInFromBottomSm" data-delay={String(index * 0.04)}>
+                  <button type="button" className="accordion__title" onClick={() => setOpenIndex((current) => (current === index ? -1 : index))}>
                     <span>{question}</span>
                     <span className="arrow">v</span>
                   </button>
@@ -874,15 +889,9 @@ function FaqSection() {
               </article>
             ))}
           </div>
-            <div className="w-full" data-animate="fadeInFromRight" data-delay="0.18">
+          <div className="faqs-image w-full" data-animate="fadeInFromRight" data-delay="0.18">
             <div className="relative h-[430px] w-full">
-              <Image
-                src="https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=1200&q=80"
-                alt="FAQ illustration"
-                fill
-                className="h-full w-full object-contain object-center"
-                sizes="516px"
-              />
+              <Image src={referenceAssets.faq} alt="Preguntas frecuentes" fill className="h-full w-full object-contain object-center" sizes="516px" />
             </div>
           </div>
         </div>
@@ -894,57 +903,58 @@ function FaqSection() {
 function ContactPageSection() {
   return (
     <section className="text-body-color" id="contact">
-      <div className="site-shell px-4 py-8 sm:px-6 sm:py-10 md:px-6 lg:px-8 lg:py-12">
-        <div className="mb-[26px] flex flex-col gap-4 text-center sm:mb-14 sm:text-left" data-animate="fadeInFromTop">
-          <span className="text-base leading-5 text-primary-500 lg:text-2xl lg:leading-7">Contactanos</span>
-          <h2 className="text-[21px] font-normal leading-[32px] lg:text-[32px] lg:leading-[38px]">
-            Tienes algun <span className="text-secondary-500">proyecto</span> en mente?
+      <div className="site-shell px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 lg:py-16">
+        <div className="contact mb-[26px] flex flex-col gap-4 text-center sm:mb-20 sm:text-left" data-animate="fadeInFromTop">
+          <span className="type-kicker">Contáctanos</span>
+          <h2 className="type-section-title">
+            ¿Tienes algún <span className="text-secondary-500">proyecto</span> en mente?
           </h2>
           <p className="max-w-2xl text-sm text-body-color sm:text-base">
-            Nosotros podemos ayudarte. Abarcamos gran parte de la Ciudad de Mexico y alrededores.
+            ¡Nosotros podemos ayudarte! Abarcamos gran parte de la Ciudad de México y alrededores.
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 lg:gap-10">
-            <div className="flex w-full flex-col gap-4 lg:gap-8" data-animate="fadeInFromLeft">
-            <ContactInfoColumn label="Correo electronico" value={sharedSite.overlay.email} icon="mail" />
-            <ContactInfoColumn label="Telefono" value={sharedSite.overlay.phone} icon="phone" />
-            <ContactInfoColumn label="Ubicacion" value={`${sharedSite.overlay.location}, ${sharedSite.overlay.city}`} icon="location" />
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 lg:gap-12">
+          <div className="axolotl-info flex w-full flex-col gap-4 lg:gap-8" data-animate="fadeIn">
+            <ContactInfoColumn label="Correo electrónico" value={sharedSite.overlay.email} icon="mail" />
+            <ContactInfoColumn label="Teléfono" value={sharedSite.overlay.phone} icon="phone" />
+            <ContactInfoColumn label="Ubicación" value={`${sharedSite.overlay.location}, ${sharedSite.overlay.city}`} icon="location" />
           </div>
-            <div className="col-span-1 w-full sm:col-span-2" data-animate="fadeInFromRight" data-delay="0.12">
-            <form className="flex w-full flex-col gap-5">
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="col-span-1 w-full sm:col-span-2" data-animate="fadeInFromRight" data-delay="0.12">
+            <form className="flex w-full flex-col gap-6">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <FormField label="Nombre *" placeholder="Nombre" />
                 <FormField label="Apellidos *" placeholder="Apellidos" />
               </div>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <FormField label="Correo electronico *" placeholder="Correo electronico" type="email" />
-                <FormField label="Numero de telefono *" placeholder="Numero de telefono" />
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <FormField label="Correo electrónico *" placeholder="Correo electrónico" type="email" />
+                <FormField label="Número de teléfono *" placeholder="Número de teléfono" />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-normal text-gray-700">Mensaje *</label>
+                <label className="mb-2 block text-sm font-medium text-gray-700">Mensaje *</label>
                 <textarea
                   rows={4}
                   placeholder="Mensaje"
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:ring-primary-500"
+                  className="w-full rounded-[14px] border border-gray-300 px-4 py-3 text-[15px] outline-none transition-colors duration-200 focus:border-primary-500"
                 />
               </div>
               <button
                 type="submit"
-                className="w-fit rounded-[5px] border border-primary-500 bg-primary-500 px-5 py-1 font-normal text-primary-50 transition-all duration-500 ease-in-out hover:scale-[1.02] hover:bg-white hover:text-primary-500"
+                className="w-fit rounded-[5px] border border-primary-500 bg-primary-500 px-6 py-2 font-bold text-primary-50 transition-all duration-500 ease-in-out hover:scale-105 hover:bg-white hover:text-primary-500"
               >
                 Enviar mensaje
               </button>
             </form>
           </div>
         </div>
-          <div className="mt-8 h-[220px] w-full overflow-hidden rounded-xl sm:mt-10 sm:h-[260px] lg:mt-12 lg:h-[320px]" data-animate="fadeInFromBottomSm" data-delay="0.2">
+        <div className="contact-map mt-8 h-[250px] w-full overflow-hidden rounded-xl sm:mt-12 sm:h-[300px] md:h-[350px] lg:mt-16 lg:h-[400px]" data-animate="fadeIn" data-delay="0.2">
           <iframe
-            title="Ubicacion"
-            src="https://www.google.com/maps?q=Ciudad%20de%20Mexico&z=11&output=embed"
+            title="Ubicación"
+            src={MAP_EMBED_URL}
             width="100%"
             height="100%"
             style={{ border: 0 }}
             loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
           />
         </div>
       </div>
@@ -955,22 +965,22 @@ function ContactPageSection() {
 function CtaCard({ dual = false }: CtaCardProps) {
   return (
     <section className="soft-section relative bg-primary-50">
-      <div className="section site-shell relative z-20 flex flex-col items-center justify-center gap-6 xl:py-[105px]">
-        <article className="flex w-full flex-col gap-6 rounded-[29px] border border-white bg-gradient-to-br from-transparent from-20% to-white/70 px-[34px] py-12 text-center" data-animate="fadeIn">
-          <span className="text-[22px] font-normal leading-8 xl:text-[34px] xl:leading-[40px]">
-            Estas listo para llevar tus ideas al siguiente nivel?
+      <div className="section site-shell relative z-20 flex flex-col items-center justify-center gap-6 py-14 lg:py-[105px]">
+        <article className="flex w-full flex-col gap-6 rounded-[29px] border border-white bg-gradient-to-br from-transparent from-20% to-white/70 px-6 py-12 text-center sm:px-10 md:py-14" data-animate="fadeIn">
+          <span className="type-section-title xl:text-[34px] xl:leading-[40px]">
+            ¿Estás listo para llevar tus ideas al siguiente nivel?
           </span>
-          <p className="text-sm leading-6 xl:text-base xl:leading-7" data-animate="fadeInFromBottomSm" style={{ animationDelay: "100ms" }}>
-            Hablemos y descubre como podemos ayudarte. O explora nuestras opciones y encuentra la solucion perfecta para tu negocio.
+          <p className="type-body" data-animate="fadeInFromBottomSm" style={{ animationDelay: "100ms" }}>
+            Hablemos y descubre cómo podemos ayudarte. O explora nuestras opciones y encuentra la solución perfecta para tu negocio.
           </p>
           <div className="flex w-full flex-col items-center justify-center gap-x-6 gap-y-2.5 text-sm xs:flex-row xl:text-base" data-animate="fadeInFromBottomSm" style={{ animationDelay: "180ms" }}>
             <Link className="primary-button max-w-[150px]" href="/contact">
-              Contactanos
+              Contáctanos
             </Link>
             {dual ? (
               <Link
                 href="/plans"
-                className="rounded-[5px] border-2 border-primary-500 px-5 py-1.5 font-normal text-primary-500 transition-all duration-300 ease-in-out hover:scale-[1.02] hover:bg-primary-600 hover:text-white"
+                className="rounded-[5px] border-2 border-primary-500 px-5 py-2 font-semibold text-primary-500 transition-all duration-300 ease-in-out hover:scale-[1.02] hover:bg-primary-600 hover:text-white"
               >
                 Nuestros planes
               </Link>
@@ -994,7 +1004,7 @@ function Footer() {
           <p className="text-sm leading-6 text-white">{sharedSite.footer.body}</p>
         </div>
         <div className="grow pt-5">
-          <span className="mb-[15px] inline-block text-xl font-normal leading-6 text-primary-300">Menu</span>
+          <span className="mb-[15px] inline-block text-xl font-normal leading-6 text-primary-300">Menú</span>
           <ul className="flex flex-col gap-y-[15px]">
             {sharedSite.footerMenu.map((item) => (
               <li key={item.href}>
@@ -1058,7 +1068,7 @@ function StickyWhatsApp() {
 function FormField({ label, placeholder, type = "text" }: FormFieldProps) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-normal text-gray-700">{label}</label>
+      <label className="mb-2 block text-sm font-medium text-gray-700">{label}</label>
       <input
         type={type}
         placeholder={placeholder}
@@ -1073,7 +1083,7 @@ function ContactInfo({ label, value, icon }: ContactInfoProps) {
     <div className="flex w-full items-start gap-4">
       <ContactIcon type={icon} />
       <div>
-        <span className="mb-1 inline-block font-normal">{label}</span>
+        <span className="mb-1 inline-block font-semibold">{label}</span>
         <p className="text-black">{value}</p>
       </div>
     </div>
@@ -1084,14 +1094,14 @@ function ContactInfoColumn({ label, value, icon }: ContactInfoProps) {
   return (
     <div className="flex flex-col gap-2 lg:gap-4">
       <ContactIcon type={icon} />
-      <h3 className="text-lg font-normal sm:text-xl">{label}</h3>
+      <h3 className="text-lg font-bold sm:text-xl">{label}</h3>
       <p className="text-sm text-gray-600 sm:text-base">{value}</p>
     </div>
   );
 }
 
 function HeroArtwork() {
-  return <div className="hero-artwork" />;
+  return <Image src={referenceAssets.hero.home} alt="AxolotlCode - Hero" width={432} height={432} className="w-full" priority />;
 }
 
 function OrbBackground() {
@@ -1149,3 +1159,16 @@ function PortfolioGradients() {
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

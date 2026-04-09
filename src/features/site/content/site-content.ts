@@ -1,4 +1,5 @@
-import type { AboutCard, BenefitBullet, FaqItem, PlanItem, ServiceItem } from "@/features/site/types";
+import { referenceAssets, referenceLogoSlides } from "@/features/site/content/reference-assets";
+import type { AboutCard, BenefitBullet, ClientLogo, FaqItem, PlanItem, ServiceItem } from "@/features/site/types";
 
 export const servicesData: ServiceItem[] = [
   {
@@ -33,16 +34,7 @@ export const servicesData: ServiceItem[] = [
   }
 ];
 
-export const logosData: string[] = [
-  "Aurumtage",
-  "Disver Uniformes",
-  "Nutrition Lab",
-  "Larezza",
-  "Master Clean",
-  "Chess IQ",
-  "Aurum Living",
-  "Mobility Guard"
-];
+export const logosData: ClientLogo[] = referenceLogoSlides;
 
 export const benefitBulletsData: BenefitBullet[] = [
   ["Innovación constante", "Utilizamos tecnologías de vanguardia"],
@@ -50,12 +42,7 @@ export const benefitBulletsData: BenefitBullet[] = [
   ["Resultados tangibles", "Diseñamos soluciones orientadas al éxito"]
 ];
 
-export const galleryData: string[] = [
-  "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80"
-];
+export const galleryData: string[] = [...referenceAssets.gallery];
 
 export const aboutCardsData: AboutCard[] = [
   {
@@ -99,7 +86,7 @@ export const faqsData: FaqItem[] = [
     "Es muy fácil. Solo contáctanos a través de nuestro sitio web o por teléfono, y programaremos una reunión para entender tus objetivos y desafíos. Nuestro equipo de expertos te brindará asesoría estratégica basada en las mejores prácticas del sector para ayudarte a tomar decisiones tecnológicas acertadas."
   ],
   [
-    "¿Qué beneficios tiene contar con profesionales a disposición?",
+    "¿Qué beneficios tiene contar con profesionales a tu disposición?",
     "Contar con nuestros profesionales en TI te permite disponer de expertos altamente capacitados en diversas áreas de tecnología sin la necesidad de contratar personal adicional. Esto reduce costos operativos, agiliza procesos y garantiza soluciones eficientes adaptadas a las necesidades de tu negocio."
   ],
   [
@@ -120,7 +107,7 @@ export const faqsData: FaqItem[] = [
   ],
   [
     "¿El software o servicio contratado tiene garantía?",
-    "Ofrecemos garantía en todos nuestros desarrollos y servicios. Mientras el software o sistema se encuentre bajo nuestra administración, corregiremos de forma GRATUITA cualquier error técnico que pueda surgir, siempre que no sea causado por un mal uso por parte del cliente."
+    "Ofrecemos garantía en todos nuestros desarrollos y servicios. Mientras el software o sistema se encuentre bajo nuestra administración, corregiremos de forma gratuita cualquier error técnico que pueda surgir, siempre que no sea causado por un mal uso por parte del cliente."
   ]
 ];
 

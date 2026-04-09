@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("/fonts/poppins/Poppins-Regular.ttf") format("truetype");
+  src: url("/fonts/poppins/poppins-300.ttf") format("truetype");
   font-style: normal;
   font-weight: 300;
   font-display: swap;
@@ -10,7 +10,11 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("/fonts/poppins/Poppins-Regular.ttf") format("truetype");
+  src:
+    url("/template-assets/axolotl/fonts/poppins-devanagari-400-normal.woff2") format("woff2"),
+    url("/template-assets/axolotl/fonts/poppins-latin-ext-400-normal.woff2") format("woff2"),
+    url("/template-assets/axolotl/fonts/poppins-latin-400-normal.woff2") format("woff2"),
+    url("/fonts/poppins/poppins-400.ttf") format("truetype");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -18,7 +22,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("/fonts/poppins/Poppins-Regular.ttf") format("truetype");
+  src: url("/fonts/poppins/poppins-500.ttf") format("truetype");
   font-style: normal;
   font-weight: 500;
   font-display: swap;
@@ -26,7 +30,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("/fonts/poppins/Poppins-Regular.ttf") format("truetype");
+  src: url("/fonts/poppins/poppins-600.ttf") format("truetype");
   font-style: normal;
   font-weight: 600;
   font-display: swap;
@@ -34,7 +38,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("/fonts/poppins/Poppins-Regular.ttf") format("truetype");
+  src: url("/fonts/poppins/poppins-700.ttf") format("truetype");
   font-style: normal;
   font-weight: 700;
   font-display: swap;
@@ -42,7 +46,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("/fonts/poppins/Poppins-Regular.ttf") format("truetype");
+  src: url("/fonts/poppins/poppins-800.ttf") format("truetype");
   font-style: normal;
   font-weight: 800;
   font-display: swap;
@@ -61,7 +65,7 @@
   --color-primary-800: #85223c;
   --color-secondary-500: #56cacc;
   --color-secondary-600: #4eb8ba;
-  --color-body-color: #000000;
+  --color-body-color: #212529;
   --color-foreground: #f6f6f6;
 }
 
@@ -80,13 +84,11 @@
   body {
     min-height: 100dvh;
     font-family: var(--font-sans);
+    overflow-x: hidden;
     font-weight: 400;
+    line-height: 1.5;
     color: var(--color-body-color);
-    background:
-      radial-gradient(circle at 12% 12%, rgba(86, 202, 204, 0.18), transparent 10%),
-      radial-gradient(circle at 42% 22%, rgba(242, 61, 109, 0.16), transparent 11%),
-      radial-gradient(circle at 86% 76%, rgba(255, 172, 172, 0.18), transparent 10%),
-      linear-gradient(180deg, #ffffff 0%, #ffffff 58%, #f8eef5 100%);
+    background: #fff;
   }
 
   a {
@@ -101,8 +103,7 @@
   h5,
   h6 {
     font-family: var(--font-sans);
-    font-weight: 400;
-    letter-spacing: -0.03em;
+    font-weight: 700;
   }
 
   img,
@@ -114,24 +115,88 @@
 
 @layer components {
   .site-shell {
-      @apply mx-auto w-full max-w-[1080px];
+    @apply mx-auto w-full max-w-7xl;
   }
 
   .section {
     width: 100%;
-    padding-inline: 0.875rem !important;
+    padding-inline: 1rem !important;
+  }
+
+  @media (min-width: 48rem) {
+    .section {
+      padding-inline: 2rem !important;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .section {
+      padding-inline: 50px !important;
+    }
   }
 
   .primary-button {
-      @apply flex min-h-[40px] items-center justify-center rounded-[5px] border border-primary-500 bg-primary-500 px-5 py-1 text-sm font-normal text-white transition-all duration-300 ease-out hover:scale-[1.02] hover:bg-white hover:text-primary-500;
+    @apply inline-flex items-center justify-center rounded-[5px] border border-primary-500 bg-primary-500 px-6 py-2 text-sm font-extrabold text-white transition-all duration-500 ease-in-out hover:scale-105 hover:bg-white hover:text-primary-500 lg:text-base;
+  }
+
+  .type-menu-trigger {
+    @apply text-base font-bold leading-7;
+  }
+
+  .type-overlay-index {
+    @apply inline-block text-base font-normal leading-none text-primary-500 md:text-lg lg:text-xl xl:text-2xl;
+  }
+
+  .type-overlay-link {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+
+  .type-overlay-title {
+    @apply text-2xl lg:text-[32px] lg:leading-9;
+  }
+
+  .type-kicker {
+    @apply text-base font-normal leading-5 text-primary-500 lg:text-[24px] lg:leading-7;
+  }
+
+  .type-section-title {
+    @apply text-[28px] font-bold leading-8 tracking-[-0.03em] lg:text-[40px] lg:leading-[48px];
+  }
+
+  .type-card-title {
+    @apply text-xl font-semibold leading-6 lg:text-[28px] lg:leading-[34px];
+  }
+
+  .type-body {
+    @apply text-sm leading-6 text-body-color sm:text-base lg:leading-7;
+  }
+
+  .type-body-strong {
+    @apply text-[15px] leading-7 text-body-color lg:text-base;
+  }
+
+  .type-hero-home {
+    @apply text-5xl font-bold leading-[58px] xl:text-7xl;
+  }
+
+  .type-hero-inner {
+    @apply text-5xl font-bold leading-[58px] md:text-[64px] md:leading-[76px];
+  }
+
+  .type-hero-portfolio {
+    @apply mt-16 mb-5 text-center text-[40px] font-bold leading-[0.95] tracking-[-0.055em] lg:mt-28 lg:mb-7 lg:text-[76px];
+  }
+
+  .type-hero-copy {
+    @apply text-base leading-7 md:text-xl;
   }
 
   .secondary-button {
-      @apply flex min-h-[40px] items-center justify-center rounded-[5px] border-2 border-secondary-500 bg-transparent px-5 py-1 text-sm font-normal text-secondary-500 transition-all duration-300 ease-out hover:scale-[1.02] hover:bg-secondary-500 hover:text-white;
+    @apply inline-flex items-center justify-center rounded-[5px] border-2 border-secondary-500 bg-transparent px-6 py-2 text-sm font-extrabold text-secondary-500 transition-all duration-500 ease-in-out hover:scale-105 hover:bg-secondary-500 hover:text-white lg:text-base;
   }
 
   .service-card {
-    @apply flex flex-col items-center gap-4 rounded-lg bg-white p-6 text-center shadow-[0_4px_10px_0_rgba(148,148,148,0.13)] transition-all duration-500 hover:-translate-y-1;
+    @apply flex flex-col items-center gap-6 rounded-lg bg-white p-8 text-center shadow-md transition-all duration-500 hover:-translate-y-1;
     backdrop-filter: blur(2px);
   }
 
@@ -142,7 +207,7 @@
   }
 
   .track {
-    width: calc(var(--item-width) * 16);
+    width: calc(var(--item-width) * 18);
     animation: scrollTrack 45s linear infinite;
     @apply flex;
   }
@@ -158,12 +223,16 @@
     @apply shrink-0;
   }
 
-  .logo-chip {
-    @apply flex h-full w-full items-center justify-center rounded-[24px] bg-white px-6 text-center text-base font-normal text-body-color shadow-md transition-all duration-200 ease-in-out hover:scale-105;
+  .logo-slide-image {
+    @apply h-full w-full object-contain transition-all duration-200 ease-in-out;
+  }
+
+  .item:hover .logo-slide-image {
+    @apply scale-110;
   }
 
   .contact-button {
-      @apply inline-flex min-h-[40px] w-fit items-center rounded-[5px] border border-primary-600 bg-primary-500 px-5 py-1 text-sm font-normal text-white shadow-lg transition-all duration-300 ease-out hover:scale-[1.02] hover:bg-white hover:text-primary-500;
+    @apply inline-flex w-fit items-center rounded-[5px] border border-primary-600 bg-primary-500 px-6 py-2 text-sm font-normal text-white shadow-lg transition-all duration-300 ease-in-out hover:scale-105 hover:bg-white hover:text-primary-500 lg:text-base;
   }
 
   .soft-section {
@@ -217,7 +286,7 @@
   }
 
   .hero-artwork {
-    @apply relative h-[432px] w-full overflow-hidden rounded-[32px] border border-white/40 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(246,246,246,0.95))] shadow-[0_20px_60px_rgba(33,37,41,0.12)];
+    @apply relative h-[448px] w-full overflow-hidden rounded-[32px] border border-white/40 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(246,246,246,0.95))] shadow-[0_20px_60px_rgba(33,37,41,0.12)];
   }
 
   .hero-artwork::before {
@@ -243,8 +312,8 @@
   }
 
   .portfolio-card {
-      @apply relative block overflow-hidden rounded-[28px] bg-cover bg-center bg-no-repeat shadow-[0_20px_60px_rgba(8,15,34,0.24)];
-      min-height: min(72dvh, 640px);
+    @apply relative block overflow-hidden rounded-[28px] bg-cover bg-center bg-no-repeat shadow-[0_20px_60px_rgba(8,15,34,0.24)];
+    min-height: min(74dvh, 680px);
   }
 
   .portfolio-btn {
@@ -256,7 +325,7 @@
   }
 
   .portfolio-info {
-      @apply relative z-20 max-w-[390px] rounded-[24px] bg-white/96 p-4 text-body-color shadow-[0_16px_40px_rgba(14,20,36,0.16)] backdrop-blur-[6px] md:p-6;
+    @apply relative z-20 max-w-[410px] rounded-[24px] bg-white/96 p-5 text-body-color shadow-[0_16px_40px_rgba(14,20,36,0.16)] backdrop-blur-[6px] md:p-7;
   }
 
   .project-logo {
@@ -268,7 +337,7 @@
   }
 
   .portfolio-text {
-      @apply mb-4 text-sm leading-6 text-[#4b5563];
+    @apply mb-4 text-sm leading-7 text-[#4b5563];
   }
 
   .portfolio-tags {
@@ -280,12 +349,12 @@
   }
 
   .portfolio-stack {
-      @apply flex flex-col gap-[11vh];
+    @apply flex flex-col gap-[11vh];
   }
 
   .portfolio-stack > .portfolio-card {
     position: sticky;
-    top: 98px;
+    top: 106px;
   }
 
   .accordion {
@@ -293,7 +362,7 @@
   }
 
   .accordion__title {
-      @apply flex w-full cursor-pointer list-none items-center justify-between gap-4 px-5 py-3.5 text-left text-[15px] font-normal leading-6 md:text-[15px];
+    @apply flex w-full cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-[15px] font-medium leading-6 md:text-[15px];
   }
 
   .accordion__title::-webkit-details-marker {
@@ -306,7 +375,7 @@
   }
 
   .accordion__description {
-    @apply overflow-hidden px-5 pb-5 text-sm leading-6 text-gray-600 md:text-[15px];
+    @apply overflow-hidden px-5 pb-5 text-sm leading-7 text-gray-600 md:text-[15px];
   }
 
   .arrow {
@@ -552,7 +621,7 @@
   }
 
   100% {
-    transform: translate(calc(-1 * var(--item-width) * 8));
+    transform: translate(calc(-1 * var(--item-width) * 9));
   }
 }
 
@@ -615,19 +684,9 @@
 }
 
 @media (min-width: 768px) {
-  .section {
-    padding-inline: 1.5rem !important;
-  }
-
   .background span {
     width: 15vmin;
     height: 15vmin;
-  }
-}
-
-@media (min-width: 1024px) {
-  .section {
-    padding-inline: 40px !important;
   }
 }
 

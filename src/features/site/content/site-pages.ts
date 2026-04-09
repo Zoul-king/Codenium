@@ -1,3 +1,4 @@
+import { referenceAssets } from "@/features/site/content/reference-assets";
 import type { SharedSite, SitePagesMap } from "@/features/site/types";
 
 export const sharedSite: SharedSite = {
@@ -42,7 +43,7 @@ export const sharedSite: SharedSite = {
   footer: {
     body:
       "En AxolotlCode transformamos ideas en realidades digitales. Creamos aplicaciones innovadoras, seguras y personalizadas que impulsan tu negocio hacia el éxito.",
-    legal: "© 2026 AxolotlCode. Todos los derechos reservados."
+    legal: "©2026 AxolotlCode. Todos los derechos reservados."
   }
 };
 
@@ -59,7 +60,7 @@ export const sitePages: SitePagesMap = {
       body:
         "En AxolotlCode transformamos ideas en realidades digitales. Creamos aplicaciones innovadoras, seguras y personalizadas que impulsan tu negocio hacia el éxito. Con tecnologías de vanguardia y un enfoque en calidad, somos tu aliado estratégico en la transformación digital.",
       primaryCta: { label: "Conocer más", href: "/about" },
-      secondaryCta: { label: "Contacto", href: "/contact" }
+      secondaryCta: { label: "Contacto", href: "/contact#contact" }
     },
     sections: ["services", "logos", "benefits", "contactStrip"]
   },
@@ -74,8 +75,8 @@ export const sitePages: SitePagesMap = {
       title: "Sobre",
       accent: "nosotros",
       body:
-        "En AxolotlCode, nuestra pasión por la innovación y el desarrollo digital nos impulsa a construir soluciones que transforman ideas en realidades tecnológicas. Con un equipo comprometido y una visión centrada en el futuro, trabajamos para crear productos que generen impacto y valor duradero.",
-      image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80"
+        "En AxolotlCode, nuestra pasión por la innovación y el desarrollo digital nos impulsa a construir soluciones que transforman ideas en realidades tecnológicas.",
+      image: referenceAssets.hero.about
     },
     sections: ["aboutStory", "missionVision", "timeline", "ctaDual"]
   },
@@ -91,7 +92,7 @@ export const sitePages: SitePagesMap = {
       accent: "servicios",
       body:
         "Descubre nuestras soluciones diseñadas para adaptarse a tus necesidades. Ofrecemos servicios personalizados para llevar tus proyectos al siguiente nivel, con planes flexibles y opciones que se ajustan a cada etapa de tu crecimiento.",
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80"
+      image: referenceAssets.hero.plans
     },
     sections: ["planServices", "pricingPlans", "ctaSingle"]
   },
@@ -179,7 +180,7 @@ export const sitePages: SitePagesMap = {
       accent: "Preguntas Frecuentes",
       body:
         "¿Tienes dudas o necesitas más información sobre nuestros servicios? Contáctanos o consulta nuestra sección de preguntas frecuentes. Estamos comprometidos en brindarte respuestas claras y rápidas para que tengas la mejor experiencia con nosotros.",
-      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80"
+      image: referenceAssets.hero.contact
     },
     sections: ["faq", "contactForm"]
   },

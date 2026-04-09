@@ -3,7 +3,7 @@ import { rmSync } from "node:fs";
 import path from "node:path";
 
 const port = 3000;
-const devDistDir = path.join(process.cwd(), ".next-dev");
+const devDistDirs = [path.join(process.cwd(), ".next"), path.join(process.cwd(), ".next-dev")];
 
 function getListeningPids(targetPort: number): string[] {
   try {
@@ -38,6 +38,27 @@ function killPid(pid: string): void {
   }
 }
 
+function sleep(milliseconds: number): void {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
+}
+
+function clearDir(dir: string): void {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      rmSync(dir, { recursive: true, force: true });
+      console.log(`Cleared dev cache at ${dir}.`);
+      return;
+    } catch {
+      if (attempt < 3) {
+        sleep(250);
+        continue;
+      }
+
+      console.log(`Could not clear dev cache at ${dir}.`);
+    }
+  }
+}
+
 const pids = getListeningPids(port);
 
 if (pids.length === 0) {
@@ -48,9 +69,6 @@ if (pids.length === 0) {
   }
 }
 
-try {
-  rmSync(devDistDir, { recursive: true, force: true });
-  console.log(`Cleared dev cache at ${devDistDir}.`);
-} catch {
-  console.log(`Could not clear dev cache at ${devDistDir}.`);
+for (const dir of devDistDirs) {
+  clearDir(dir);
 }

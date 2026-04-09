@@ -7,10 +7,8 @@ export function ReferenceFooter() {
   return (
     <footer className="bg-[#212529]">
       <div className="section mx-auto flex max-w-7xl flex-col justify-between md:flex-row md:flex-wrap md:pt-[90px] md:pb-6 xl:flex-nowrap lg:pb-[76px]">
-        <div className="min-w-0 flex-1 md:min-w-[530px]">
-          <div className="mb-4">
-            <BrandLogo variant="white" className="w-[86px]" />
-          </div>
+        <div className="flex-1 md:min-w-[530px]">
+          <BrandLogo variant="white" className="w-[125px]" />
           <p className="text-sm leading-6 text-white">{sharedSite.footer.body}</p>
         </div>
         <div className="grow pt-5">
@@ -18,7 +16,7 @@ export function ReferenceFooter() {
           <ul className="flex flex-col gap-y-[15px]">
             {sharedSite.footerMenu.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="text-sm text-white transition-colors hover:text-primary-200">
+                <Link href={item.href} className="text-sm text-white">
                   {item.label}
                 </Link>
               </li>
@@ -38,8 +36,8 @@ export function ReferenceFooter() {
           <ul className="flex gap-x-5">
             {sharedSite.socials.map((social) => (
               <li key={social.label} className="rounded-[5px] transition-all duration-300 ease-in-out hover:scale-105 hover:bg-white/20">
-                <a href={social.href} target="_blank" rel="noreferrer" aria-label={social.label} className="grid size-[29px] place-content-center text-white">
-                  <SocialIcon type={social.icon} className="size-4" />
+                <a href={social.href} target="_blank" rel="noreferrer" aria-label={social.label}>
+                  <SocialIcon type={social.icon} className="size-[29px]" />
                 </a>
               </li>
             ))}

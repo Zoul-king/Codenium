@@ -33,6 +33,12 @@ export interface SocialLink extends LinkItem {
   icon: SocialIconType;
 }
 
+export interface ClientLogo {
+  src: string;
+  alt: string;
+  href?: string;
+}
+
 export interface CtaLink extends LinkItem {}
 
 export interface SiteBrand {
