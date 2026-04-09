@@ -5,13 +5,13 @@ export const homePage: MarketingPageData = {
   slug: "/",
   headerVariant: "brand",
   meta: {
-    title: "AxolotlCode - Software, plataformas y experiencias digitales",
-    description: "Diseñamos sitios, plataformas y productos digitales con estimado inicial y seguimiento claro durante el proceso."
+    title: "Codenium - Software, plataformas y experiencias digitales",
+    description: "Disenamos sitios, plataformas y productos digitales con estimado inicial y seguimiento claro durante el proceso."
   },
   hero: {
     kind: "home",
     title: "Software y plataformas a tu medida",
-    body: "Diseñamos y desarrollamos productos digitales con un proceso más claro desde el inicio: estimado inicial, continuidad comercial y seguimiento en cada etapa.",
+    body: "Disenamos y desarrollamos productos digitales con un proceso mas claro desde el inicio: estimado inicial, continuidad comercial y seguimiento en cada etapa.",
     primaryCta: { label: "Sobre nosotros", href: "/about" },
     secondaryCta: { label: "Obtener estimado", href: "/quote" }
   }
@@ -24,23 +24,23 @@ export const services: ServiceItem[] = [
     icon: "code"
   },
   {
-    title: "Consultorías",
-    body: "Acompañamiento estratégico para ordenar decisiones, alcance y prioridades digitales.",
+    title: "Consultorias",
+    body: "Acompanamiento estrategico para ordenar decisiones, alcance y prioridades digitales.",
     icon: "consulting"
   },
   {
-    title: "Profesionales a tu disposición",
+    title: "Profesionales a tu disposicion",
     body: "Talento especializado para reforzar equipos y acelerar iniciativas clave.",
     icon: "team"
   },
   {
     title: "Desarrollo a la medida",
-    body: "Productos pensados para tu operación, tu negocio y el nivel de detalle que necesitas.",
+    body: "Productos pensados para tu operacion, tu negocio y el nivel de detalle que necesitas.",
     icon: "spark"
   },
   {
-    title: "Soporte técnico",
-    body: "Continuidad, mantenimiento y resolución ágil para mantener tu operación en movimiento.",
+    title: "Soporte tecnico",
+    body: "Continuidad, mantenimiento y resolucion agil para mantener tu operacion en movimiento.",
     icon: "support"
   },
   {
@@ -51,20 +51,18 @@ export const services: ServiceItem[] = [
 ];
 
 export const clientLogos: ClientLogo[] = [
-  { src: site.assets.logos.goser, href: "https://goser.mx/", alt: "Goser" },
-  { src: site.assets.logos.disver, href: "https://disveruniformes.com.mx/", alt: "Disver Uniformes" },
-  { src: site.assets.logos.client3, alt: "Cliente 3" },
-  { src: site.assets.logos.client4, alt: "Cliente 4" },
-  { src: site.assets.logos.aurumtage, href: "https://aurumtage.com/", alt: "Aurumtage" },
-  { src: site.assets.logos.sittycia, href: "https://sittycia.com/", alt: "Sittycia" },
-  { src: site.assets.logos.nutritionLab, href: "https://nutrition-lab.mx/", alt: "Nutrition Lab" },
-  { src: site.assets.logos.larezza, href: "https://larezza.com/", alt: "Larezza" },
-  { src: site.assets.logos.masterClean, href: "https://masterclean.mx/", alt: "Master Clean" },
-  { src: site.assets.logos.valhui, href: "https://valhui.com/", alt: "Valhui" }
+  { alt: "Facebook" },
+  { alt: "Instagram" },
+  { alt: "Snapchat" },
+  { alt: "Twitter" },
+  { alt: "LinkedIn" },
+  { alt: "Notion" },
+  { alt: "Shopify" },
+  { alt: "Slack" }
 ];
 
 export const benefits: BenefitItem[] = [
-  { title: "Proceso más claro", body: "Empezamos con un estimado inicial aterrizado." },
+  { title: "Proceso mas claro", body: "Empezamos con un estimado inicial aterrizado." },
   { title: "Seguimiento continuo", body: "Mantienes visibilidad durante cada etapa." },
-  { title: "Soluciones útiles", body: "Diseñamos para negocio, operación y crecimiento." }
+  { title: "Soluciones utiles", body: "Disenamos para negocio, operacion y crecimiento." }
 ];

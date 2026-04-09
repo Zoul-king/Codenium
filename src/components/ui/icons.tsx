@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { SVGProps } from "react";
 
-import { ArrowRight, Check, X } from "lucide-react";
+import { ArrowRight, Check, Wrench, X } from "lucide-react";
 
 import type { ContactIconType, ServiceIconType, SocialIconType } from "@/features/marketing/types";
 
@@ -32,17 +32,17 @@ function SvgIcon(props: SVGProps<SVGSVGElement>) {
 
 const serviceIcons: Record<ServiceIconType, { src: string; width: number; height: number; alt: string }> = {
   code: { src: "/icons/services/code.svg", width: 52, height: 42, alt: "Desarrollo de software" },
-  consulting: { src: "/icons/services/consulting.svg", width: 42, height: 42, alt: "Consultorías" },
-  team: { src: "/icons/services/team.svg", width: 36, height: 40, alt: "Profesionales a tu disposición" },
+  consulting: { src: "/icons/services/consulting.svg", width: 42, height: 42, alt: "Consultorias" },
+  team: { src: "/icons/services/team.svg", width: 36, height: 40, alt: "Profesionales a tu disposicion" },
   spark: { src: "/icons/services/spark.svg", width: 42, height: 41, alt: "Desarrollo a la medida" },
-  support: { src: "/icons/services/support.svg", width: 41, height: 42, alt: "Soporte técnico" },
+  support: { src: "/icons/services/support.svg", width: 41, height: 42, alt: "Soporte tecnico" },
   idea: { src: "/icons/services/idea.svg", width: 26, height: 36, alt: "Incubadora" }
 };
 
 const contactIcons: Record<ContactIconType, { src: string; width: number; height: number; alt: string }> = {
-  mail: { src: "/icons/contact/mail.svg", width: 32, height: 32, alt: "Correo electrónico" },
-  phone: { src: "/icons/contact/phone.svg", width: 33, height: 34, alt: "Teléfono" },
-  location: { src: "/icons/contact/location.svg", width: 20, height: 32, alt: "Ubicación" }
+  mail: { src: "/icons/contact/mail.svg", width: 24, height: 24, alt: "Correo electronico" },
+  phone: { src: "/icons/contact/phone.svg", width: 24, height: 24, alt: "Telefono" },
+  location: { src: "/icons/contact/location.svg", width: 20, height: 24, alt: "Ubicacion" }
 };
 
 const socialIcons: Record<SocialIconType, { src: string; alt: string }> = {
@@ -72,6 +72,10 @@ export function CheckIcon() {
   return <Check className="h-4 w-4" strokeWidth={2.6} aria-hidden="true" />;
 }
 
+export function ToolIcon({ className = "size-5" }: IconProps) {
+  return <Wrench className={className} strokeWidth={2.1} aria-hidden="true" />;
+}
+
 export function ServiceIcon({ type }: ServiceIconProps) {
   const icon = serviceIcons[type];
 
@@ -81,7 +85,7 @@ export function ServiceIcon({ type }: ServiceIconProps) {
 export function ContactIcon({ type }: ContactIconProps) {
   const icon = contactIcons[type];
 
-  return <Image src={icon.src} width={icon.width} height={icon.height} alt={icon.alt} className="size-8 transition-transform hover:scale-105" />;
+  return <Image src={icon.src} width={icon.width} height={icon.height} alt={icon.alt} className="size-6 transition-transform hover:scale-105" />;
 }
 
 export function SocialIcon({ type, className = "size-4" }: SocialIconProps) {
@@ -98,8 +102,13 @@ export function WhatsAppIcon({ className = "size-8" }: IconProps) {
   return <Image src="/icons/whatsapp.svg" width={32} height={32} alt="WhatsApp" className={className} />;
 }
 
-export function BrandLogo({ variant = "brand", className = "w-[112px]", priority = false }: BrandLogoProps) {
-  const src = variant === "white" ? "/images/brand/logo-white.webp" : "/images/brand/logo-pink.webp";
-
-  return <Image src={src} width={284} height={249} alt="AxolotlCode" className={className} priority={priority} />;
+export function BrandLogo({ variant = "brand", className = "w-[112px]" }: BrandLogoProps) {
+  return (
+    <span className={`inline-flex items-center gap-3 ${className}`} aria-label="Codenium">
+      <span className={`grid h-11 w-11 place-content-center rounded-[14px] text-sm font-bold ${variant === "white" ? "bg-white text-primary-600" : "bg-primary-500 text-white"}`}>
+        CD
+      </span>
+      <span className={`text-lg font-semibold tracking-[-0.04em] ${variant === "white" ? "text-white" : "text-body-color"}`}>Codenium</span>
+    </span>
+  );
 }

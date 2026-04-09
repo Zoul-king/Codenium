@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 import type { ClientLogo } from "@/features/marketing/types";
 
 interface LogosProps {
@@ -11,29 +9,21 @@ export function Logos({ items }: LogosProps) {
 
   return (
     <section className="section relative bg-foreground">
-      <div className="site-shell flex min-h-[70vh] flex-col items-center justify-between gap-x-7 gap-y-12 py-16 md:flex-row">
+      <div className="site-shell flex min-h-[52vh] flex-col items-center justify-between gap-10 py-16 md:flex-row">
         <article className="flex w-full flex-col gap-4" data-animate="fadeInFromTop">
           <span className="type-kicker">Clientes satisfechos</span>
           <h2 className="type-section-title">
-            Marcas que <span className="text-secondary-500">confiaron</span> en nuestro trabajo
+            Referencias que inspiran <span className="text-secondary-500">confianza</span>
           </h2>
-          <p className="max-w-2xl text-sm text-body-color sm:text-base">
-            Nos enorgullece haber desarrollado sitios web para empresas que valoran la calidad. Estas son algunas de las marcas que confiaron en nosotros.
-          </p>
+          <p className="max-w-xl text-sm text-slate-600 sm:text-base">Trabajamos con el nivel de claridad visual y producto que hoy exigen marcas digitales fuertes.</p>
         </article>
         <article className="slider" data-animate="fadeInFromBottom">
           <div className="track">
             {repeated.map((item, index) => (
-              <div key={`${item.alt}-${index}`} className="item cursor-pointer">
-                {item.href ? (
-                  <a href={item.href} target="_blank" rel="noreferrer" className="flex h-full w-full items-center justify-center">
-                    <Image src={item.src} alt={item.alt} width={220} height={120} className="logo-slide-image h-auto max-h-[120px] w-auto" />
-                  </a>
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center">
-                    <Image src={item.src} alt={item.alt} width={220} height={120} className="logo-slide-image h-auto max-h-[120px] w-auto" />
-                  </span>
-                )}
+              <div key={`${item.alt}-${index}`} className="item">
+                <div className="flex h-full w-full items-center justify-center rounded-[22px] border border-slate-200 bg-white px-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+                  <span className="text-xl font-semibold tracking-[-0.04em] text-slate-800">{item.alt}</span>
+                </div>
               </div>
             ))}
           </div>

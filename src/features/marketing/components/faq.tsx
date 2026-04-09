@@ -12,7 +12,7 @@ interface FaqProps {
 }
 
 export function Faq({ items }: FaqProps) {
-  const [openIndex, setOpenIndex] = useState(0);
+  const [openIndex, setOpenIndex] = useState(-1);
 
   return (
     <section className="relative overflow-hidden">
@@ -21,7 +21,7 @@ export function Faq({ items }: FaqProps) {
         <div className="faqs-info mb-10 text-center" data-animate="fadeInFromTop">
           <span className="type-kicker">Dudas frecuentes</span>
           <h2 className="type-section-title mt-4">
-            Preguntas más <span className="text-secondary-500">frecuentes</span>
+            Preguntas mas <span className="text-secondary-500">frecuentes</span>
           </h2>
         </div>
         <div className="flex flex-col items-start justify-center gap-8 sm:flex-row lg:gap-12">
@@ -34,7 +34,9 @@ export function Faq({ items }: FaqProps) {
                     <ChevronDown className="arrow" strokeWidth={2.2} aria-hidden="true" />
                   </button>
                   <div className="details__content">
-                    <p className="accordion__description">{item.answer}</p>
+                    <div className="overflow-hidden">
+                      <p className="accordion__description">{item.answer}</p>
+                    </div>
                   </div>
                 </div>
               </article>

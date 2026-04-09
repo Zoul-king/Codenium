@@ -5,65 +5,61 @@ export const aboutPage: MarketingPageData = {
   slug: "/about",
   headerVariant: "white",
   meta: {
-    title: "Sobre nosotros - AxolotlCode",
-    description:
-      "Conoce la historia, misión y visión de AxolotlCode y cómo construimos soluciones tecnológicas para empresas."
+    title: "Sobre nosotros - Codenium",
+    description: "Conoce la historia, mision y vision de Codenium y como construimos soluciones tecnologicas para empresas."
   },
   hero: {
     kind: "image",
     title: "Sobre",
     accent: "nosotros",
-    body:
-      "En AxolotlCode, nuestra pasión por la innovación y el desarrollo digital nos impulsa a construir soluciones que transforman ideas en realidades tecnológicas.",
+    body: "Construimos productos digitales con foco en utilidad real, claridad operativa y crecimiento sostenible.",
     image: site.assets.hero.about
   }
 };
 
 export const story = [
-  "AxolotlCode nació con la misión de transformar las ideas de nuestros clientes en soluciones tecnológicas de alto impacto. Desde nuestros inicios, hemos priorizado la innovación, la calidad y la seguridad en cada proyecto, trabajando con un equipo comprometido y apasionado.",
-  "A lo largo de nuestra trayectoria, hemos ayudado a empresas de diversos sectores a modernizar sus procesos y alcanzar sus objetivos en un mundo digital en constante evolución. Nos enorgullece ser aliados estratégicos en la transformación tecnológica de nuestros clientes."
+  "Codenium empezo desde cero, como un proyecto propio construido con esfuerzo, aprendizaje constante y la necesidad de demostrar que una buena ejecucion cambia el resultado de un negocio.",
+  "Cada etapa exigio resolver mejor, trabajar con mas criterio y crecer desde la disciplina. Esa historia hoy define nuestra forma de disenar, desarrollar y acompanar productos digitales."
 ];
 
 export const missionVision: AboutBlock[] = [
   {
-    title: "Misión",
-    body:
-      "Desarrollamos tecnología con sello mexicano, creando soluciones innovadoras que transforman vidas y elevan el potencial de personas, empresas y comunidades."
+    title: "Mision",
+    body: "Construir software y plataformas utiles, claras y bien ejecutadas para ayudar a empresas a operar mejor, decidir mejor y crecer con una base mas solida."
   },
   {
-    title: "Visión",
-    body:
-      "Ser una empresa tecnológica mexicana reconocida a nivel mundial por la calidad de sus soluciones, su capacidad de innovar y un ambiente laboral que promueve el crecimiento individual del equipo."
+    title: "Vision",
+    body: "Ser una empresa tecnologica mexicana reconocida a nivel mundial por la calidad de sus soluciones, su capacidad de evolucionar y una cultura de trabajo exigente pero humana."
   }
 ];
 
 export const timeline: TimelineStep[] = [
   {
-    title: "Investigación y recopilación de información",
-    body: "Descubrimos contigo lo que necesitas y cómo podemos lograrlo."
+    title: "Investigacion y contexto",
+    body: "Entendemos el problema, el objetivo y las restricciones reales."
   },
   {
-    title: "Planificación",
-    body: "Estructuramos tus ideas con mapa del sitio, wireframes y alcances claros."
+    title: "Planificacion",
+    body: "Ordenamos alcance, entregables y decisiones de prioridad."
   },
   {
-    title: "Diseño y prototipos",
-    body: "Creamos propuestas visuales que reflejan tu visión de negocio."
+    title: "Diseno y prototipos",
+    body: "Traducimos la estrategia en una experiencia entendible y util."
   },
   {
     title: "Contenido",
-    body: "Damos voz a tu sitio con textos e imágenes alineados con tus objetivos."
+    body: "Aterrizamos mensajes, flujos y materiales para comunicar mejor."
   },
   {
     title: "Desarrollo frontend y backend",
-    body: "Construimos tu producto para que funcione sólido y se vea impecable."
+    body: "Construimos una base solida para operar, crecer y mantener."
   },
   {
     title: "Pruebas y despliegue",
-    body: "Ajustamos los detalles finales para un lanzamiento sin sobresaltos."
+    body: "Pulimos detalles y salimos a produccion con control."
   },
   {
-    title: "Mantenimiento y evolución",
-    body: "Acompañamos el crecimiento de tu sitio con soporte y mejoras continuas."
+    title: "Mantenimiento y evolucion",
+    body: "Seguimos mejorando el producto segun uso, datos y nuevas necesidades."
   }
 ];

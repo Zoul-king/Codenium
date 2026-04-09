@@ -16,7 +16,7 @@ export interface SocialLink extends LinkItem {
 }
 
 export interface ClientLogo {
-  src: string;
+  src?: string;
   alt: string;
   href?: string;
 }
@@ -77,6 +77,8 @@ export interface SiteContact {
   phone: string;
   phoneRaw: string;
   whatsapp: string;
+  assistantLabel?: string;
+  assistantHref?: string;
 }
 
 export interface SiteFooter {

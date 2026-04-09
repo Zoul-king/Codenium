@@ -63,27 +63,28 @@ export function getQuoteViability(draft: QuoteDraft, estimate: QuoteEstimate) {
   const featureCount = draft.modules.filter((item) => item !== "maintenance").length;
   const timelineMax = estimate.timelineWeeks.max;
   const buildMax = estimate.build.max;
+  const expectedTimelineMax = draft.timelinePreference === "1-4" ? 16 : draft.timelinePreference === "5-7" ? 28 : 48;
 
-  if (buildMax <= 70000 && timelineMax <= 8 && featureCount <= 3) {
+  if (buildMax <= 70000 && timelineMax <= 8 && featureCount <= 3 && timelineMax <= expectedTimelineMax) {
     return {
       tone: "favorable" as const,
       label: "Favorable",
-      description: "El alcance está bien acotado y se puede avanzar con una definición relativamente rápida."
+      description: "El alcance esta bien acotado y se puede avanzar con una definicion relativamente rapida."
     };
   }
 
-  if (buildMax <= 140000 && timelineMax <= 14 && featureCount <= 6) {
+  if (buildMax <= 140000 && timelineMax <= 14 && featureCount <= 6 && timelineMax <= expectedTimelineMax) {
     return {
       tone: "media" as const,
       label: "Media",
-      description: "El proyecto es viable, pero conviene priorizar módulos y revisar dependencias antes de cerrar tiempos."
+      description: "El proyecto es viable, pero conviene priorizar modulos y revisar dependencias antes de cerrar tiempos."
     };
   }
 
   return {
     tone: "complex" as const,
     label: "Compleja",
-    description: "El alcance combina varias piezas críticas. Necesita una definición más detallada para aterrizar fases y riesgos."
+    description: "El alcance combina varias piezas criticas o el tiempo deseado es muy agresivo para el nivel de complejidad actual."
   };
 }
 

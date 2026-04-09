@@ -35,6 +35,8 @@ export type QuoteModuleKey =
   | "chat"
   | "maintenance";
 
+export type QuoteTimelinePreference = "1-4" | "5-7" | "8-12";
+
 export type QuoteStatus = "draft" | "sent" | "review" | "approved";
 
 export type ProjectStatus = "discovery" | "design" | "build" | "qa" | "done";
@@ -70,6 +72,8 @@ export interface QuoteModuleOption {
 
 export interface QuoteDraft {
   projectType: QuoteProjectType;
+  objective: string;
+  timelinePreference: QuoteTimelinePreference;
   modules: QuoteModuleKey[];
 }
 

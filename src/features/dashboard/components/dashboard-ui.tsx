@@ -50,16 +50,21 @@ export function StatusBadge({
 }) {
   const toneClassName =
     tone === "accent"
-      ? "border-primary-100 bg-primary-50 text-primary-700"
+      ? "text-primary-700"
       : tone === "success"
-        ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+        ? "text-emerald-700"
         : tone === "warning"
-          ? "border-amber-100 bg-amber-50 text-amber-700"
+          ? "text-amber-700"
           : tone === "danger"
-            ? "border-rose-100 bg-rose-50 text-rose-700"
-            : "border-slate-200 bg-slate-100 text-slate-700";
+            ? "text-rose-700"
+            : "text-slate-700";
 
-  return <span className={cn("inline-flex rounded-full border px-3 py-1 text-xs font-semibold", toneClassName)}>{children}</span>;
+  return (
+    <span className={cn("inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em]", toneClassName)}>
+      <span className="inline-block h-2 w-2 rounded-full bg-current" />
+      {children}
+    </span>
+  );
 }
 
 export function ProgressBar({ value }: { value: number }) {

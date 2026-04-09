@@ -5,7 +5,7 @@ export const loginPage: MarketingPageData = {
   slug: "/login",
   headerVariant: "white",
   meta: {
-    title: "Acceso - AxolotlCode",
+    title: "Acceso - Codenium",
     description: "Ingresa para revisar cotizaciones, proyectos y seguimiento."
   },
   hero: {
@@ -21,7 +21,7 @@ export const registerPage: MarketingPageData = {
   slug: "/register",
   headerVariant: "white",
   meta: {
-    title: "Registro - AxolotlCode",
+    title: "Registro - Codenium",
     description: "Crea tu cuenta cliente para dar seguimiento a tus solicitudes."
   },
   hero: {
@@ -37,7 +37,7 @@ export const forgotPasswordPage: MarketingPageData = {
   slug: "/forgot-password",
   headerVariant: "white",
   meta: {
-    title: "Recuperar acceso - AxolotlCode",
+    title: "Recuperar acceso - Codenium",
     description: "Solicita instrucciones para volver a entrar a tu cuenta."
   },
   hero: {

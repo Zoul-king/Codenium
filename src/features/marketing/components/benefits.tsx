@@ -20,18 +20,18 @@ export function Benefits({ items }: BenefitsProps) {
               data-animate="fadeIn"
               data-delay={String(index * 0.12)}
             >
-              <Image src={image} alt="Vista del trabajo de AxolotlCode" fill className="object-cover" sizes="(min-width: 900px) 285px, 100vw" />
+              <Image src={image} alt="Vista del trabajo de Codenium" fill className="object-cover" sizes="(min-width: 900px) 285px, 100vw" />
             </div>
           ))}
         </div>
         <article className="flex w-full flex-col items-start text-left" data-animate="fadeIn">
           <div className="mb-3 flex flex-col gap-4">
-            <span className="type-kicker">¿Por qué AxolotlCode?</span>
+            <span className="type-kicker">Por que Codenium?</span>
             <h2 className="type-section-title">
-              En AxolotlCode construimos <span className="text-secondary-500">más que software</span>
+              Construimos <span className="text-secondary-500">mas que software</span>
             </h2>
             <p className="max-w-2xl text-sm text-body-color sm:text-base">
-              Creamos soluciones que impulsan tu negocio hacia el éxito. Nuestro equipo combina innovación, calidad y compromiso para desarrollar herramientas tecnológicas personalizadas.
+              Creamos soluciones con una combinacion de criterio de producto, ejecucion tecnica y acompanamiento claro.
             </p>
           </div>
           <div className="grid w-full grid-cols-1 gap-1">

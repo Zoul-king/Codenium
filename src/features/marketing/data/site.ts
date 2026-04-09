@@ -2,8 +2,8 @@ import type { SiteConfig } from "@/features/marketing/types";
 
 export const site: SiteConfig = {
   brand: {
-    name: "AxolotlCode",
-    short: "AX"
+    name: "Codenium",
+    short: "CD"
   },
   nav: [
     { label: "Inicio", href: "/" },
@@ -24,27 +24,29 @@ export const site: SiteConfig = {
   ],
   contact: {
     location: "Texcoco",
-    city: "Estado de México",
-    email: "admin@axolotlcode.tech",
-    phone: "+(52) 56 2495 5086",
-    phoneRaw: "+525624955086",
-    whatsapp: "https://wa.link/ivbalm"
+    city: "Estado de Mexico",
+    email: "GZM.manuel@gmail.com",
+    phone: "55 75 59 54",
+    phoneRaw: "+5255755954",
+    whatsapp: "https://wa.me/5255755954",
+    assistantLabel: "Juliana IA",
+    assistantHref: "/contact"
   },
   socials: [
-    { label: "Instagram", href: "https://www.instagram.com/axolotl.code/", icon: "instagram" },
-    { label: "X", href: "https://x.com/AxolotlCode", icon: "x" },
-    { label: "Facebook", href: "https://www.facebook.com/Desarrollo.software.axolotlcode", icon: "facebook" },
-    { label: "LinkedIn", href: "https://mx.linkedin.com/in/axolotl-code-86b85732a?trk=public_post_feed-actor-name", icon: "linkedin" },
-    { label: "TikTok", href: "https://www.tiktok.com/@axolotl.code", icon: "tiktok" }
+    { label: "Instagram", href: "https://www.instagram.com/", icon: "instagram" },
+    { label: "X", href: "https://x.com/", icon: "x" },
+    { label: "Facebook", href: "https://www.facebook.com/", icon: "facebook" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/", icon: "linkedin" },
+    { label: "TikTok", href: "https://www.tiktok.com/", icon: "tiktok" }
   ],
   footer: {
-    body: "Diseñamos sitios, plataformas y productos digitales con un proceso claro, desde el estimado inicial hasta el seguimiento del proyecto.",
-    legal: "© 2026 AxolotlCode. Todos los derechos reservados."
+    body: "Disenamos software, dashboards y productos digitales con una estructura clara, sobria y orientada a resolver procesos reales.",
+    legal: "© 2026 Codenium. Todos los derechos reservados."
   },
   sticky: {
-    message: "Contáctanos",
-    label: "Por WhatsApp",
-    href: "https://wa.link/ivbalm"
+    message: "Canales de contacto",
+    label: "Abrir herramientas",
+    href: "/contact"
   },
   assets: {
     brand: {

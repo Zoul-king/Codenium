@@ -18,8 +18,8 @@ const poppins = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "AxolotlCode",
-  description: "Sitio corporativo de AxolotlCode construido con Next.js, React, TypeScript y Tailwind CSS."
+  title: "Codenium",
+  description: "Sitio corporativo de Codenium construido con Next.js, React, TypeScript y Tailwind CSS."
 };
 
 interface RootLayoutProps {
