@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import type { InputHTMLAttributes } from "react";
+import { useMemo, useState, type InputHTMLAttributes, type ReactNode } from "react";
 
 import { ContactIcon } from "@/components/ui/icons";
 import { site } from "@/features/marketing/data/site";
@@ -9,6 +11,8 @@ interface FormFieldProps {
   label: string;
   placeholder: string;
   type?: InputHTMLAttributes<HTMLInputElement>["type"];
+  value: string;
+  onChange: (value: string) => void;
 }
 
 interface ContactInfoProps {
@@ -17,52 +21,142 @@ interface ContactInfoProps {
   icon: ContactIconType;
 }
 
-export function ContactForm() {
+interface ContactFormValues {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  message: string;
+}
+
+interface ContactFormProps {
+  kicker?: string;
+  title?: string;
+  description?: string;
+  submitLabel?: string;
+  summary?: ReactNode;
+  successMessage?: string;
+  initialValues?: Partial<ContactFormValues>;
+}
+
+const defaultValues: ContactFormValues = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  message: ""
+};
+
+export function ContactForm({
+  kicker = "Contáctanos",
+  title = "¿Tienes algún proyecto en mente?",
+  description = "Nosotros podemos ayudarte. Abarcamos gran parte de la Ciudad de México y alrededores.",
+  submitLabel = "Enviar mensaje",
+  summary,
+  successMessage = "Recibimos tu mensaje. En una siguiente etapa este punto se conectará con backend real.",
+  initialValues
+}: ContactFormProps) {
+  const [values, setValues] = useState<ContactFormValues>({ ...defaultValues, ...initialValues });
+  const [submitted, setSubmitted] = useState(false);
+  const hasSummary = Boolean(summary);
+
+  const isDisabled = useMemo(
+    () =>
+      !values.firstName.trim() ||
+      !values.lastName.trim() ||
+      !values.email.trim() ||
+      !values.phone.trim() ||
+      !values.message.trim(),
+    [values]
+  );
+
+  function updateValue(key: keyof ContactFormValues, value: string) {
+    setValues((current) => ({
+      ...current,
+      [key]: value
+    }));
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (isDisabled) {
+      return;
+    }
+
+    setSubmitted(true);
+  }
+
   return (
     <section className="text-body-color" id="contact">
       <div className="site-shell px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 lg:py-16">
         <div className="contact mb-[26px] flex flex-col gap-4 text-center sm:mb-20 sm:text-left" data-animate="fadeInFromTop">
-          <span className="type-kicker">Contáctanos</span>
-          <h2 className="type-section-title">
-            ¿Tienes algún <span className="text-secondary-500">proyecto</span> en mente?
-          </h2>
-          <p className="max-w-2xl text-sm text-body-color sm:text-base">
-            Nosotros podemos ayudarte. Abarcamos gran parte de la Ciudad de México y alrededores.
-          </p>
+          <span className="type-kicker">{kicker}</span>
+          <h2 className="type-section-title">{title}</h2>
+          <p className="max-w-2xl text-sm text-body-color sm:text-base">{description}</p>
         </div>
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 lg:gap-12">
-          <div className="axolotl-info flex w-full flex-col gap-4 lg:gap-8" data-animate="fadeIn">
-            <ContactInfoColumn label="Correo electrónico" value={site.contact.email} icon="mail" />
-            <ContactInfoColumn label="Teléfono" value={site.contact.phone} icon="phone" />
-            <ContactInfoColumn label="Ubicación" value={`${site.contact.location}, ${site.contact.city}`} icon="location" />
+
+        {submitted ? (
+          <div className="rounded-[24px] bg-white p-8 shadow-[0_16px_40px_rgba(14,20,36,0.08)]" data-animate="fadeIn">
+            <span className="type-kicker">Solicitud enviada</span>
+            <h3 className="mt-4 text-2xl font-bold text-body-color">Gracias por compartir tu información</h3>
+            <p className="type-body mt-4">{successMessage}</p>
           </div>
-          <div className="col-span-1 w-full sm:col-span-2" data-animate="fadeInFromRight" data-delay="0.12">
-            <form className="flex w-full flex-col gap-6">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <FormField label="Nombre *" placeholder="Nombre" />
-                <FormField label="Apellidos *" placeholder="Apellidos" />
-              </div>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <FormField label="Correo electrónico *" placeholder="Correo electrónico" type="email" />
-                <FormField label="Número de teléfono *" placeholder="Número de teléfono" />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">Mensaje *</label>
-                <textarea
-                  rows={4}
-                  placeholder="Mensaje"
-                  className="w-full rounded-[14px] border border-gray-300 px-4 py-3 text-[15px] outline-none transition-colors duration-200 focus:border-primary-500"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-fit rounded-[5px] border border-primary-500 bg-primary-500 px-6 py-2 font-bold text-primary-50 transition-all duration-500 ease-in-out hover:scale-105 hover:bg-white hover:text-primary-500"
+        ) : (
+          <div className={hasSummary ? "grid grid-cols-1 gap-8 lg:grid-cols-[0.55fr_1.45fr] lg:gap-12" : "grid grid-cols-1 gap-8 sm:grid-cols-3 lg:gap-12"}>
+            <div className={hasSummary ? "flex flex-col gap-8" : "axolotl-info flex w-full flex-col gap-4 lg:gap-8"} data-animate="fadeIn">
+              <ContactInfoColumn label="Correo electrónico" value={site.contact.email} icon="mail" boxed={hasSummary} />
+              <ContactInfoColumn label="Teléfono" value={site.contact.phone} icon="phone" boxed={hasSummary} />
+              <ContactInfoColumn label="Ubicación" value={`${site.contact.location}, ${site.contact.city}`} icon="location" boxed={hasSummary} />
+              {hasSummary ? <div data-animate="fadeInFromBottomSm">{summary}</div> : null}
+            </div>
+
+            <div className={hasSummary ? "" : "col-span-1 w-full sm:col-span-2"} data-animate="fadeInFromRight" data-delay="0.12">
+              <form
+                className={hasSummary ? "flex w-full flex-col gap-6 rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)] sm:p-8" : "flex w-full flex-col gap-6"}
+                onSubmit={handleSubmit}
               >
-                Enviar mensaje
-              </button>
-            </form>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <FormField label="Nombre *" placeholder="Nombre" value={values.firstName} onChange={(value) => updateValue("firstName", value)} />
+                  <FormField label="Apellidos *" placeholder="Apellidos" value={values.lastName} onChange={(value) => updateValue("lastName", value)} />
+                </div>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <FormField
+                    label="Correo electrónico *"
+                    placeholder="Correo electrónico"
+                    type="email"
+                    value={values.email}
+                    onChange={(value) => updateValue("email", value)}
+                  />
+                  <FormField
+                    label="Número de teléfono *"
+                    placeholder="Número de teléfono"
+                    value={values.phone}
+                    onChange={(value) => updateValue("phone", value)}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">Mensaje *</label>
+                  <textarea
+                    rows={6}
+                    placeholder="Mensaje"
+                    value={values.message}
+                    onChange={(event) => updateValue("message", event.target.value)}
+                    className="w-full rounded-[14px] border border-gray-300 px-4 py-3 text-[15px] outline-none transition-colors duration-200 focus:border-primary-500"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isDisabled}
+                  className="w-fit rounded-[5px] border border-primary-500 bg-primary-500 px-6 py-2 font-bold text-primary-50 transition-all duration-500 ease-in-out hover:scale-105 hover:bg-white hover:text-primary-500 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {submitLabel}
+                </button>
+              </form>
+            </div>
           </div>
-        </div>
+        )}
+
         <div className="contact-map mt-8 h-[250px] w-full overflow-hidden rounded-xl sm:mt-12 sm:h-[300px] md:h-[350px] lg:mt-16 lg:h-[400px]" data-animate="fadeIn" data-delay="0.2">
           <iframe
             title="Ubicación"
@@ -118,13 +212,15 @@ export function ContactStrip() {
   );
 }
 
-function FormField({ label, placeholder, type = "text" }: FormFieldProps) {
+function FormField({ label, placeholder, type = "text", value, onChange }: FormFieldProps) {
   return (
     <div>
       <label className="mb-2 block text-sm font-medium text-gray-700">{label}</label>
       <input
         type={type}
         placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
         className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:ring-primary-500"
       />
     </div>
@@ -143,12 +239,18 @@ function ContactInfoRow({ label, value, icon }: ContactInfoProps) {
   );
 }
 
-function ContactInfoColumn({ label, value, icon }: ContactInfoProps) {
+function ContactInfoColumn({ label, value, icon, boxed = false }: ContactInfoProps & { boxed?: boolean }) {
+  return <ContactInfoCard label={label} value={value} icon={icon} boxed={boxed} />;
+}
+
+function ContactInfoCard({ label, value, icon, boxed }: ContactInfoProps & { boxed: boolean }) {
   return (
-    <div className="flex flex-col gap-2 lg:gap-4">
-      <ContactIcon type={icon} />
-      <h3 className="text-lg font-bold sm:text-xl">{label}</h3>
-      <p className="text-sm text-gray-600 sm:text-base">{value}</p>
+    <div className={boxed ? "rounded-[20px] bg-white p-5 shadow-[0_16px_40px_rgba(14,20,36,0.08)]" : ""}>
+      <div className="flex flex-col gap-2 lg:gap-4">
+        <ContactIcon type={icon} />
+        <h3 className="text-lg font-bold sm:text-xl">{label}</h3>
+        <p className="text-sm text-gray-600 sm:text-base">{value}</p>
+      </div>
     </div>
   );
 }

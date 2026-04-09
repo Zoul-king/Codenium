@@ -9,6 +9,7 @@ export const site: SiteConfig = {
     { label: "Inicio", href: "/" },
     { label: "Sobre nosotros", href: "/about" },
     { label: "Planes y servicios", href: "/plans" },
+    { label: "Cotizador", href: "/quote" },
     { label: "Portafolio", href: "/portfolio" },
     { label: "Contacto", href: "/contact" }
   ],
@@ -16,6 +17,7 @@ export const site: SiteConfig = {
     { label: "Inicio", href: "/" },
     { label: "Sobre nosotros", href: "/about" },
     { label: "Planes y servicios", href: "/plans" },
+    { label: "Cotizador", href: "/quote" },
     { label: "Portafolio", href: "/portfolio" },
     { label: "Contacto", href: "/contact" },
     { label: "Aviso de privacidad", href: "/privacy" }

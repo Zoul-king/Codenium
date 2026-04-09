@@ -15,7 +15,7 @@ export const homePage: MarketingPageData = {
     body:
       "En AxolotlCode transformamos ideas en realidades digitales. Creamos aplicaciones innovadoras, seguras y personalizadas que impulsan tu negocio hacia el éxito. Con tecnologías de vanguardia y un enfoque en calidad, somos tu aliado estratégico en la transformación digital.",
     primaryCta: { label: "Conocer más", href: "/about" },
-    secondaryCta: { label: "Contacto", href: "/contact#contact" }
+    secondaryCta: { label: "Cotizar proyecto", href: "/quote" }
   }
 };
 
