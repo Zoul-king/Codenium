@@ -1,4 +1,6 @@
-export const sharedSite = {
+import type { SharedSite, SitePagesMap } from "@/features/site/types";
+
+export const sharedSite: SharedSite = {
   brand: {
     name: "AxolotlCode",
     short: "AX"
@@ -44,7 +46,7 @@ export const sharedSite = {
   }
 };
 
-export const sitePages = {
+export const sitePages: SitePagesMap = {
   home: {
     key: "home",
     title: "AxolotlCode - Desarrollo de software y soluciones digitales",
@@ -73,8 +75,7 @@ export const sitePages = {
       accent: "nosotros",
       body:
         "En AxolotlCode, nuestra pasión por la innovación y el desarrollo digital nos impulsa a construir soluciones que transforman ideas en realidades tecnológicas. Con un equipo comprometido y una visión centrada en el futuro, trabajamos para crear productos que generen impacto y valor duradero.",
-      image:
-        "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80"
+      image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80"
     },
     sections: ["aboutStory", "missionVision", "timeline", "ctaDual"]
   },
@@ -90,8 +91,7 @@ export const sitePages = {
       accent: "servicios",
       body:
         "Descubre nuestras soluciones diseñadas para adaptarse a tus necesidades. Ofrecemos servicios personalizados para llevar tus proyectos al siguiente nivel, con planes flexibles y opciones que se ajustan a cada etapa de tu crecimiento.",
-      image:
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80"
+      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80"
     },
     sections: ["planServices", "pricingPlans", "ctaSingle"]
   },
@@ -179,8 +179,7 @@ export const sitePages = {
       accent: "Preguntas Frecuentes",
       body:
         "¿Tienes dudas o necesitas más información sobre nuestros servicios? Contáctanos o consulta nuestra sección de preguntas frecuentes. Estamos comprometidos en brindarte respuestas claras y rápidas para que tengas la mejor experiencia con nosotros.",
-      image:
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80"
+      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80"
     },
     sections: ["faq", "contactForm"]
   },

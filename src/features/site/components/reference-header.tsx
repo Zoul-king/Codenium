@@ -1,10 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import type { Dispatch, SetStateAction } from "react";
+
 import { BrandLogo, MenuIcon, SocialIcon } from "@/components/ui/icons";
 import { sharedSite } from "@/features/site/content/site-pages";
+import type { SitePageDefinition } from "@/features/site/types";
 
-export function ReferenceHeader({ page, open, setOpen }) {
+interface ReferenceHeaderProps {
+  page: SitePageDefinition;
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+export function ReferenceHeader({ page, open, setOpen }: ReferenceHeaderProps) {
   const whiteHeader = page.headerVariant === "white";
   const topHeaderTextClass = whiteHeader ? "text-white hover:text-primary-500" : "text-body-color hover:text-primary-500";
 
@@ -19,11 +28,11 @@ export function ReferenceHeader({ page, open, setOpen }) {
             type="button"
             className={`group flex items-center gap-2 text-base font-normal leading-7 transition-colors ${topHeaderTextClass}`}
             aria-expanded={open}
-            aria-label="Abrir menu"
+            aria-label="Abrir menú"
             onClick={() => setOpen((current) => !current)}
           >
             <MenuIcon />
-            Menu
+            Menú
           </button>
         </div>
       </header>
@@ -46,7 +55,7 @@ export function ReferenceHeader({ page, open, setOpen }) {
                 type="button"
                 className="group flex items-center gap-2 text-base font-normal leading-7 text-body-color transition-colors hover:text-primary-500"
                 aria-expanded={open}
-                aria-label="Cerrar menu"
+                aria-label="Cerrar menú"
                 onClick={() => setOpen(false)}
               >
                 <span className="text-xl leading-none">x</span>

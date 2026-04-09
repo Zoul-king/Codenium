@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowRightIcon, CheckIcon, ContactIcon, ServiceIcon, WhatsAppIcon } from "@/components/ui/icons";
+import { useState, type InputHTMLAttributes } from "react";
+import { ArrowRightIcon, BrandLogo, CheckIcon, ContactIcon, MenuIcon, ServiceIcon, SocialIcon, WhatsAppIcon } from "@/components/ui/icons";
 import { ReferenceFooter } from "@/features/site/components/reference-footer";
 import { ReferenceHeader } from "@/features/site/components/reference-header";
 import {
@@ -19,6 +19,7 @@ import {
 } from "@/features/site/content/site-content";
 import { useReveal } from "@/hooks/use-reveal";
 import { sharedSite } from "@/features/site/content/site-pages";
+import type { ContactIconType, PortfolioCard, SitePageDefinition } from "@/features/site/types";
 
 const services = [
   {
@@ -172,7 +173,31 @@ const plans = [
   }
 ];
 
-export function SitePage({ page }) {
+interface SitePageProps {
+  page: SitePageDefinition;
+}
+
+interface PortfolioShowcaseProps {
+  cards: PortfolioCard[];
+}
+
+interface CtaCardProps {
+  dual?: boolean;
+}
+
+interface FormFieldProps {
+  label: string;
+  placeholder: string;
+  type?: InputHTMLAttributes<HTMLInputElement>["type"];
+}
+
+interface ContactInfoProps {
+  label: string;
+  value: string;
+  icon: ContactIconType;
+}
+
+export function SitePage({ page }: SitePageProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   useReveal();
 
@@ -192,7 +217,9 @@ export function SitePage({ page }) {
         {page.sections.includes("planServices") && <PlanServices />}
         {page.sections.includes("pricingPlans") && <PricingPlans />}
         {page.sections.includes("ctaSingle") && <CtaCard />}
-        {page.sections.includes("portfolioCards") && <PortfolioShowcase cards={page.hero.cards} />}
+        {page.sections.includes("portfolioCards") && page.hero.kind === "portfolio" && page.hero.cards ? (
+          <PortfolioShowcase cards={page.hero.cards} />
+        ) : null}
         {page.sections.includes("faq") && <FaqSection />}
         {page.sections.includes("contactForm") && <ContactPageSection />}
       </main>
@@ -202,7 +229,7 @@ export function SitePage({ page }) {
   );
 }
 
-function Header({ page, open, setOpen }) {
+function Header({ page, open, setOpen }: { page: SitePageDefinition; open: boolean; setOpen: (value: boolean | ((current: boolean) => boolean)) => void }) {
   const whiteHeader = page.headerVariant === "white";
 
   return (
@@ -328,7 +355,7 @@ function Header({ page, open, setOpen }) {
   );
 }
 
-function Hero({ page }) {
+function Hero({ page }: { page: SitePageDefinition }) {
   if (page.hero.kind === "home") {
     return (
         <section className="section soft-section relative flex min-h-dvh items-center justify-center overflow-hidden pt-[96px]">
@@ -778,7 +805,7 @@ function PricingPlans() {
   );
 }
 
-function PortfolioShowcase({ cards }) {
+function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
   return (
       <section className="projects-scroller relative mt-2 mb-20 lg:min-h-[260vh]">
         <div id="projects-container" className="site-shell portfolio-stack rounded-2xl">
@@ -925,7 +952,7 @@ function ContactPageSection() {
   );
 }
 
-function CtaCard({ dual = false }) {
+function CtaCard({ dual = false }: CtaCardProps) {
   return (
     <section className="soft-section relative bg-primary-50">
       <div className="section site-shell relative z-20 flex flex-col items-center justify-center gap-6 xl:py-[105px]">
@@ -1028,7 +1055,7 @@ function StickyWhatsApp() {
   );
 }
 
-function FormField({ label, placeholder, type = "text" }) {
+function FormField({ label, placeholder, type = "text" }: FormFieldProps) {
   return (
     <div>
       <label className="mb-2 block text-sm font-normal text-gray-700">{label}</label>
@@ -1041,7 +1068,7 @@ function FormField({ label, placeholder, type = "text" }) {
   );
 }
 
-function ContactInfo({ label, value, icon }) {
+function ContactInfo({ label, value, icon }: ContactInfoProps) {
   return (
     <div className="flex w-full items-start gap-4">
       <ContactIcon type={icon} />
@@ -1053,7 +1080,7 @@ function ContactInfo({ label, value, icon }) {
   );
 }
 
-function ContactInfoColumn({ label, value, icon }) {
+function ContactInfoColumn({ label, value, icon }: ContactInfoProps) {
   return (
     <div className="flex flex-col gap-2 lg:gap-4">
       <ContactIcon type={icon} />

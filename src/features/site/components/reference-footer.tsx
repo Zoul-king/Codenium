@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import { BrandLogo, SocialIcon } from "@/components/ui/icons";
 import { sharedSite } from "@/features/site/content/site-pages";
 
@@ -13,7 +14,7 @@ export function ReferenceFooter() {
           <p className="text-sm leading-6 text-white">{sharedSite.footer.body}</p>
         </div>
         <div className="grow pt-5">
-          <span className="mb-[15px] inline-block text-xl font-bold leading-6 text-primary-300">Menu</span>
+          <span className="mb-[15px] inline-block text-xl font-bold leading-6 text-primary-300">Menú</span>
           <ul className="flex flex-col gap-y-[15px]">
             {sharedSite.footerMenu.map((item) => (
               <li key={item.href}>
@@ -24,7 +25,7 @@ export function ReferenceFooter() {
             ))}
           </ul>
         </div>
-        <div className="grow pt-5 py-[23px]">
+        <div className="grow py-[23px] pt-5">
           <span className="mb-[15px] inline-block text-xl font-bold leading-6 text-primary-300">Contacto</span>
           <ul className="mb-[15px] flex flex-col gap-y-[15px] text-sm text-white">
             <li>{sharedSite.overlay.email}</li>
