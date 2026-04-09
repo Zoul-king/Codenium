@@ -1,0 +1,23 @@
+{
+  "name": "codenium-next-landing",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "predev": "node scripts/free-port-3000.cjs",
+    "dev": "next dev --turbopack --port 3000",
+    "dev:webpack": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "gsap": "^3.14.2",
+    "lucide-react": "^1.7.0",
+    "next": "^15.3.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "tailwindcss": "^4.1.18"
+  }
+}
