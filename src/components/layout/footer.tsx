@@ -5,7 +5,7 @@ import { site } from "@/features/marketing/data/site";
 
 export function Footer() {
   return (
-    <footer className="bg-[#212529]">
+    <footer className="bg-body-color">
       <div className="section mx-auto flex max-w-7xl flex-col justify-between md:flex-row md:flex-wrap md:pb-6 md:pt-[90px] lg:pb-[76px] xl:flex-nowrap">
         <div className="flex-1 md:min-w-[530px]">
           <BrandLogo variant="white" className="w-[125px]" />
@@ -44,7 +44,7 @@ export function Footer() {
           </ul>
         </div>
       </div>
-      <div className="section border-t border-[#DADADA]">
+      <div className="section border-t border-white/15">
         <p className="py-[30px] text-center text-white">{site.footer.legal}</p>
       </div>
     </footer>

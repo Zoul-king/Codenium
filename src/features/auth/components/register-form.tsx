@@ -6,8 +6,14 @@ import { useRouter } from "next/navigation";
 import { AuthField, AuthMessage } from "@/features/auth/components/auth-fields";
 import { getDashboardRoute, validateRegister } from "@/features/auth/lib/auth-service";
 import { writeSession } from "@/features/auth/lib/session-store";
+import { cn } from "@/lib/utils";
 
-export function RegisterForm() {
+interface RegisterFormProps {
+  onSuccess?: () => void;
+  submitClassName?: string;
+}
+
+export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [form, setForm] = useState({
@@ -40,6 +46,7 @@ export function RegisterForm() {
 
     writeSession(result);
     setMessage(null);
+    onSuccess?.();
 
     startTransition(() => {
       router.push(getDashboardRoute(result.role));
@@ -70,8 +77,8 @@ export function RegisterForm() {
 
       {message ? <AuthMessage tone="error">{message}</AuthMessage> : null}
 
-      <button type="submit" className="primary-button w-fit" disabled={isPending}>
-        {isPending ? "Creando cuenta..." : "Crear cuenta cliente"}
+      <button type="submit" className={cn("primary-button w-fit", submitClassName)} disabled={isPending}>
+        {isPending ? "Creando cuenta..." : "Crear cuenta"}
       </button>
     </form>
   );

@@ -1,31 +1,25 @@
-import Link from "next/link";
-
-import { AuthCard } from "@/features/auth/components/auth-card";
 import { ForgotPasswordForm } from "@/features/auth/components/forgot-password-form";
-import { AuthShell } from "@/features/auth/components/auth-shell";
 import { forgotPasswordPage } from "@/features/auth/lib/auth-pages";
+import { MarketingShell } from "@/features/marketing/components/marketing-shell";
 import { createMetadata } from "@/features/marketing/lib/metadata";
 
 export const metadata = createMetadata(forgotPasswordPage);
 
 export default function ForgotPasswordPage() {
   return (
-    <AuthShell page={forgotPasswordPage}>
-      <AuthCard
-        kicker="Recuperación"
-        title="Solicita restablecer tu acceso"
-        description="Comparte tu correo y te mostraremos el siguiente paso para volver a entrar a tu cuenta."
-        footer={
-          <div className="text-sm text-body-color">
-            Volver a{" "}
-            <Link href="/login" className="font-semibold hover:text-primary-500">
-              iniciar sesión
-            </Link>
+    <MarketingShell headerVariant="white">
+      <section className="section soft-section bg-foreground pt-[130px]">
+        <div className="site-shell py-16 lg:py-20">
+          <div className="mx-auto max-w-[640px] rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)] sm:p-8">
+            <span className="type-kicker">Recuperar acceso</span>
+            <h1 className="mt-4 text-[28px] font-bold leading-8 text-body-color">Vuelve a entrar a tu cuenta</h1>
+            <p className="mt-3 text-sm leading-6 text-body-color">Déjanos tu correo y te mostraremos el siguiente paso.</p>
+            <div className="mt-6">
+              <ForgotPasswordForm />
+            </div>
           </div>
-        }
-      >
-        <ForgotPasswordForm />
-      </AuthCard>
-    </AuthShell>
+        </div>
+      </section>
+    </MarketingShell>
   );
 }

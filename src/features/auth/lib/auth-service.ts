@@ -80,7 +80,7 @@ export function validateForgotPassword(input: ForgotPasswordInput) {
     return "Ingresa un correo válido.";
   }
 
-  return `Listo. Prepararemos instrucciones de recuperación para ${input.email.trim()}.`;
+  return `Listo. Prepararemos instrucciones para ${input.email.trim()}.`;
 }
 
 export function getDashboardRoute(role: Role) {

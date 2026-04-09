@@ -6,13 +6,13 @@ export const loginPage: MarketingPageData = {
   headerVariant: "white",
   meta: {
     title: "Acceso - AxolotlCode",
-    description: "Ingresa a tu espacio para revisar cotizaciones, proyectos y seguimiento."
+    description: "Ingresa para revisar cotizaciones, proyectos y seguimiento."
   },
   hero: {
     kind: "image",
     title: "Acceso",
-    accent: "seguro",
-    body: "Ingresa con tu correo y contraseña para continuar con tu seguimiento dentro de AxolotlCode.",
+    accent: "directo",
+    body: "Ingresa con tu correo y continúa con tus proyectos, cotizaciones y mensajes.",
     image: site.assets.hero.contact
   }
 };
@@ -22,13 +22,13 @@ export const registerPage: MarketingPageData = {
   headerVariant: "white",
   meta: {
     title: "Registro - AxolotlCode",
-    description: "Crea tu cuenta cliente para dar seguimiento a cotizaciones, proyectos y mensajes."
+    description: "Crea tu cuenta cliente para dar seguimiento a tus solicitudes."
   },
   hero: {
     kind: "image",
     title: "Crear cuenta",
     accent: "cliente",
-    body: "Abre tu cuenta para centralizar tu información, dar seguimiento a tus solicitudes y mantener la comunicación en un solo lugar.",
+    body: "Abre tu cuenta para continuar solicitudes, revisar avances y mantener todo en un solo lugar.",
     image: site.assets.hero.plans
   }
 };
@@ -38,13 +38,13 @@ export const forgotPasswordPage: MarketingPageData = {
   headerVariant: "white",
   meta: {
     title: "Recuperar acceso - AxolotlCode",
-    description: "Solicita instrucciones para recuperar el acceso a tu cuenta."
+    description: "Solicita instrucciones para volver a entrar a tu cuenta."
   },
   hero: {
     kind: "image",
     title: "Recuperar",
     accent: "acceso",
-    body: "Déjanos tu correo y te mostraremos el siguiente paso para volver a entrar a tu cuenta.",
+    body: "Déjanos tu correo y te mostraremos el siguiente paso para volver a entrar.",
     image: site.assets.hero.contact
   }
 };

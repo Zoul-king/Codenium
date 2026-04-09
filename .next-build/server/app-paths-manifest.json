@@ -1,16 +1,16 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
   "/api/health/route": "app/api/health/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/dashboard/[role]/[[...section]]/page": "app/dashboard/[role]/[[...section]]/page.js",
   "/(marketing)/legals/privacy/page": "app/(marketing)/legals/privacy/page.js",
-  "/(auth)/register/page": "app/(auth)/register/page.js",
-  "/(auth)/forgot-password/page": "app/(auth)/forgot-password/page.js",
   "/(auth)/login/page": "app/(auth)/login/page.js",
-  "/(marketing)/portfolio/page": "app/(marketing)/portfolio/page.js",
   "/(marketing)/contact/page": "app/(marketing)/contact/page.js",
-  "/(marketing)/quote/page": "app/(marketing)/quote/page.js",
-  "/(marketing)/privacy/page": "app/(marketing)/privacy/page.js",
-  "/(marketing)/page": "app/(marketing)/page.js",
+  "/(auth)/forgot-password/page": "app/(auth)/forgot-password/page.js",
+  "/(auth)/register/page": "app/(auth)/register/page.js",
   "/(marketing)/about/page": "app/(marketing)/about/page.js",
-  "/(marketing)/plans/page": "app/(marketing)/plans/page.js"
+  "/(marketing)/page": "app/(marketing)/page.js",
+  "/(marketing)/plans/page": "app/(marketing)/plans/page.js",
+  "/(marketing)/portfolio/page": "app/(marketing)/portfolio/page.js",
+  "/(marketing)/privacy/page": "app/(marketing)/privacy/page.js",
+  "/(marketing)/quote/page": "app/(marketing)/quote/page.js"
 }

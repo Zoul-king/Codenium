@@ -33,25 +33,14 @@ export function QuoteEstimator({ draft, onChange }: QuoteEstimatorProps) {
   }
 
   return (
-    <div
-      className="relative space-y-4 overflow-hidden rounded-[24px] border border-[#D7E2E7] bg-[#F9FBFC] px-4 py-4 shadow-[inset_0_0_0_1px_rgba(222,230,234,0.95),0_14px_26px_rgba(15,23,32,0.05)] sm:px-5"
-      style={{
-        backgroundImage:
-          "linear-gradient(180deg, rgba(252,254,255,0.98) 0%, rgba(244,248,250,0.98) 100%), linear-gradient(135deg, rgba(20,92,120,0.08), transparent 46%)"
-      }}
-    >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[4px] bg-[linear-gradient(90deg,rgba(20,92,120,0.18)_0%,rgba(20,92,120,0.48)_50%,rgba(20,92,120,0.18)_100%)]" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[4px] bg-[linear-gradient(90deg,rgba(20,92,120,0.14)_0%,rgba(20,92,120,0.34)_50%,rgba(20,92,120,0.14)_100%)]" />
-
+    <div className="rounded-[24px] border border-white bg-gradient-to-br from-transparent to-white/80 p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)]">
       <div className="max-w-2xl space-y-3">
         <span className="type-kicker">Estimado inicial</span>
         <h2 className="text-[28px] font-bold leading-8 text-body-color lg:text-[34px] lg:leading-[42px]">Responde unas preguntas y obtén un estimado inicial</h2>
-        <p className="type-body">
-          Define la base de tu proyecto, suma lo que necesitas y revisa un rango orientativo antes de continuar con tu solicitud.
-        </p>
+        <p className="type-body">Define la base del proyecto, suma lo que necesitas y revisa un rango orientativo antes de continuar.</p>
       </div>
 
-      <div className="space-y-3">
+      <div className="mt-6 space-y-3">
         {quoteSections.map((section) => (
           <QuoteSection
             key={section.key}
@@ -61,22 +50,15 @@ export function QuoteEstimator({ draft, onChange }: QuoteEstimatorProps) {
             onToggle={() => setOpenSection(section.key)}
           >
             {section.key === "project" ? (
-              <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {quoteProjectTypes.map((item) => {
                   const selected = draft.projectType === item.key;
 
                   return (
-                    <button
-                      key={item.key}
-                      type="button"
-                      onClick={() => updateProjectType(item.key)}
-                      className={getOptionButtonClass(selected)}
-                    >
+                    <button key={item.key} type="button" onClick={() => updateProjectType(item.key)} className={getOptionButtonClass(selected)}>
                       <span className="block text-sm font-semibold">{item.label}</span>
-                      <span className={cn("mt-1 block text-xs leading-5", selected ? "text-white/82" : "text-[#556670]")}>{item.description}</span>
-                      <span className={cn("mt-3 block text-xs font-semibold", selected ? "text-white" : "text-[#145C78]")}>
-                        Desde {formatCurrency(item.base.min)}
-                      </span>
+                      <span className={cn("mt-1 block text-xs leading-5", selected ? "text-white/82" : "text-body-color/70")}>{item.description}</span>
+                      <span className={cn("mt-3 block text-xs font-semibold", selected ? "text-white" : "text-secondary-600")}>Desde {formatCurrency(item.base.min)}</span>
                     </button>
                   );
                 })}
@@ -84,7 +66,7 @@ export function QuoteEstimator({ draft, onChange }: QuoteEstimatorProps) {
             ) : null}
 
             {section.key === "features" ? (
-              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {quoteModules
                   .filter((item) => item.group === "feature")
                   .map((item) => {
@@ -94,12 +76,12 @@ export function QuoteEstimator({ draft, onChange }: QuoteEstimatorProps) {
                       <button key={item.key} type="button" onClick={() => toggleModule(item.key)} className={getOptionButtonClass(selected)}>
                         <div className="flex items-start justify-between gap-3">
                           <span className="block text-sm font-semibold">{item.label}</span>
-                          <span className={cn("rounded-full px-2 py-1 text-[11px] font-semibold", selected ? "bg-white/15 text-white" : "bg-[#F4F8FA] text-[#145C78]")}>
+                          <span className={cn("rounded-full px-2 py-1 text-[11px] font-semibold", selected ? "bg-white/15 text-white" : "bg-foreground text-secondary-600")}>
                             {selected ? "Incluido" : "Agregar"}
                           </span>
                         </div>
-                        <span className={cn("mt-1 block text-xs leading-5", selected ? "text-white/82" : "text-[#556670]")}>{item.description}</span>
-                        <span className={cn("mt-3 block text-xs font-semibold", selected ? "text-white" : "text-[#145C78]")}>
+                        <span className={cn("mt-1 block text-xs leading-5", selected ? "text-white/82" : "text-body-color/70")}>{item.description}</span>
+                        <span className={cn("mt-3 block text-xs font-semibold", selected ? "text-white" : "text-secondary-600")}>
                           {formatCurrency(item.price.min)} - {formatCurrency(item.price.max)}
                         </span>
                       </button>
@@ -109,7 +91,7 @@ export function QuoteEstimator({ draft, onChange }: QuoteEstimatorProps) {
             ) : null}
 
             {section.key === "services" ? (
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 {quoteModules
                   .filter((item) => item.group === "service")
                   .map((item) => {
@@ -119,12 +101,12 @@ export function QuoteEstimator({ draft, onChange }: QuoteEstimatorProps) {
                       <button key={item.key} type="button" onClick={() => toggleModule(item.key)} className={getOptionButtonClass(selected)}>
                         <div className="flex items-start justify-between gap-3">
                           <span className="block text-sm font-semibold">{item.label}</span>
-                          <span className={cn("rounded-full px-2 py-1 text-[11px] font-semibold", selected ? "bg-white/15 text-white" : "bg-[#F4F8FA] text-[#145C78]")}>
+                          <span className={cn("rounded-full px-2 py-1 text-[11px] font-semibold", selected ? "bg-white/15 text-white" : "bg-foreground text-secondary-600")}>
                             {selected ? "Activo" : "Opcional"}
                           </span>
                         </div>
-                        <span className={cn("mt-1 block text-xs leading-5", selected ? "text-white/82" : "text-[#556670]")}>{item.description}</span>
-                        <span className={cn("mt-3 block text-xs font-semibold", selected ? "text-white" : "text-[#145C78]")}>
+                        <span className={cn("mt-1 block text-xs leading-5", selected ? "text-white/82" : "text-body-color/70")}>{item.description}</span>
+                        <span className={cn("mt-3 block text-xs font-semibold", selected ? "text-white" : "text-secondary-600")}>
                           Desde {formatCurrency(item.monthly?.min ?? 0)} al mes
                         </span>
                       </button>
@@ -149,13 +131,13 @@ interface QuoteSectionProps {
 
 function QuoteSection({ title, description, isOpen, onToggle, children }: QuoteSectionProps) {
   return (
-    <section className="rounded-[18px] border border-[#D5E0E5] bg-white px-4 py-3 shadow-[0_10px_18px_rgba(15,23,32,0.04)]">
+    <section className="rounded-[18px] border border-black/10 bg-white p-4 shadow-[0_10px_18px_rgba(15,23,32,0.04)]">
       <button type="button" onClick={onToggle} className="flex w-full items-center justify-between gap-4 text-left">
         <div>
-          <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-[#145C78]">{title}</span>
-          <span className="mt-1 block text-xs leading-5 text-[#556670]">{description}</span>
+          <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-secondary-600">{title}</span>
+          <span className="mt-1 block text-xs leading-5 text-body-color/70">{description}</span>
         </div>
-        <span className={cn("shrink-0 text-lg leading-none text-[#145C78] transition-transform duration-200", isOpen ? "rotate-45" : "rotate-0")} aria-hidden="true">
+        <span className={cn("shrink-0 text-lg leading-none text-secondary-600 transition-transform duration-200", isOpen ? "rotate-45" : "rotate-0")} aria-hidden="true">
           +
         </span>
       </button>
@@ -169,6 +151,6 @@ function QuoteSection({ title, description, isOpen, onToggle, children }: QuoteS
 
 function getOptionButtonClass(isActive: boolean) {
   return isActive
-    ? "rounded-[14px] border border-[#145C78] bg-[#145C78] px-3 py-3 text-left text-white shadow-[0_8px_16px_rgba(20,92,120,0.1)]"
-    : "rounded-[14px] border border-[#D5E0E5] bg-[#FCFDFD] px-3 py-3 text-left text-[#314049] transition hover:border-[#145C78]/28 hover:bg-white";
+    ? "rounded-[14px] border border-primary-500 bg-primary-500 px-3 py-3 text-left text-white shadow-[0_8px_16px_rgba(108,79,211,0.12)]"
+    : "rounded-[14px] border border-black/10 bg-foreground px-3 py-3 text-left text-body-color transition hover:border-secondary-500/30 hover:bg-white";
 }

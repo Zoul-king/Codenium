@@ -1,26 +1,20 @@
-import { AuthCard, AuthFooterLinks } from "@/features/auth/components/auth-card";
-import { LoginForm } from "@/features/auth/components/login-form";
-import { SessionStatus } from "@/features/auth/components/session-status";
-import { AuthShell } from "@/features/auth/components/auth-shell";
+import { AuthPanel } from "@/features/auth/components/auth-panel";
 import { loginPage } from "@/features/auth/lib/auth-pages";
+import { MarketingShell } from "@/features/marketing/components/marketing-shell";
 import { createMetadata } from "@/features/marketing/lib/metadata";
 
 export const metadata = createMetadata(loginPage);
 
 export default function LoginPage() {
   return (
-    <AuthShell page={loginPage}>
-      <AuthCard
-        kicker="Acceso"
-        title="Entra a tu espacio de seguimiento"
-        description="Ingresa para revisar cotizaciones, proyectos y mensajes según el tipo de cuenta disponible para ti."
-        footer={<AuthFooterLinks />}
-      >
-        <LoginForm />
-        <div className="mt-6">
-          <SessionStatus />
+    <MarketingShell headerVariant="white">
+      <section className="section soft-section bg-foreground pt-[130px]">
+        <div className="site-shell py-16 lg:py-20">
+          <div className="mx-auto max-w-[640px]">
+            <AuthPanel initialMode="login" showSessionStatus />
+          </div>
         </div>
-      </AuthCard>
-    </AuthShell>
+      </section>
+    </MarketingShell>
   );
 }

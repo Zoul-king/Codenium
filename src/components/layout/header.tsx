@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { BrandLogo, CloseIcon, MenuIcon, SocialIcon } from "@/components/ui/icons";
+import { AuthPanel } from "@/features/auth/components/auth-panel";
 import { site } from "@/features/marketing/data/site";
 import type { HeaderVariant } from "@/features/marketing/types";
 import { cn } from "@/lib/utils";
@@ -68,41 +69,42 @@ interface OverlayProps {
 function AccessOverlay({ open, onClose }: OverlayProps) {
   return (
     <div className={cn("fixed inset-0 z-50 hidden lg:block", open ? "pointer-events-auto" : "pointer-events-none")} aria-hidden={!open}>
-      <div className={cn("absolute inset-0 bg-[#EFEFEF]/88 transition-opacity duration-500", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
+      <div className={cn("absolute inset-0 bg-foreground/90 transition-opacity duration-500", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
       <div className="absolute inset-0 flex items-center justify-center p-6">
         <div
           className={cn(
-            "w-full max-w-[560px] rounded-[28px] bg-white p-8 text-body-color shadow-[0_24px_60px_rgba(14,20,36,0.18)] transition-all duration-500",
+            "w-full max-w-[1080px] rounded-[30px] bg-white p-8 text-body-color shadow-[0_24px_60px_rgba(14,20,36,0.18)] transition-all duration-500",
             open ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
           )}
         >
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <span className="type-kicker">Bienvenido</span>
-              <h2 className="mt-4 text-[32px] font-bold leading-10 text-body-color">Accede a tu espacio</h2>
-              <p className="type-body mt-4 max-w-[28rem]">
-                Accede para dar seguimiento a tus cotizaciones y proyectos, revisar mensajes y continuar con tu solicitud.
-              </p>
+          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="rounded-[24px] bg-foreground p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="type-kicker">Bienvenido</span>
+                  <h2 className="mt-4 text-[32px] font-bold leading-10 text-body-color">Accede o crea tu cuenta</h2>
+                  <p className="type-body mt-4 max-w-[28rem]">
+                    Revisa tu estimado, sigue el avance de tus proyectos y mantén la conversación en un solo lugar.
+                  </p>
+                </div>
+                <button type="button" onClick={onClose} className="rounded-full border border-black/10 p-3 text-body-color transition hover:text-primary-500" aria-label="Cerrar acceso">
+                  <CloseIcon className="size-4" />
+                </button>
+              </div>
+
+              <div className="mt-8 space-y-4">
+                <div className="rounded-[18px] bg-white p-4 shadow-[0_12px_24px_rgba(14,20,36,0.06)]">
+                  <span className="text-sm font-semibold text-primary-500">Cotización y seguimiento</span>
+                  <p className="mt-2 text-sm leading-6 text-body-color">Consulta tu estimado inicial, tus proyectos y los mensajes más recientes.</p>
+                </div>
+                <div className="rounded-[18px] bg-white p-4 shadow-[0_12px_24px_rgba(14,20,36,0.06)]">
+                  <span className="text-sm font-semibold text-secondary-600">Todo en continuidad</span>
+                  <p className="mt-2 text-sm leading-6 text-body-color">Tu cuenta conserva el contexto para no empezar desde cero cada vez.</p>
+                </div>
+              </div>
             </div>
-            <button type="button" onClick={onClose} className="rounded-full border border-black/10 p-3 text-body-color transition hover:text-primary-500" aria-label="Cerrar acceso">
-              <CloseIcon className="size-4" />
-            </button>
-          </div>
 
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-            <Link href="/login" onClick={onClose} className="primary-button !justify-center">
-              Iniciar sesión
-            </Link>
-            <Link href="/register" onClick={onClose} className="secondary-button !justify-center">
-              Crear cuenta
-            </Link>
-          </div>
-
-          <div className="mt-6 rounded-[20px] bg-foreground p-5">
-            <p className="text-sm font-semibold text-primary-500">Todo en un solo lugar</p>
-            <p className="mt-2 text-sm leading-6 text-body-color">
-              Consulta avances, conserva el contexto de tu solicitud y mantén la comunicación ordenada desde tu cuenta.
-            </p>
+            <AuthPanel compact onSuccess={onClose} />
           </div>
         </div>
       </div>
@@ -113,10 +115,10 @@ function AccessOverlay({ open, onClose }: OverlayProps) {
 function MobileMenu({ open, onClose }: OverlayProps) {
   return (
     <div className={cn("fixed inset-0 z-50 lg:hidden", open ? "pointer-events-auto" : "pointer-events-none")} aria-hidden={!open}>
-      <div className={cn("absolute inset-0 bg-[#EFEFEF] transition-opacity duration-500", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
+      <div className={cn("absolute inset-0 bg-foreground transition-opacity duration-500", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
       <div
         className={cn(
-          "absolute inset-x-0 top-0 min-h-dvh bg-white px-5 pb-8 pt-6 text-body-color transition-transform duration-500",
+          "absolute inset-x-0 top-0 min-h-dvh overflow-y-auto bg-white px-5 pb-8 pt-6 text-body-color transition-transform duration-500",
           open ? "translate-y-0" : "-translate-y-full"
         )}
       >
@@ -130,7 +132,7 @@ function MobileMenu({ open, onClose }: OverlayProps) {
           </button>
         </div>
 
-        <div className="mt-10 space-y-10">
+        <div className="mt-10 space-y-8">
           <nav className="space-y-3">
             {site.nav.map((item) => (
               <Link
@@ -146,15 +148,10 @@ function MobileMenu({ open, onClose }: OverlayProps) {
 
           <div className="rounded-[24px] bg-foreground p-5">
             <span className="type-kicker">Acceso</span>
-            <h3 className="mt-4 text-2xl font-bold text-body-color">Da seguimiento a tus proyectos</h3>
-            <p className="type-body mt-3">Entra a tu cuenta para revisar cotizaciones, avances y mensajes en un solo lugar.</p>
-            <div className="mt-6 flex flex-col gap-3">
-              <Link href="/login" className="primary-button !justify-center" onClick={onClose}>
-                Iniciar sesión
-              </Link>
-              <Link href="/register" className="secondary-button !justify-center" onClick={onClose}>
-                Crear cuenta
-              </Link>
+            <h3 className="mt-4 text-2xl font-bold text-body-color">Entra o crea tu cuenta</h3>
+            <p className="type-body mt-3">Consulta tus cotizaciones, proyectos y mensajes desde un solo lugar.</p>
+            <div className="mt-6">
+              <AuthPanel compact onSuccess={onClose} />
             </div>
           </div>
 

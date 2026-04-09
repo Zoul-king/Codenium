@@ -1,31 +1,20 @@
-import Link from "next/link";
-
-import { AuthCard } from "@/features/auth/components/auth-card";
-import { RegisterForm } from "@/features/auth/components/register-form";
-import { AuthShell } from "@/features/auth/components/auth-shell";
+import { AuthPanel } from "@/features/auth/components/auth-panel";
 import { registerPage } from "@/features/auth/lib/auth-pages";
+import { MarketingShell } from "@/features/marketing/components/marketing-shell";
 import { createMetadata } from "@/features/marketing/lib/metadata";
 
 export const metadata = createMetadata(registerPage);
 
 export default function RegisterPage() {
   return (
-    <AuthShell page={registerPage}>
-      <AuthCard
-        kicker="Registro"
-        title="Crear cuenta cliente"
-        description="El registro público está pensado para clientes que quieren dar seguimiento a solicitudes, proyectos y mensajes desde un solo lugar."
-        footer={
-          <div className="text-sm text-body-color">
-            ¿Ya tienes acceso?{" "}
-            <Link href="/login" className="font-semibold hover:text-primary-500">
-              Inicia sesión
-            </Link>
+    <MarketingShell headerVariant="white">
+      <section className="section soft-section bg-foreground pt-[130px]">
+        <div className="site-shell py-16 lg:py-20">
+          <div className="mx-auto max-w-[640px]">
+            <AuthPanel initialMode="register" />
           </div>
-        }
-      >
-        <RegisterForm />
-      </AuthCard>
-    </AuthShell>
+        </div>
+      </section>
+    </MarketingShell>
   );
 }

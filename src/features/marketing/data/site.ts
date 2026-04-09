@@ -39,7 +39,7 @@ export const site: SiteConfig = {
   ],
   footer: {
     body:
-      "En AxolotlCode transformamos ideas en realidades digitales. Creamos aplicaciones innovadoras, seguras y personalizadas que impulsan tu negocio hacia el éxito.",
+      "Diseñamos sitios, plataformas y productos digitales con un proceso claro desde el estimado inicial hasta el seguimiento del proyecto.",
     legal: "© 2026 AxolotlCode. Todos los derechos reservados."
   },
   sticky: {

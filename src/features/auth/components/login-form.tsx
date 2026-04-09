@@ -1,14 +1,21 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { AuthField, AuthMessage } from "@/features/auth/components/auth-fields";
 import { getDashboardRoute, validateLogin } from "@/features/auth/lib/auth-service";
 import { writeSession } from "@/features/auth/lib/session-store";
+import { cn } from "@/lib/utils";
 
-export function LoginForm() {
+interface LoginFormProps {
+  onSuccess?: () => void;
+  onForgotPassword?: () => void;
+  showSupportText?: boolean;
+  submitClassName?: string;
+}
+
+export function LoginForm({ onSuccess, onForgotPassword, showSupportText = false, submitClassName }: LoginFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [email, setEmail] = useState("");
@@ -27,6 +34,7 @@ export function LoginForm() {
 
     writeSession(result);
     setMessage(null);
+    onSuccess?.();
 
     startTransition(() => {
       router.push(getDashboardRoute(result.role));
@@ -42,15 +50,15 @@ export function LoginForm() {
 
       {message ? <AuthMessage tone="error">{message}</AuthMessage> : null}
 
-      <button type="submit" className="primary-button w-fit" disabled={isPending}>
+      <button type="submit" className={cn("primary-button w-fit", submitClassName)} disabled={isPending}>
         {isPending ? "Entrando..." : "Iniciar sesión"}
       </button>
 
       <div className="flex flex-col gap-2 text-sm text-body-color">
-        <Link href="/forgot-password" className="hover:text-primary-500">
+        <button type="button" onClick={onForgotPassword} className="w-fit text-left transition-colors hover:text-primary-500">
           Olvidé mi contraseña
-        </Link>
-        <span>Cuentas de prueba: `paola@valhui.mx`, `javier@axolotlcode.tech`, `admin@axolotlcode.tech`.</span>
+        </button>
+        {showSupportText ? <span>Prueba con `paola@valhui.mx`, `javier@axolotlcode.tech` o `admin@axolotlcode.tech`.</span> : null}
       </div>
     </form>
   );

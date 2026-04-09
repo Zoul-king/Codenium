@@ -38,18 +38,16 @@ export function QuoteBuilder() {
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <article className="rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)]">
-            <span className="type-kicker">Siguiente paso</span>
-            <h3 className="mt-4 text-2xl font-bold text-body-color">Cuando estés listo, continuamos contigo</h3>
-            <p className="type-body mt-4">
-              Si este estimado va en la dirección correcta, comparte tus datos y afinamos alcance, tiempos y prioridades contigo.
-            </p>
-            <div className="mt-6 rounded-[18px] bg-foreground p-4">
-              <p className="text-sm font-semibold text-primary-500">Importante</p>
+          <article className="rounded-[24px] border border-white bg-gradient-to-br from-transparent to-white/80 p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)]">
+            <span className="type-kicker">Continuar</span>
+            <h3 className="mt-4 text-2xl font-bold text-body-color">Si este estimado va contigo, avanzamos</h3>
+            <p className="type-body mt-4">Comparte tus datos y te ayudaremos a convertir este rango inicial en una propuesta más clara.</p>
+            <div className="mt-6 rounded-[18px] bg-white p-4 shadow-[0_10px_18px_rgba(15,23,32,0.04)]">
+              <p className="text-sm font-semibold text-secondary-600">Importante</p>
               <ul className="mt-3 space-y-2 text-sm text-body-color">
                 <li>Este rango es una guía inicial, no una propuesta cerrada.</li>
-                <li>Podemos ajustar el alcance según tus objetivos y lo que hoy sea más urgente.</li>
-                <li>Tu resumen se enviará junto con el formulario para no empezar desde cero.</li>
+                <li>Podemos ajustar el alcance según tus prioridades y el nivel de detalle requerido.</li>
+                <li>Tu resumen se enviará junto con el formulario para continuar con contexto.</li>
               </ul>
             </div>
           </article>
@@ -58,7 +56,7 @@ export function QuoteBuilder() {
             <ContactForm
               kicker="Continuar"
               title="Déjanos tus datos"
-              description="Comparte tu información y te contactaremos para convertir este estimado en una propuesta clara."
+              description="Comparte tu información y te contactaremos para aterrizar este estimado."
               submitLabel="Continuar"
               initialValues={{ message: quoteMessage }}
               successMessage="Recibimos tu solicitud. El siguiente paso es revisar el alcance contigo y preparar una propuesta más precisa."

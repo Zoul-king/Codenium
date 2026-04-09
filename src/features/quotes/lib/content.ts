@@ -4,17 +4,17 @@ export const quoteSections = [
   {
     key: "project",
     title: "Configuración principal",
-    description: "Define el tipo de proyecto para calcular una base inicial."
+    description: "Elige la base del proyecto para calcular un rango inicial."
   },
   {
     key: "features",
     title: "Capacidades complementarias",
-    description: "Suma las funciones que quieres incorporar desde el arranque."
+    description: "Suma las funciones que quieres incluir desde el arranque."
   },
   {
     key: "services",
     title: "Acompañamiento opcional",
-    description: "Agrega soporte recurrente o continuidad mensual si lo necesitas."
+    description: "Agrega continuidad mensual o soporte si lo necesitas."
   }
 ] as const;
 
@@ -31,7 +31,7 @@ export function getQuoteSectionSummary(sectionKey: (typeof quoteSections)[number
   const items = selectedModules.filter((item) => item.group === (sectionKey === "features" ? "feature" : "service"));
 
   if (items.length === 0) {
-    return sectionKey === "features" ? "Sin funcionalidades adicionales por ahora." : "Sin acompañamiento mensual por ahora.";
+    return sectionKey === "features" ? "Sin funciones adicionales por ahora." : "Sin acompañamiento mensual por ahora.";
   }
 
   if (items.length === 1) {

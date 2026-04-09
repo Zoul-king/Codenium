@@ -5,49 +5,49 @@ export const homePage: MarketingPageData = {
   slug: "/",
   headerVariant: "pink",
   meta: {
-    title: "AxolotlCode - Desarrollo de software y soluciones digitales",
+    title: "AxolotlCode - Software, plataformas y experiencias digitales",
     description:
-      "AxolotlCode desarrolla software y soluciones digitales personalizadas para empresas que buscan crecer con tecnología."
+      "Diseñamos sitios, plataformas y productos digitales con estimado inicial y seguimiento claro durante el proceso."
   },
   hero: {
     kind: "home",
-    title: "Desarrollo de soluciones tecnológicas a tu medida",
+    title: "Software y plataformas a tu medida",
     body:
-      "En AxolotlCode transformamos ideas en realidades digitales. Creamos aplicaciones innovadoras, seguras y personalizadas que impulsan tu negocio hacia el éxito. Con tecnologías de vanguardia y un enfoque en calidad, somos tu aliado estratégico en la transformación digital.",
-    primaryCta: { label: "Conocer más", href: "/about" },
-    secondaryCta: { label: "Cotizar proyecto", href: "/quote" }
+      "Diseñamos y desarrollamos productos digitales con un proceso más claro desde el inicio: estimado inicial, continuidad comercial y seguimiento en cada etapa.",
+    primaryCta: { label: "Sobre nosotros", href: "/about" },
+    secondaryCta: { label: "Obtener estimado", href: "/quote" }
   }
 };
 
 export const services: ServiceItem[] = [
   {
     title: "Desarrollo de software",
-    body: "Creación de aplicaciones y sistemas personalizados, escalables e innovadores para optimizar tu negocio.",
+    body: "Aplicaciones y sistemas hechos para resolver procesos reales y crecer contigo.",
     icon: "code"
   },
   {
     title: "Consultorías",
-    body: "Asesoría tecnológica estratégica para mejorar procesos, productividad y transformación digital empresarial.",
+    body: "Acompañamiento estratégico para ordenar decisiones, alcance y prioridades digitales.",
     icon: "consulting"
   },
   {
     title: "Profesionales a tu disposición",
-    body: "Expertos en TI listos para potenciar proyectos con soluciones eficientes y personalizadas.",
+    body: "Talento especializado para reforzar equipos y acelerar iniciativas clave.",
     icon: "team"
   },
   {
     title: "Desarrollo a la medida",
-    body: "Software a medida, adaptado a tus necesidades, con alta calidad y seguridad.",
+    body: "Productos pensados para tu operación, tu negocio y el nivel de detalle que necesitas.",
     icon: "spark"
   },
   {
     title: "Soporte técnico",
-    body: "Servicio técnico especializado en mantenimiento, resolución de problemas y optimización de sistemas informáticos.",
+    body: "Continuidad, mantenimiento y resolución ágil para mantener tu operación en movimiento.",
     icon: "support"
   },
   {
     title: "Incubadora",
-    body: "Mentoría y apoyo para startups, acelerando su crecimiento con estrategias digitales innovadoras.",
+    body: "Aterrizamos ideas digitales con una base clara para validarlas y construirlas bien.",
     icon: "idea"
   }
 ];
@@ -66,7 +66,7 @@ export const clientLogos: ClientLogo[] = [
 ];
 
 export const benefits: BenefitItem[] = [
-  { title: "Innovación constante", body: "Utilizamos tecnologías de vanguardia." },
-  { title: "Seguridad garantizada", body: "Protegemos tus datos y proyectos." },
-  { title: "Resultados tangibles", body: "Diseñamos soluciones orientadas al éxito." }
+  { title: "Proceso más claro", body: "Empezamos con un estimado inicial aterrizado." },
+  { title: "Seguimiento continuo", body: "Mantienes visibilidad durante cada etapa." },
+  { title: "Soluciones útiles", body: "Diseñamos para negocio, operación y crecimiento." }
 ];
