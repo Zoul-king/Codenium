@@ -12,18 +12,18 @@ export function Hero({ hero }: HeroProps) {
   if (hero.kind === "home") {
     return (
       <section className="section soft-section relative flex min-h-dvh items-center justify-center overflow-hidden pt-[114px]">
-        <div className="site-shell relative flex flex-col items-center gap-6 pb-[155px] pt-12 md:flex-row lg:gap-[50px] lg:pb-[190px] lg:pt-[76px]">
-          <article className="hero-text hero__content flex w-full flex-col items-center gap-6 text-center md:items-start md:gap-10 md:text-left" data-animate="fadeInFromLeft">
+        <div className="site-shell relative z-10 flex flex-col items-center gap-6 pb-[155px] pt-12 md:flex-row lg:gap-[50px] lg:pb-[190px] lg:pt-[76px]">
+          <article className="hero-text hero__content relative z-10 flex w-full flex-col items-center gap-6 text-center md:items-start md:gap-10 md:text-left" data-animate="fadeInFromLeft">
             <h1 className="type-hero-home">{hero.title}</h1>
             <p className="text-base leading-7 xl:text-xl xl:leading-9">
               <span className="font-bold text-primary-500">Codenium </span>
               {hero.body}
             </p>
-            <div className="flex flex-row gap-4">
-              <Link className="primary-button" href={hero.primaryCta.href}>
+            <div className="relative z-10 flex flex-row gap-4">
+              <Link className="primary-button" href={hero.primaryCta.href} aria-label={hero.primaryCta.label}>
                 {hero.primaryCta.label}
               </Link>
-              <Link className="secondary-button" href={hero.secondaryCta.href}>
+              <Link className="secondary-button" href={hero.secondaryCta.href} aria-label={hero.secondaryCta.label}>
                 {hero.secondaryCta.label}
               </Link>
             </div>
@@ -79,10 +79,10 @@ function SquareBackground() {
 function HeroGradients() {
   return (
     <>
-      <div className="hero-gradient hero-gradient-bottom" aria-hidden="true">
+      <div className="hero-gradient hero-gradient-bottom pointer-events-none" aria-hidden="true">
         <div className="hero-gradient-shape hero-gradient-shape-bottom" />
       </div>
-      <div className="hero-gradient hero-gradient-top" aria-hidden="true">
+      <div className="hero-gradient hero-gradient-top pointer-events-none" aria-hidden="true">
         <div className="hero-gradient-shape hero-gradient-shape-top" />
       </div>
     </>

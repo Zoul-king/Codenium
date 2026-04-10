@@ -4,6 +4,7 @@ import type { UserRecord } from "@/lib/types/domain";
 export const mockUsers: UserRecord[] = [
   {
     id: "user-client-1",
+    createdAt: "2026-03-12",
     firstName: "Valeria",
     lastName: "Ríos",
     name: "Valeria Ríos",
@@ -17,6 +18,7 @@ export const mockUsers: UserRecord[] = [
   },
   {
     id: "user-client-2",
+    createdAt: "2026-03-20",
     firstName: "Daniel",
     lastName: "Ortega",
     name: "Daniel Ortega",
@@ -30,6 +32,7 @@ export const mockUsers: UserRecord[] = [
   },
   {
     id: "user-client-3",
+    createdAt: "2026-04-10",
     firstName: "Laura",
     lastName: "Medina",
     name: "Laura Medina",
@@ -43,6 +46,7 @@ export const mockUsers: UserRecord[] = [
   },
   {
     id: "user-pm-1",
+    createdAt: "2026-02-16",
     firstName: "Miguel",
     lastName: "Santos",
     name: "Miguel Santos",
@@ -55,6 +59,7 @@ export const mockUsers: UserRecord[] = [
   },
   {
     id: "user-pm-2",
+    createdAt: "2026-04-10",
     firstName: "Andrea",
     lastName: "Ruiz",
     name: "Andrea Ruiz",
@@ -67,6 +72,7 @@ export const mockUsers: UserRecord[] = [
   },
   {
     id: "user-admin-1",
+    createdAt: "2026-01-04",
     firstName: "Equipo",
     lastName: "Dirección",
     name: "Equipo Dirección",

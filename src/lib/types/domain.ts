@@ -109,6 +109,7 @@ export interface QuoteRecord {
   pmId?: string;
   status: QuoteStatus;
   createdAt: string;
+  acceptedAt?: string;
   planProfile: PlanProfile;
   planTitle: string;
   projectType: QuoteProjectType;
@@ -182,6 +183,7 @@ export interface PaymentRecord {
 
 export interface UserRecord {
   id: string;
+  createdAt: string;
   firstName: string;
   lastName: string;
   name: string;

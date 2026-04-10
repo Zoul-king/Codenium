@@ -12,50 +12,58 @@ export function PmStatusPanel() {
   const changes = projects.flatMap((project) => getProjectChangeRequests(state, project.id).map((change) => ({ ...change, projectName: project.name })));
 
   return (
-    <div className="grid h-full gap-5 xl:grid-cols-[0.88fr_1.12fr]">
-      <DashboardMutedCard>
-        <SectionHeading eyebrow="Hitos" title="Secuencia real por proyecto" description="Cuando un hito se cierra aqui, el pago asociado se activa automaticamente para el cliente." />
-        <div className="mt-6 grid gap-3">
-          {changes.map((change) => (
-            <div key={change.id} className="rounded-[20px] border border-slate-200 bg-white p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-slate-950">{change.title}</p>
-                  <p className="mt-1 text-sm text-slate-500">{change.projectName}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{change.detail}</p>
+    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[1.02fr_0.98fr]">
+      <DashboardCard className="flex min-h-0 flex-col">
+        <div className="border-b border-slate-200 pb-5">
+          <SectionHeading eyebrow="Hitos" title="Ejecucion por proyecto" description="Finalizar un hito desbloquea el pago relacionado en el panel del cliente." />
+        </div>
+
+        <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto">
+          <div className="grid gap-4">
+            {milestones.map((milestone) => (
+              <div key={milestone.id} className="grid gap-4 border-b border-slate-100 pb-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-lg font-semibold text-slate-950">{milestone.title}</p>
+                    <p className="mt-1 text-sm text-slate-500">{milestone.projectName}</p>
+                  </div>
+                  <StatusBadge tone={milestone.status === "done" ? "success" : milestone.status === "current" ? "accent" : "neutral"}>
+                    {milestone.status === "done" ? "Completado" : milestone.status === "current" ? "En curso" : "Pendiente"}
+                  </StatusBadge>
                 </div>
+                <p className="text-sm leading-6 text-slate-600">{milestone.summary}</p>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-slate-500">{formatLongDate(milestone.date)}</p>
+                  {milestone.status !== "done" ? (
+                    <button type="button" className="dashboard-button-primary" onClick={() => completeMilestone(milestone.id)}>
+                      Marcar finalizado
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </DashboardCard>
+
+      <DashboardMutedCard>
+        <div className="border-b border-slate-200 pb-5">
+          <SectionHeading eyebrow="Cambios solicitados" title="Solicitudes del cliente" />
+        </div>
+
+        <div className="mt-6 grid gap-4">
+          {changes.map((change) => (
+            <div key={change.id} className="grid gap-2 border-b border-slate-100 pb-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="font-semibold text-slate-950">{change.title}</p>
                 <StatusBadge tone={change.priority === "high" ? "danger" : change.priority === "medium" ? "warning" : "accent"}>{change.priority}</StatusBadge>
               </div>
+              <p className="text-sm text-slate-500">{change.projectName}</p>
+              <p className="text-sm leading-6 text-slate-600">{change.detail}</p>
             </div>
           ))}
         </div>
       </DashboardMutedCard>
-
-      <DashboardCard>
-        <SectionHeading eyebrow="Ejecucion" title="Marcar hitos completados" />
-        <div className="mt-6 grid gap-4">
-          {milestones.map((milestone) => (
-            <div key={milestone.id} className="rounded-[22px] border border-slate-200 bg-slate-50 p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-lg font-semibold text-slate-950">{milestone.title}</p>
-                  <p className="mt-1 text-sm text-slate-500">{milestone.projectName}</p>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">{milestone.summary}</p>
-                  <p className="mt-3 text-sm font-medium text-slate-500">{formatLongDate(milestone.date)}</p>
-                </div>
-                <StatusBadge tone={milestone.status === "done" ? "success" : milestone.status === "current" ? "accent" : "warning"}>
-                  {milestone.status === "done" ? "Completado" : milestone.status === "current" ? "En curso" : "Siguiente"}
-                </StatusBadge>
-              </div>
-              {milestone.status !== "done" ? (
-                <button type="button" className="dashboard-button-primary mt-5" onClick={() => completeMilestone(milestone.id)}>
-                  Marcar como finalizado
-                </button>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      </DashboardCard>
     </div>
   );
 }

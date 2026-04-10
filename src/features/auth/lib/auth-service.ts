@@ -57,6 +57,7 @@ export function validateRegister(input: RegisterInput) {
 
   const mockUser: UserRecord = {
     id: "user-client-new",
+    createdAt: "2026-04-10",
     firstName: input.firstName.trim(),
     lastName: input.lastName.trim(),
     name: `${input.firstName.trim()} ${input.lastName.trim()}`,

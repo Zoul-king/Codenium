@@ -1,6 +1,5 @@
 "use client";
 
-import { DashboardCard, DashboardMutedCard, MetricPill, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
 import { getPrimaryProject, getPrimaryUser, getUserById } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import type { Role } from "@/lib/types/domain";
@@ -17,49 +16,55 @@ export function ProfilePanel({ role }: ProfilePanelProps) {
   const client = getUserById(state, project?.clientId);
 
   return (
-    <div className="grid h-full gap-5 xl:grid-cols-[0.88fr_1.12fr]">
-      <DashboardCard>
-        <SectionHeading eyebrow="Perfil" title={user?.name ?? "Sin usuario"} description={user?.title} />
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <MetricPill label="Correo" value={user?.email ?? "-"} tone="accent" />
-          <MetricPill label="Telefono" value={user?.phone ?? "-"} />
-          <MetricPill label="Empresa" value={user?.company ?? "Interno"} />
-          <MetricPill label="Estado" value={user?.state ?? "-"} />
+    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+      <section className="rounded-[18px] border border-slate-200 bg-white px-6 py-6">
+        <div className="border-b border-slate-200 pb-5">
+          <p className="dashboard-eyebrow">Perfil</p>
+          <h2 className="mt-2 text-[28px] font-semibold tracking-[-0.04em] text-slate-950">{user?.name ?? "Sin usuario"}</h2>
+          <p className="mt-2 text-sm text-slate-600">{user?.title}</p>
         </div>
-      </DashboardCard>
 
-      <DashboardMutedCard>
-        <SectionHeading eyebrow="Relacion operativa" title={role === "client" ? "Tu punto de seguimiento" : "Relacion con cliente"} />
+        <div className="mt-6 grid gap-4">
+          <ProfileRow label="Correo" value={user?.email ?? "-"} />
+          <ProfileRow label="Telefono" value={user?.phone ?? "-"} />
+          <ProfileRow label="Empresa" value={user?.company ?? "Interno"} />
+          <ProfileRow label="Estado" value={user?.state ?? "-"} />
+        </div>
+      </section>
+
+      <section className="rounded-[18px] border border-slate-200 bg-[linear-gradient(180deg,rgba(248,250,252,0.74)_0%,rgba(241,245,249,0.62)_100%)] px-6 py-6">
+        <div className="border-b border-slate-200 pb-5">
+          <p className="dashboard-eyebrow">{role === "client" ? "Seguimiento" : "Relacion operativa"}</p>
+          <h2 className="mt-2 text-[28px] font-semibold tracking-[-0.04em] text-slate-950">{role === "client" ? "Tu PM asignado y plan" : "Cliente principal y plan"}</h2>
+        </div>
+
         <div className="mt-6 grid gap-4">
           {role === "client" ? (
             <>
-              <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">PM asignado</p>
-                <p className="mt-2 text-xl font-semibold text-slate-950">{pm?.name ?? "Pendiente"}</p>
-                <p className="mt-2 text-sm text-slate-600">{pm?.email ?? "Se mostrara al confirmar el proyecto."}</p>
-              </div>
-              <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">Plan contratado</p>
-                <p className="mt-2 text-xl font-semibold text-slate-950">{project?.planTitle ?? "Sin proyecto"}</p>
-                <p className="mt-2 text-sm text-slate-600">{project?.planProfile === "business" ? "Perfil empresarial con lectura administrativa visible para el equipo." : "Perfil personal conectado a hitos, pagos y entregables."}</p>
-              </div>
+              <ProfileRow label="PM asignado" value={pm?.name ?? "Pendiente"} />
+              <ProfileRow label="Correo PM" value={pm?.email ?? "-"} />
+              <ProfileRow label="Plan contratado" value={project?.planTitle ?? "Sin proyecto"} />
+              <ProfileRow label="Perfil contratado" value={project?.planProfile === "business" ? "Empresarial" : "Personal"} />
             </>
           ) : (
             <>
-              <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">Cliente principal</p>
-                <p className="mt-2 text-xl font-semibold text-slate-950">{client?.name ?? "Pendiente"}</p>
-                <p className="mt-2 text-sm text-slate-600">{client?.email ?? "Sin contacto visible."}</p>
-              </div>
-              <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">Plan del proyecto</p>
-                <p className="mt-2 text-xl font-semibold text-slate-950">{project?.planTitle ?? "Sin proyecto"}</p>
-                <p className="mt-2 text-sm text-slate-600">Este dato tambien lo ve administracion y condiciona los pagos del cliente.</p>
-              </div>
+              <ProfileRow label="Cliente principal" value={client?.name ?? "Pendiente"} />
+              <ProfileRow label="Correo cliente" value={client?.email ?? "-"} />
+              <ProfileRow label="Proyecto activo" value={project?.name ?? "Sin proyecto"} />
+              <ProfileRow label="Plan del proyecto" value={project?.planTitle ?? "Sin proyecto"} />
             </>
           )}
         </div>
-      </DashboardMutedCard>
+      </section>
+    </div>
+  );
+}
+
+function ProfileRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid gap-2 border-b border-slate-200 pb-4 sm:grid-cols-[180px_minmax(0,1fr)] sm:items-center">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+      <p className="text-sm font-semibold text-slate-900">{value}</p>
     </div>
   );
 }

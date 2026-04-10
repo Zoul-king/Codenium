@@ -2,90 +2,74 @@
 
 import Link from "next/link";
 
-import { DashboardCard, DashboardMutedCard, MetricPill, ProgressBar, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
-import { getPrimaryProject, getProjectPayments, getQuoteById, getUserById } from "@/features/dashboard/lib/selectors";
+import { DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
+import { getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
-import { formatCurrency } from "@/features/quotes/lib/estimate";
-import { formatLongDate, formatShortDate, getProjectStatusLabel, getPaymentStatusLabel } from "@/lib/presenters";
+import { getProjectStatusLabel } from "@/lib/presenters";
 
 export function ClientOverviewPanel() {
   const { state } = useDashboardWorkspace();
-  const project = getPrimaryProject(state, "client");
-  const quote = getQuoteById(state, project?.quoteId);
-  const pm = getUserById(state, project?.pmId);
-  const payments = getProjectPayments(state, project?.id);
-  const nextPayment = payments.find((payment) => payment.status !== "paid");
+  const projects = getVisibleProjects(state, "client");
 
-  if (!project) {
+  if (projects.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
-        <DashboardCard className="max-w-xl">
-          <SectionHeading eyebrow="Panel de cliente" title="Todavia no tienes un proyecto activo" description="Cuando una cotizacion pase a ejecucion, aqui veras plan contratado, pagos, entregables y seguimiento con tu PM." />
+        <DashboardCard className="max-w-2xl">
+          <SectionHeading
+            eyebrow="Proyectos"
+            title="Todavia no tienes proyectos activos"
+            description="Cuando una cotizacion pase a ejecucion, aqui veras nombre, avance y acceso directo a hitos y cambios."
+          />
         </DashboardCard>
       </div>
     );
   }
 
   return (
-    <div className="grid h-full gap-5 xl:grid-cols-[1.15fr_0.85fr] xl:grid-rows-[minmax(0,1fr)_minmax(0,0.95fr)]">
-      <DashboardCard className="xl:row-span-2">
-        <SectionHeading eyebrow="Proyecto activo" title={project.name} description={project.summary} />
-        <div className="mt-6 grid gap-4 sm:grid-cols-4">
-          <MetricPill label="Estado" value={getProjectStatusLabel(project.status)} tone="accent" />
-          <MetricPill label="Progreso" value={`${project.progress}%`} />
-          <MetricPill label="Plan contratado" value={project.planTitle} />
-          <MetricPill label="PM asignado" value={pm?.name ?? "Pendiente"} />
-        </div>
-        <div className="mt-5">
-          <ProgressBar value={project.progress} />
-        </div>
+    <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-6">
+      <div className="border-b border-slate-200 pb-5">
+        <SectionHeading eyebrow="Proyectos" title="Tus proyectos" description="Selecciona un proyecto para revisar hitos, cambios y seguimiento operativo." />
+      </div>
 
-        <div className="mt-6 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-semibold text-slate-500">Contrato visible</p>
-            <p className="mt-2 text-lg font-semibold text-slate-950">{quote?.quoteKind === "formal" ? "Cotizacion formal" : "Precotizacion"}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              {project.planProfile === "business" ? "Perfil empresarial con entregables y pagos por etapas." : "Perfil personal con seguimiento centralizado y lectura clara del alcance."}
-            </p>
-            <p className="mt-3 text-sm font-medium text-slate-500">{project.quoteCode}</p>
-          </div>
-
-          <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-semibold text-slate-500">Siguiente entrega</p>
-            <p className="mt-2 text-lg font-semibold text-slate-950">{formatLongDate(project.dueDate)}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">La fecha ya se conecta con hitos, pagos y entregables visibles dentro del mismo flujo.</p>
-          </div>
-        </div>
-      </DashboardCard>
-
-      <DashboardMutedCard>
-        <SectionHeading eyebrow="Pago relacionado" title={nextPayment ? nextPayment.label : "Sin pagos pendientes"} />
-        {nextPayment ? (
-          <div className="mt-6 rounded-[20px] border border-slate-200 bg-white p-5">
-            <div className="flex items-center justify-between gap-3">
-              <p className="font-semibold text-slate-950">{formatCurrency(nextPayment.amount)}</p>
-              <StatusBadge tone={nextPayment.status === "pending" ? "warning" : "accent"}>{getPaymentStatusLabel(nextPayment.status)}</StatusBadge>
+      <div className="grid gap-4 xl:grid-cols-2">
+        {projects.map((project) => (
+          <Link
+            key={project.id}
+            href="/dashboard/client/milestones"
+            className="grid gap-4 rounded-[18px] border border-slate-200 bg-white px-5 py-5 transition hover:border-primary-200 hover:bg-primary-50/50"
+          >
+            <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-xl font-semibold tracking-[-0.03em] text-slate-950">{project.name}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{project.summary}</p>
+              </div>
+              <span className="rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                {getProjectStatusLabel(project.status)}
+              </span>
             </div>
-            <p className="mt-3 text-sm leading-6 text-slate-600">Se desbloquea segun el avance confirmado por tu PM y mantiene trazabilidad con los hitos activos.</p>
-            <p className="mt-3 text-sm font-medium text-slate-500">Vence el {formatShortDate(nextPayment.dueDate)}</p>
-          </div>
-        ) : null}
-      </DashboardMutedCard>
 
-      <DashboardMutedCard>
-        <SectionHeading eyebrow="Acciones rapidas" title="Siguiente paso visible" />
-        <div className="mt-6 grid gap-3">
-          <Link href="/dashboard/client/milestones" className="dashboard-action">
-            Revisar hitos y cambios
+            <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_160px] sm:items-end">
+              <div>
+                <div className="mb-2 flex items-center justify-between text-sm font-medium text-slate-600">
+                  <span>Avance</span>
+                  <span>{project.progress}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-slate-200">
+                  <div
+                    className="h-full rounded-full bg-[linear-gradient(90deg,#224a78_0%,#3f7aa3_48%,#68b8b2_100%)]"
+                    style={{ width: `${Math.max(0, Math.min(100, project.progress))}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="border-l border-slate-200 pl-4 text-sm text-slate-600 sm:text-right">
+                <p className="font-semibold text-slate-900">{project.planTitle}</p>
+                <p className="mt-2">Ir a hitos y cambios</p>
+              </div>
+            </div>
           </Link>
-          <Link href="/dashboard/client/deliverables" className="dashboard-action">
-            Abrir entregables
-          </Link>
-          <Link href="/dashboard/client/chat" className="dashboard-action">
-            Continuar con tu PM
-          </Link>
-        </div>
-      </DashboardMutedCard>
+        ))}
+      </div>
     </div>
   );
 }

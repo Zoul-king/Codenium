@@ -50,6 +50,13 @@ export interface PlanItem {
   items: string[];
 }
 
+export interface ServicePricingItem {
+  title: string;
+  price: string;
+  subtitle: string;
+  description: string;
+}
+
 export interface PlanCatalog {
   personal: PlanItem[];
   business: PlanItem[];

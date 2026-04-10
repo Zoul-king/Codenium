@@ -37,6 +37,14 @@ interface CreatePmAccountInput {
   phone: string;
 }
 
+interface AddProjectDocumentInput {
+  projectId: string;
+  title: string;
+  kind: string;
+  href?: string;
+  audience?: "client" | "shared";
+}
+
 interface DashboardWorkspaceContextValue {
   state: DashboardWorkspaceState;
   acceptQuote: (quoteId: string, pmId: string) => void;
@@ -47,6 +55,7 @@ interface DashboardWorkspaceContextValue {
   addChangeRequest: (request: Omit<ChangeRequestRecord, "id" | "requestedAt" | "status">) => void;
   addProjectMessage: (projectId: string, senderId: string, role: Role, preview: string) => void;
   markPaymentAsPaid: (paymentId: string) => void;
+  addProjectDocument: (input: AddProjectDocumentInput) => void;
 }
 
 const initialWorkspaceState: DashboardWorkspaceState = {
@@ -95,7 +104,7 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           }
 
           const nextQuotes = current.quotes.map((item) =>
-            item.id === quoteId ? { ...item, pmId, quoteKind: "formal" as const, status: "approved" as const } : item
+            item.id === quoteId ? { ...item, pmId, quoteKind: "formal" as const, status: "approved" as const, acceptedAt: "2026-04-10" } : item
           );
           const alreadyCreated = current.projects.some((project) => project.quoteId === quoteId);
           const client = current.users.find((user) => user.id === quote.clientId);
@@ -155,9 +164,10 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           ...current,
           users: [
             ...current.users,
-            {
-              id: `user-pm-${current.users.filter((user) => user.role === "pm").length + 1}`,
-              firstName: input.firstName,
+              {
+                  id: `user-pm-${current.users.filter((user) => user.role === "pm").length + 1}`,
+                  createdAt: "2026-04-10",
+                  firstName: input.firstName,
               lastName: input.lastName,
               name: `${input.firstName} ${input.lastName}`,
               email: input.email,
@@ -256,6 +266,23 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
         setState((current) => ({
           ...current,
           payments: current.payments.map((payment) => (payment.id === paymentId ? { ...payment, status: "paid" } : payment))
+        }));
+      },
+      addProjectDocument: ({ projectId, title, kind, href, audience = "client" }) => {
+        setState((current) => ({
+          ...current,
+          documents: [
+            {
+              id: `doc-${current.documents.length + 1}`,
+              projectId,
+              title,
+              kind,
+              updatedAt: "2026-04-10",
+              href: href?.trim() || `#document-${current.documents.length + 1}`,
+              audience
+            },
+            ...current.documents
+          ]
         }));
       }
     }),

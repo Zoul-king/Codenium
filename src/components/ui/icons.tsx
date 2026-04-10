@@ -3,6 +3,7 @@ import type { SVGProps } from "react";
 
 import { ArrowRight, Check, Wrench, X } from "lucide-react";
 
+import { site } from "@/features/marketing/data/site";
 import type { ContactIconType, ServiceIconType, SocialIconType } from "@/features/marketing/types";
 import { cn } from "@/lib/utils";
 
@@ -103,39 +104,12 @@ export function WhatsAppIcon({ className = "size-8" }: IconProps) {
   return <Image src="/icons/whatsapp.svg" width={32} height={32} alt="WhatsApp" className={className} />;
 }
 
-export function BrandLogo({ variant = "brand", className = "w-[112px]" }: BrandLogoProps) {
-  const isWhite = variant === "white";
-  const primaryColor = isWhite ? "#FFFFFF" : "#18395e"; // Dark blue/greenish base
-  const dotColor = isWhite ? "#FFFFFF" : "#4f9792"; // Teal for dots
+export function BrandLogo({ variant = "brand", className = "w-[112px]", priority = false }: BrandLogoProps) {
+  const asset = variant === "white" ? site.assets.brand.white : site.assets.brand.pink;
 
   return (
-    <span className={cn("inline-flex items-center gap-3", className)} aria-label="Codenium">
-      <svg
-        width="44"
-        height="44"
-        viewBox="0 0 44 44"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-11 w-11 shrink-0"
-      >
-        {/* The "C" shape */}
-        <path
-          d="M34 11C30.5 7.5 25.5 5.5 20 5.5C10.8873 5.5 3.5 12.8873 3.5 22C3.5 31.1127 10.8873 38.5 20 38.5C25.5 38.5 30.5 36.5 34 33"
-          stroke={primaryColor}
-          strokeWidth="6"
-          strokeLinecap="round"
-        />
-        {/* Three points on the edges of C */}
-        <circle cx="34" cy="11" r="3" fill={dotColor} />
-        <circle cx="3.5" cy="22" r="3" fill={dotColor} />
-        <circle cx="34" cy="33" r="3" fill={dotColor} />
-        {/* Central point */}
-        <circle cx="20" cy="22" r="3" fill={dotColor} />
-      </svg>
-      <span className={cn("text-lg font-semibold tracking-[-0.04em]", isWhite ? "text-white" : "text-body-color")}>
-        Codenium
-      </span>
+    <span className={cn("relative inline-flex", className)} aria-label="Codenium">
+      <Image src={asset} alt="Codenium Technologies" width={320} height={120} className="h-auto w-full object-contain" priority={priority} />
     </span>
   );
 }
-
