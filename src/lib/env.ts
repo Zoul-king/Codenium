@@ -18,6 +18,8 @@ export const env = {
   SESSION_SECRET: process.env.SESSION_SECRET ?? "",
   EMAIL_PROVIDER: process.env.EMAIL_PROVIDER ?? "",
   EMAIL_FROM: process.env.EMAIL_FROM ?? "",
+  CONTACT_EMAIL: process.env.CONTACT_EMAIL ?? "",
+  EMAIL_TO_CONTACT: process.env.EMAIL_TO_CONTACT ?? "",
   EMAIL_TO_QUOTES: process.env.EMAIL_TO_QUOTES ?? "",
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",
   NODE_ENV: readNodeEnv()

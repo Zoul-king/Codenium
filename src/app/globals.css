@@ -355,7 +355,7 @@
   }
 
   .tag {
-    @apply rounded-full border border-black/10 bg-white/80 px-3 py-1 text-xs font-medium text-body-color md:text-sm;
+    @apply rounded-[12px] border border-black/10 bg-white/80 px-3 py-1 text-xs font-medium text-body-color md:text-sm;
   }
 
   .portfolio-stack {

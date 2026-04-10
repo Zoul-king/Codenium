@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 
 import { ContactIcon } from "@/components/ui/icons";
@@ -66,6 +67,7 @@ export function ContactForm({
   contactEmail = site.contact.email,
   embedded = false
 }: ContactFormProps) {
+  const pathname = usePathname();
   const [values, setValues] = useState<ContactFormValues>({ ...defaultValues, ...initialValues });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -102,7 +104,7 @@ export function ContactForm({
         email: values.email.trim(),
         phone: values.phone.trim(),
         message: values.message.trim(),
-        originPath: source,
+        originPath: pathname || `/${source}`,
         hiddenFields
       });
 

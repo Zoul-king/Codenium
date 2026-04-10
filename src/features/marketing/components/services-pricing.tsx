@@ -38,7 +38,7 @@ export function ServicesPricing({ items }: ServicesPricingProps) {
 
               <Link
                 href={buildContactSelectionHref({ source: "service", label: item.title })}
-                className="accent-button-solid mt-10 !justify-center"
+                className="accent-button mt-10 !justify-center"
                 onClick={() => writeQuoteSelection({ source: "service", label: item.title })}
               >
                 Solicitar servicio
