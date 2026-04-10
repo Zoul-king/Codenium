@@ -25,11 +25,11 @@ export const site: SiteConfig = {
   contact: {
     location: "Texcoco",
     city: "Estado de México",
-    email: "GZM.manuel@gmail.com",
-    phone: "55 75 59 54",
-    phoneRaw: "+5255755954",
-    whatsapp: "https://wa.me/5255755954",
-    assistantLabel: "Juliana IA",
+    email: "cotizaciones@codenium.nth-solutions.com.mx",
+    phone: "56 43 46 10 37",
+    phoneRaw: "+525643461037",
+    whatsapp: "https://wa.me/525643461037",
+    assistantLabel: "FrancIA",
     assistantHref: "/contact"
   },
   socials: [
