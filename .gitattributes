@@ -1,0 +1,8 @@
+.next/** linguist-generated=true
+.next-build/** linguist-generated=true
+.next-dev/** linguist-generated=true
+dist/** linguist-generated=true
+build/** linguist-generated=true
+out/** linguist-generated=true
+coverage/** linguist-generated=true
+*.tsbuildinfo linguist-generated=true
