@@ -6,13 +6,13 @@ export const homePage: MarketingPageData = {
   headerVariant: "brand",
   meta: {
     title: "Codenium - Software, plataformas y experiencias digitales",
-    description: "Disenamos sitios, plataformas y productos digitales con estimado inicial y seguimiento claro durante el proceso."
+    description: "Diseñamos sitios, plataformas y productos digitales con estimado inicial y seguimiento claro durante el proceso."
   },
   hero: {
     kind: "home",
     title: "Software y plataformas a tu medida",
-    body: "Disenamos y desarrollamos productos digitales con un proceso mas claro desde el inicio: estimado inicial, continuidad comercial y seguimiento en cada etapa.",
-    primaryCta: { label: "Sobre nosotros", href: "/about" },
+    body: "Diseñamos y desarrollamos productos digitales con un proceso más claro desde el inicio: estimado inicial, continuidad comercial y seguimiento en cada etapa.",
+    primaryCta: { label: "Conocer más", href: "/about" },
     secondaryCta: { label: "Obtener estimado", href: "/quote" }
   }
 };
@@ -24,23 +24,23 @@ export const services: ServiceItem[] = [
     icon: "code"
   },
   {
-    title: "Consultorias",
-    body: "Acompanamiento estrategico para ordenar decisiones, alcance y prioridades digitales.",
+    title: "Consultorías",
+    body: "Acompañamiento estratégico para ordenar decisiones, alcance y prioridades digitales.",
     icon: "consulting"
   },
   {
-    title: "Profesionales a tu disposicion",
+    title: "Profesionales a tu disposición",
     body: "Talento especializado para reforzar equipos y acelerar iniciativas clave.",
     icon: "team"
   },
   {
     title: "Desarrollo a la medida",
-    body: "Productos pensados para tu operacion, tu negocio y el nivel de detalle que necesitas.",
+    body: "Productos pensados para tu operación, tu negocio y el nivel de detalle que necesitas.",
     icon: "spark"
   },
   {
-    title: "Soporte tecnico",
-    body: "Continuidad, mantenimiento y resolucion agil para mantener tu operacion en movimiento.",
+    title: "Soporte técnico",
+    body: "Continuidad, mantenimiento y resolución ágil para mantener tu operación en movimiento.",
     icon: "support"
   },
   {
@@ -62,7 +62,12 @@ export const clientLogos: ClientLogo[] = [
 ];
 
 export const benefits: BenefitItem[] = [
-  { title: "Proceso mas claro", body: "Empezamos con un estimado inicial aterrizado." },
-  { title: "Seguimiento continuo", body: "Mantienes visibilidad durante cada etapa." },
-  { title: "Soluciones utiles", body: "Disenamos para negocio, operacion y crecimiento." }
+  { title: "Estimación inicial clara", body: "Sin sorpresas, presupuesto aterrizado desde el primer día." },
+  { title: "Panel de seguimiento propio", body: "Control total sobre el avance de tu proyecto en tiempo real." },
+  { title: "Acompañamiento continuo", body: "Asesoría constante para tomar las mejores decisiones digitales." },
+  { title: "Comunicación centralizada", body: "Toda la conversación y archivos en un solo lugar seguro." },
+  { title: "Entregables visibles", body: "Hitos claros con resultados tangibles en cada etapa." },
+  { title: "Prioridades aterrizadas", body: "Enfoque en lo que realmente genera valor para tu negocio." }
 ];
+
+

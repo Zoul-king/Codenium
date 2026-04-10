@@ -41,9 +41,9 @@ const defaultValues: ContactFormValues = {
 };
 
 export function ContactForm({
-  kicker = "Contactanos",
-  title = "Cuentanos que necesitas",
-  description = "Compartenos el contexto y te ayudaremos a aterrizar el siguiente paso.",
+  kicker = "Contáctanos",
+  title = "Cuéntanos qué necesitas",
+  description = "Compártenos el contexto y te ayudaremos a aterrizar el siguiente paso.",
   submitLabel = "Enviar mensaje",
   summary,
   successMessage = "Recibimos tu mensaje. Muy pronto daremos seguimiento para continuar contigo.",
@@ -96,10 +96,11 @@ export function ContactForm({
               {hasSummary ? <div>{summary}</div> : null}
               {!hasSummary ? (
                 <>
-                  <ContactInfoColumn label="Correo electronico" value={site.contact.email} icon="mail" boxed={false} />
-                  <ContactInfoColumn label="Telefono" value={site.contact.phone} icon="phone" boxed={false} />
-                  <ContactInfoColumn label="Ubicacion" value={`${site.contact.location}, ${site.contact.city}`} icon="location" boxed={false} />
+                  <ContactInfoColumn label="Correo electrónico" value={site.contact.email} icon="mail" boxed={false} />
+                  <ContactInfoColumn label="Teléfono" value={site.contact.phone} icon="phone" boxed={false} />
+                  <ContactInfoColumn label="Ubicación" value={`${site.contact.location}, ${site.contact.city}`} icon="location" boxed={false} />
                 </>
+
               ) : null}
             </div>
 
@@ -113,10 +114,11 @@ export function ContactForm({
                   <TextField label="Apellidos *" placeholder="Apellidos" value={values.lastName} onChange={(value) => updateValue("lastName", value)} />
                 </div>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <TextField label="Correo electronico *" placeholder="Correo electronico" type="email" value={values.email} onChange={(value) => updateValue("email", value)} />
-                  <TextField label="Numero de telefono *" placeholder="Numero de telefono" value={values.phone} onChange={(value) => updateValue("phone", value)} />
+                  <TextField label="Correo electrónico *" placeholder="Correo electrónico" type="email" value={values.email} onChange={(value) => updateValue("email", value)} />
+                  <TextField label="Número de teléfono *" placeholder="Número de teléfono" value={values.phone} onChange={(value) => updateValue("phone", value)} />
                 </div>
-                <TextAreaField label="Mensaje *" placeholder="Cuentanos brevemente que necesitas" value={values.message} onChange={(value) => updateValue("message", value)} />
+                <TextAreaField label="Mensaje *" placeholder="Cuéntanos brevemente qué necesitas" value={values.message} onChange={(value) => updateValue("message", value)} />
+
                 <button type="submit" disabled={isDisabled} className="primary-button w-fit disabled:cursor-not-allowed disabled:opacity-70">
                   {submitLabel}
                 </button>
@@ -125,70 +127,55 @@ export function ContactForm({
           </div>
         )}
 
-        <div className="contact-map mt-8 h-[250px] w-full overflow-hidden rounded-xl sm:mt-12 sm:h-[300px] md:h-[350px] lg:mt-16 lg:h-[400px]" data-animate="fadeIn" data-delay="0.2">
-          <iframe
-            title="Ubicacion UPTex Texcoco"
-            src={site.mapEmbedUrl}
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            loading="lazy"
-            allowFullScreen
-            referrerPolicy="strict-origin-when-cross-origin"
-          />
-        </div>
       </div>
     </section>
+
   );
 }
 
 export function ContactStrip() {
   return (
     <section className="section overflow-hidden bg-foreground">
-      <div className="site-shell flex flex-col gap-5 py-16 lg:flex-row lg:gap-[50px]">
-        <article className="contact flex w-full flex-col items-center gap-5 text-center lg:max-w-[540px] lg:items-start lg:gap-6 lg:text-left" data-animate="fadeInFromLeft">
-          <span className="type-kicker">Contactanos</span>
+      <div className="site-shell flex flex-col gap-10 py-16 lg:flex-row lg:items-center lg:justify-between lg:gap-[50px]">
+        <article className="contact flex w-full flex-col items-center gap-5 text-center lg:max-w-[640px] lg:items-start lg:gap-6 lg:text-left" data-animate="fadeInFromLeft">
+          <span className="type-kicker">Contáctanos</span>
           <h2 className="type-section-title">
-            Tienes algun <span className="text-secondary-500">proyecto</span> en mente?
+            ¿Tienes algún <span className="text-primary-500">proyecto</span> en mente?
           </h2>
-          <p className="max-w-2xl text-sm text-body-color sm:text-base">Comparte tu idea y te ayudaremos a convertirla en un siguiente paso claro.</p>
-          <Link href="/contact" className="contact-button">
-            Enviar mensaje
-          </Link>
+          <p className="max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
+            Comparte tu idea y te ayudaremos a convertirla en un siguiente paso claro.
+            Nuestro equipo está listo para asesorarte en la mejor ruta técnica para tu negocio.
+          </p>
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <Link href="/quote" className="primary-button">
+              Cotizar proyecto
+            </Link>
+            <Link href="/contact" className="inline-flex items-center justify-center rounded-[5px] border border-primary-500 bg-white px-6 py-2 text-sm font-extrabold text-primary-500 transition-all duration-500 ease-in-out hover:bg-primary-500 hover:text-white lg:text-base">
+              Enviar mensaje
+            </Link>
+          </div>
         </article>
-        <article className="map w-full" data-animate="fadeInFromRight" data-delay="0.12">
-          <div className="h-[300px] overflow-hidden rounded-xl sm:h-[400px]">
-            <iframe
-              title="Ubicacion UPTex Texcoco"
-              src={site.mapEmbedUrl}
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              loading="lazy"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-            />
-          </div>
-          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-2">
-            <ContactInfoRow label="Correo electronico" value={site.contact.email} icon="mail" />
-            <ContactInfoRow label="Telefono" value={site.contact.phone} icon="phone" />
-            <ContactInfoRow label="Ubicacion" value={`${site.contact.location}, ${site.contact.city}`} icon="location" />
-          </div>
+        <article className="info-cards grid w-full gap-4 sm:grid-cols-3 lg:w-auto lg:shrink-0 lg:grid-cols-1" data-animate="fadeInFromRight" data-delay="0.12">
+          <ContactInfoRow label="Correo electrónico" value={site.contact.email} icon="mail" />
+          <ContactInfoRow label="Teléfono" value={site.contact.phone} icon="phone" />
+          <ContactInfoRow label="Ubicación" value={`${site.contact.location}, ${site.contact.city}`} icon="location" />
         </article>
       </div>
     </section>
   );
 }
 
+
 function ContactInfoRow({ label, value, icon }: ContactInfoProps) {
   return (
-    <div className="flex w-full items-start gap-3">
+    <div className="flex w-full items-start gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:bg-primary-50">
       <ContactIcon type={icon} />
       <div>
-        <span className="mb-1 inline-block text-sm font-semibold">{label}</span>
-        <p className="text-sm text-black">{value}</p>
+        <span className="mb-1 inline-block text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</span>
+        <p className="text-sm font-medium text-slate-900">{value}</p>
       </div>
     </div>
+
   );
 }
 

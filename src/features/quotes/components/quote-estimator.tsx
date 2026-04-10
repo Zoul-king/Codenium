@@ -40,9 +40,11 @@ export function QuoteEstimator({ draft, onChange }: QuoteEstimatorProps) {
     <div className="rounded-[28px] border border-white bg-gradient-to-br from-transparent to-white/85 p-6 shadow-[0_18px_44px_rgba(14,20,36,0.08)]">
       <div className="max-w-2xl space-y-3">
         <span className="type-kicker">Cotizador</span>
-        <h2 className="text-[28px] font-bold leading-8 text-body-color lg:text-[34px] lg:leading-[42px]">Define tu proyecto y revisa un estimado inicial</h2>
-        <p className="type-body">La experiencia ahora sigue una secuencia mas natural: categoria, objetivo, tiempo, capacidades y soporte.</p>
+        <h2 className="text-[28px] font-bold leading-8 text-body-color lg:text-[34px] lg:leading-[42px]">
+          Escoge lo más cercano a tu proyecto para obtener una cotización inicial
+        </h2>
       </div>
+
 
       <div className="mt-6 space-y-3">
         {quoteSections.map((section) => (
@@ -71,13 +73,14 @@ export function QuoteEstimator({ draft, onChange }: QuoteEstimatorProps) {
 
             {section.key === "objective" ? (
               <TextAreaField
-                label="Que quieres lograr?"
-                placeholder="Ej. Necesito un dashboard para visualizar ventas, seguimiento comercial y reportes para direccion."
+                label="¿Qué quieres lograr?"
+                placeholder="Ej. Necesito un dashboard para visualizar ventas, seguimiento comercial y reportes para dirección."
                 rows={5}
                 value={draft.objective}
                 onChange={(value) => onChange({ ...draft, objective: value })}
               />
             ) : null}
+
 
             {section.key === "timeline" ? (
               <div className="grid gap-3 md:grid-cols-3">
@@ -110,24 +113,8 @@ export function QuoteEstimator({ draft, onChange }: QuoteEstimatorProps) {
               </div>
             ) : null}
 
-            {section.key === "services" ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {quoteModules.filter((item) => item.group === "service").map((item) => {
-                  const selected = draft.modules.includes(item.key);
+            {/* Services section removed as per request */}
 
-                  return (
-                    <button key={item.key} type="button" onClick={() => toggleModule(item.key)} className={getOptionButtonClass(selected)}>
-                      <div className="flex items-start justify-between gap-3">
-                        <span className="block text-sm font-semibold">{item.label}</span>
-                        <span className={cn("text-[11px] font-semibold", selected ? "text-white" : "text-secondary-600")}>{selected ? "Activo" : "Opcional"}</span>
-                      </div>
-                      <span className={cn("mt-1 block text-xs leading-5", selected ? "text-white/82" : "text-body-color/70")}>{item.description}</span>
-                      <span className={cn("mt-3 block text-xs font-semibold", selected ? "text-white" : "text-secondary-600")}>Desde {formatCurrency(item.monthly?.min ?? 0)} al mes</span>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : null}
           </QuoteSection>
         ))}
       </div>
@@ -156,9 +143,10 @@ function QuoteSection({ title, description, isOpen, onToggle, children }: QuoteS
         </span>
       </button>
 
-      <div className={cn("quote-expand overflow-hidden transition-[grid-template-rows,opacity,margin] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]", isOpen ? "mt-4 grid grid-rows-[1fr] opacity-100" : "mt-0 grid grid-rows-[0fr] opacity-0")}>
+      <div className={cn("quote-expand overflow-hidden transition-[grid-template-rows,opacity,margin] duration-200 ease-in-out", isOpen ? "mt-4 grid grid-rows-[1fr] opacity-100" : "mt-0 grid grid-rows-[0fr] opacity-0")}>
         <div className="min-h-0">{children}</div>
       </div>
+
     </section>
   );
 }

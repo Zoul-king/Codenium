@@ -14,7 +14,7 @@ export function Services({ items, compact = false }: ServicesProps) {
           <div className="info" data-animate="fadeInFromTop">
             <span className="type-kicker">Nuestros servicios</span>
             <h2 className="type-section-title mb-8 mt-4">
-              Como podemos <span className="text-secondary-500">ayudarte</span>?
+              ¿Cómo podemos <span className="text-secondary-500">ayudarte</span>?
             </h2>
           </div>
           <div className="grid grid-cols-1 gap-5 text-left sm:grid-cols-2 lg:grid-cols-3">
@@ -39,15 +39,15 @@ export function Services({ items, compact = false }: ServicesProps) {
     <section className="section soft-section">
       <div className="site-shell py-16">
         <div className="offer-info mb-14 text-center" data-animate="fadeInFromTop">
-          <span className="type-kicker">Novedades</span>
-          <h2 className="type-section-title mt-4">Que ofrecemos?</h2>
+          <span className="type-kicker">Nuestros servicios</span>
+          <h2 className="type-section-title mt-4">¿Qué ofrecemos?</h2>
         </div>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {items.map((service, index) => (
-            <article key={service.title} className="service-card min-h-[230px] rounded-[24px] p-6" data-animate="fadeInFromBottom" data-delay={String(index * 0.06)}>
+            <article key={service.title} className="service-card mx-auto w-full max-w-[360px] min-h-[230px] rounded-[24px] p-8" data-animate="fadeInFromBottom" data-delay={String(index * 0.06)}>
               <ServiceIcon type={service.icon} />
-              <h3 className="text-xl font-semibold leading-6 text-body-color">{service.title}</h3>
-              <p className="text-center text-sm leading-6 text-slate-600">{service.body}</p>
+              <h3 className="mt-4 text-center text-xl font-semibold leading-6 text-body-color">{service.title}</h3>
+              <p className="mt-2 text-center text-sm leading-6 text-slate-600">{service.body}</p>
             </article>
           ))}
         </div>

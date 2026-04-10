@@ -6,7 +6,7 @@ export const aboutPage: MarketingPageData = {
   headerVariant: "white",
   meta: {
     title: "Sobre nosotros - Codenium",
-    description: "Conoce la historia, mision y vision de Codenium y como construimos soluciones tecnologicas para empresas."
+    description: "Conoce la historia, misión y visión de Codenium y cómo construimos soluciones tecnológicas para empresas."
   },
   hero: {
     kind: "image",
@@ -18,33 +18,33 @@ export const aboutPage: MarketingPageData = {
 };
 
 export const story = [
-  "Codenium empezo desde cero, como un proyecto propio construido con esfuerzo, aprendizaje constante y la necesidad de demostrar que una buena ejecucion cambia el resultado de un negocio.",
-  "Cada etapa exigio resolver mejor, trabajar con mas criterio y crecer desde la disciplina. Esa historia hoy define nuestra forma de disenar, desarrollar y acompanar productos digitales."
+  "Codenium empezó desde cero, como un proyecto propio construido con esfuerzo, aprendizaje constante y la necesidad de demostrar que una buena ejecución cambia el resultado de un negocio.",
+  "Cada etapa exigió resolver mejor, trabajar con más criterio y crecer desde la disciplina. Esa historia hoy define nuestra forma de diseñar, desarrollar y acompañar productos digitales."
 ];
 
 export const missionVision: AboutBlock[] = [
   {
-    title: "Mision",
-    body: "Construir software y plataformas utiles, claras y bien ejecutadas para ayudar a empresas a operar mejor, decidir mejor y crecer con una base mas solida."
+    title: "Misión",
+    body: "Construir software y plataformas útiles, claras y bien ejecutadas para ayudar a empresas a operar mejor, decidir mejor y crecer con una base más sólida."
   },
   {
-    title: "Vision",
-    body: "Ser una empresa tecnologica mexicana reconocida a nivel mundial por la calidad de sus soluciones, su capacidad de evolucionar y una cultura de trabajo exigente pero humana."
+    title: "Visión",
+    body: "Ser una empresa tecnológica mexicana reconocida a nivel mundial por la calidad de sus soluciones, su capacidad de evolucionar y una cultura de trabajo exigente pero humana."
   }
 ];
 
 export const timeline: TimelineStep[] = [
   {
-    title: "Investigacion y contexto",
+    title: "Investigación y contexto",
     body: "Entendemos el problema, el objetivo y las restricciones reales."
   },
   {
-    title: "Planificacion",
+    title: "Planificación",
     body: "Ordenamos alcance, entregables y decisiones de prioridad."
   },
   {
-    title: "Diseno y prototipos",
-    body: "Traducimos la estrategia en una experiencia entendible y util."
+    title: "Diseño y prototipos",
+    body: "Traducimos la estrategia en una experiencia entendible y útil."
   },
   {
     title: "Contenido",
@@ -52,14 +52,15 @@ export const timeline: TimelineStep[] = [
   },
   {
     title: "Desarrollo frontend y backend",
-    body: "Construimos una base solida para operar, crecer y mantener."
+    body: "Construimos una base sólida para operar, crecer y mantener."
   },
   {
     title: "Pruebas y despliegue",
-    body: "Pulimos detalles y salimos a produccion con control."
+    body: "Pulimos detalles y salimos a producción con control."
   },
   {
-    title: "Mantenimiento y evolucion",
-    body: "Seguimos mejorando el producto segun uso, datos y nuevas necesidades."
+    title: "Mantenimiento y evolución",
+    body: "Seguimos mejorando el producto según uso, datos y nuevas necesidades."
   }
 ];
+

@@ -25,28 +25,31 @@ export function Benefits({ items }: BenefitsProps) {
           ))}
         </div>
         <article className="flex w-full flex-col items-start text-left" data-animate="fadeIn">
-          <div className="mb-3 flex flex-col gap-4">
-            <span className="type-kicker">Por que Codenium?</span>
+          <div className="mb-6 flex flex-col gap-4">
+            <span className="type-kicker">¿Por qué Codenium?</span>
             <h2 className="type-section-title">
-              Construimos <span className="text-secondary-500">mas que software</span>
+              Construimos <span className="text-secondary-500">más que software</span>
             </h2>
-            <p className="max-w-2xl text-sm text-body-color sm:text-base">
-              Creamos soluciones con una combinacion de criterio de producto, ejecucion tecnica y acompanamiento claro.
-            </p>
           </div>
-          <div className="grid w-full grid-cols-1 gap-1">
+          <div className="grid w-full grid-cols-1 gap-2">
             {items.map((item) => (
-              <div key={item.title} className="flex items-center gap-4 rounded-lg p-2 transition-colors duration-300 hover:bg-primary-500/10 md:p-1">
-                <div className="p-2 text-secondary-500">
+              <div key={item.title} className="flex items-start gap-4 rounded-xl border border-transparent p-3 transition-all duration-300 hover:border-slate-100 hover:bg-slate-50 md:p-4">
+                <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-50 text-secondary-500">
                   <CheckIcon />
                 </div>
-                <span className="text-[16px] font-bold text-gray-700 sm:text-sm lg:text-base">
-                  {item.title}: <span className="font-normal">{item.body}</span>
-                </span>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[17px] font-bold text-slate-900">
+                    {item.title}
+                  </span>
+                  <p className="text-sm leading-relaxed text-slate-600">
+                    {item.body}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </article>
+
       </div>
       <svg width="407" height="598" viewBox="0 0 407 598" fill="none" className="absolute top-0 z-10 w-full">
         <g filter="url(#benefit-glow)">

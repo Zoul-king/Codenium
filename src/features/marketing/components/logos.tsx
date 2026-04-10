@@ -11,12 +11,17 @@ export function Logos({ items }: LogosProps) {
     <section className="section relative bg-foreground">
       <div className="site-shell flex min-h-[52vh] flex-col items-center justify-between gap-10 py-16 md:flex-row">
         <article className="flex w-full flex-col gap-4" data-animate="fadeInFromTop">
-          <span className="type-kicker">Clientes satisfechos</span>
-          <h2 className="type-section-title">
-            Referencias que inspiran <span className="text-secondary-500">confianza</span>
+          <span className="type-kicker">Nuestros clientes</span>
+          <h2 className="text-[28px] font-bold leading-8 tracking-[-0.03em] text-slate-950 lg:text-[40px] lg:leading-[48px]">
+            Empresas que <span className="text-primary-500">confiaron</span> en nuestro trabajo
           </h2>
-          <p className="max-w-xl text-sm text-slate-600 sm:text-base">Trabajamos con el nivel de claridad visual y producto que hoy exigen marcas digitales fuertes.</p>
+          <p className="max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
+            Hemos acompañado a diversas organizaciones en la construcción de su ecosistema digital,
+            entregando soluciones que no solo cumplen con sus objetivos técnicos, sino que también
+            fortalecen la confianza de sus usuarios finales a través de productos robustos y escalables.
+          </p>
         </article>
+
         <article className="slider" data-animate="fadeInFromBottom">
           <div className="track">
             {repeated.map((item, index) => (

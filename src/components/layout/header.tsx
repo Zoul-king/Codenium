@@ -37,7 +37,11 @@ export function Header({ variant }: HeaderProps) {
           </nav>
 
           <div className="hidden lg:block">
-            <button type="button" className="primary-button" onClick={() => setAccessOpen(true)}>
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-[5px] border border-primary-500 bg-white px-6 py-2 text-sm font-extrabold text-primary-500 transition-all duration-500 ease-in-out hover:bg-primary-500 hover:text-white lg:text-base"
+              onClick={() => setAccessOpen(true)}
+            >
               Iniciar sesión
             </button>
           </div>

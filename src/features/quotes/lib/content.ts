@@ -3,30 +3,26 @@ import { quoteModules } from "@/lib/mocks";
 export const quoteSections = [
   {
     key: "project",
-    title: "Categoria",
+    title: "Categoría",
     description: "Elige la base principal del proyecto."
   },
   {
     key: "objective",
     title: "Objetivo",
-    description: "Describe que quieres lograr o que problema necesitas resolver."
+    description: "¿Qué quieres lograr o qué problema necesitas resolver?"
   },
   {
     key: "timeline",
     title: "Tiempo aproximado",
-    description: "Selecciona el rango de tiempo en el que te gustaria mover el proyecto."
+    description: "Selecciona el rango de tiempo en el que te gustaría mover el proyecto."
   },
   {
     key: "features",
     title: "Capacidades complementarias",
     description: "Suma las funciones que quieres incluir desde el arranque."
-  },
-  {
-    key: "services",
-    title: "Soporte posterior",
-    description: "Define si necesitas acompanamiento despues de la entrega."
   }
 ] as const;
+
 
 export function getSelectedQuoteModules(moduleKeys: string[]) {
   return quoteModules.filter((item) => moduleKeys.includes(item.key));

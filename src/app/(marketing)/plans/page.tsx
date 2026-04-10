@@ -12,9 +12,10 @@ export default function PlansPage() {
   return (
     <MarketingShell headerVariant={plansPage.headerVariant}>
       <Hero hero={plansPage.hero} />
-      <Services items={planServices} compact />
       <Pricing plans={pricingPlans} />
+      <Services items={planServices} />
       <Cta />
     </MarketingShell>
+
   );
 }

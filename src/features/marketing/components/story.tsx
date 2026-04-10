@@ -11,10 +11,11 @@ export function Story({ paragraphs, missionVision }: StoryProps) {
       <div className="site-shell py-14">
         <div className="grid gap-8 rounded-[32px] border border-slate-200 bg-white p-8 shadow-[0_18px_48px_rgba(15,23,42,0.06)] lg:grid-cols-[1.15fr_0.85fr] lg:p-10">
           <article className="flex flex-col gap-4 text-sm leading-7 text-slate-600 lg:text-base" data-animate="fadeInFromLeft">
-            <span className="type-kicker">Sobre nosotros</span>
-            <h2 className="type-section-title">
-              Conoce nuestra <span className="text-secondary-500">historia</span>
+            <span className="font-semibold uppercase tracking-[0.18em] text-purple-600">Sobre nosotros</span>
+            <h2 className="text-[28px] font-bold leading-8 tracking-[-0.03em] text-slate-950 lg:text-[40px] lg:leading-[48px]">
+              Conoce nuestra <span className="text-primary-500">historia</span>
             </h2>
+
             {paragraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}

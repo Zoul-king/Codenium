@@ -24,7 +24,7 @@ export const site: SiteConfig = {
   ],
   contact: {
     location: "Texcoco",
-    city: "Estado de Mexico",
+    city: "Estado de México",
     email: "GZM.manuel@gmail.com",
     phone: "55 75 59 54",
     phoneRaw: "+5255755954",
@@ -40,7 +40,7 @@ export const site: SiteConfig = {
     { label: "TikTok", href: "https://www.tiktok.com/", icon: "tiktok" }
   ],
   footer: {
-    body: "Disenamos software, dashboards y productos digitales con una estructura clara, sobria y orientada a resolver procesos reales.",
+    body: "Diseñamos software, dashboards y productos digitales con una estructura clara, sobria y orientada a resolver procesos reales.",
     legal: "© 2026 Codenium. Todos los derechos reservados."
   },
   sticky: {

@@ -11,14 +11,35 @@ export function Timeline({ steps }: TimelineProps) {
   return (
     <section className="soft-section relative overflow-hidden bg-foreground">
       <div className="timeline section site-shell relative z-20 py-14 text-center lg:py-20">
-        <span className="type-kicker" data-animate="fadeIn">
+        <span className="font-semibold uppercase tracking-[0.18em] text-purple-600" data-animate="fadeIn">
           Nuestro proceso de trabajo
         </span>
-        <h2 className="type-section-title mt-4" data-animate="fadeIn">
-          Como lo <span className="text-secondary-500">hacemos</span>?
+        <h2 className="text-[28px] font-bold leading-8 tracking-[-0.03em] text-slate-950 lg:text-[40px] lg:leading-[48px]" data-animate="fadeIn">
+          ¿Cómo lo <span className="text-secondary-500">hacemos</span>?
         </h2>
-        <div className="relative mx-auto mt-10 max-w-[1120px]">
-          <div className="timeline-dashed hidden lg:block" aria-hidden="true" />
+        <div className="relative mx-auto mt-[100px] max-w-[1120px]">
+          <svg
+            className="pointer-events-none absolute inset-0 hidden h-full w-full lg:block"
+            viewBox="0 0 1120 1200" // Adjusted viewBox to match the container
+            fill="none"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M160 80 Q 560 80 560 200 T 960 260 T 160 480 T 960 620 T 160 840 T 960 980"
+              stroke="url(#timeline-gradient)"
+              strokeWidth="2"
+              strokeDasharray="8 12"
+              strokeLinecap="round"
+              className="opacity-40"
+            />
+            <defs>
+              <linearGradient id="timeline-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#224a78" />
+                <stop offset="100%" stopColor="#68b8b2" />
+              </linearGradient>
+            </defs>
+          </svg>
+
           <div className="grid grid-cols-1 gap-y-8 lg:grid-cols-2">
             {steps.map((step, index) => (
               <article
