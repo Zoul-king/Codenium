@@ -6,6 +6,7 @@ import type { PublicLeadSource } from "@/lib/email-payloads";
 export interface EmailConfig {
   provider: "resend";
   from: string;
+  fallbackFrom: string;
   companyInboxes: Record<PublicLeadSource, string>;
   resendApiKey: string;
   appUrl: string;
@@ -27,6 +28,7 @@ export function getEmailConfig(): EmailConfig {
   return {
     provider: "resend",
     from: required.EMAIL_FROM,
+    fallbackFrom: env.RESEND_FALLBACK_FROM,
     companyInboxes: {
       contact: contactInbox,
       quote: quoteInbox

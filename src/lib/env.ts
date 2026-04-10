@@ -18,6 +18,7 @@ export const env = {
   SESSION_SECRET: process.env.SESSION_SECRET ?? "",
   EMAIL_PROVIDER: process.env.EMAIL_PROVIDER ?? "",
   EMAIL_FROM: process.env.EMAIL_FROM ?? "",
+  RESEND_FALLBACK_FROM: process.env.RESEND_FALLBACK_FROM ?? "Codenium <onboarding@resend.dev>",
   CONTACT_EMAIL: process.env.CONTACT_EMAIL ?? "",
   EMAIL_TO_CONTACT: process.env.EMAIL_TO_CONTACT ?? "",
   EMAIL_TO_QUOTES: process.env.EMAIL_TO_QUOTES ?? "",
