@@ -1,11 +1,12 @@
 import "server-only";
 
 import { env, requireServerEnv } from "@/lib/env";
+import type { PublicLeadSource } from "@/lib/email-payloads";
 
 export interface EmailConfig {
   provider: "resend";
   from: string;
-  companyInbox: string;
+  companyInboxes: Record<PublicLeadSource, string>;
   resendApiKey: string;
   appUrl: string;
   visibleContactEmail: string;
@@ -19,18 +20,29 @@ export function getEmailConfig(): EmailConfig {
     throw new Error(`Unsupported EMAIL_PROVIDER "${required.EMAIL_PROVIDER}". Only "resend" is implemented right now.`);
   }
 
+  const quoteInbox = extractEmailAddress(required.EMAIL_TO_QUOTES);
+  const contactInbox = extractEmailAddress(env.EMAIL_TO_CONTACT || required.EMAIL_TO_QUOTES);
+  const visibleContactEmail = extractEmailAddress(env.CONTACT_EMAIL || env.EMAIL_TO_CONTACT || required.EMAIL_TO_QUOTES || required.EMAIL_FROM);
+
   return {
     provider: "resend",
     from: required.EMAIL_FROM,
-    companyInbox: required.EMAIL_TO_QUOTES,
+    companyInboxes: {
+      contact: contactInbox,
+      quote: quoteInbox
+    },
     resendApiKey: required.RESEND_API_KEY,
     appUrl: required.APP_URL,
-    visibleContactEmail: extractEmailAddress(required.EMAIL_FROM)
+    visibleContactEmail
   };
 }
 
 export function getPublicContactEmail() {
-  return extractEmailAddress(env.EMAIL_FROM || env.EMAIL_TO_QUOTES || "");
+  return extractEmailAddress(env.CONTACT_EMAIL || env.EMAIL_TO_CONTACT || env.EMAIL_TO_QUOTES || env.EMAIL_FROM || "");
+}
+
+export function getCompanyInbox(source: PublicLeadSource) {
+  return getEmailConfig().companyInboxes[source];
 }
 
 export function getAppUrl() {

@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { PublicLeadPayload } from "@/lib/email-payloads";
-import { getEmailConfig } from "@/server/email/config";
+import { getCompanyInbox, getEmailConfig } from "@/server/email/config";
 import { sendEmail } from "@/server/email/send-email";
 import {
   buildChangeRequestEmail,
@@ -21,11 +21,10 @@ function formatReceivedAt() {
 }
 
 export async function sendContactNotificationToCompany(lead: PublicLeadPayload) {
-  const config = getEmailConfig();
   const template = buildCompanyLeadEmail({ lead, receivedAt: formatReceivedAt() });
 
   return sendEmail({
-    to: config.companyInbox,
+    to: getCompanyInbox(lead.source),
     subject: template.subject,
     text: template.text,
     html: template.html,
@@ -38,13 +37,15 @@ export async function sendQuoteNotificationToCompany(lead: PublicLeadPayload) {
 }
 
 export async function sendContactConfirmationToLead(lead: PublicLeadPayload) {
+  const config = getEmailConfig();
   const template = buildLeadConfirmationEmail({ lead, receivedAt: formatReceivedAt() });
 
   return sendEmail({
     to: lead.email,
     subject: template.subject,
     text: template.text,
-    html: template.html
+    html: template.html,
+    replyTo: config.visibleContactEmail
   });
 }
 

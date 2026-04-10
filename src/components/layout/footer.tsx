@@ -48,7 +48,11 @@ export function Footer({ contactEmail }: FooterProps) {
         <div>
           <span className="mb-6 block text-xs font-bold uppercase tracking-[0.2em] text-white">Contacto</span>
           <ul className="flex flex-col gap-y-4">
-            <li className="text-sm text-slate-400">{contactEmail}</li>
+            <li>
+              <a href={`mailto:${contactEmail}`} className="text-sm text-slate-400 transition-colors hover:text-primary-400">
+                {contactEmail}
+              </a>
+            </li>
             <li>
               <a href={`tel:${site.contact.phoneRaw}`} className="text-sm text-slate-400 transition-colors hover:text-primary-400">
                 {site.contact.phone}

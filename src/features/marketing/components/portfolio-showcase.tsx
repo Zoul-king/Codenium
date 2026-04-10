@@ -39,7 +39,7 @@ export function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
     <section className="section soft-section bg-foreground">
       <div className="site-shell py-16 lg:py-24">
         <div className="mb-12 flex flex-col items-start gap-4" data-animate="fadeInFromTop">
-          <span className="font-semibold uppercase tracking-[0.18em] text-secondary-600">Proyectos desarrollados</span>
+          <span className="font-semibold uppercase tracking-[0.18em] text-accent-500">Proyectos desarrollados</span>
           <h2 className="text-[28px] font-bold leading-tight tracking-[-0.04em] text-slate-950 lg:text-[42px]">
             Proyectos que se <span className="text-secondary-600">recorren</span> como un flujo continuo
           </h2>
@@ -81,23 +81,6 @@ export function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
               </div>
             </div>
 
-            <div className="mt-8 grid gap-2 border-t border-slate-200 pt-5">
-              {cards.map((card, index) => (
-                <button
-                  key={card.name}
-                  type="button"
-                  onClick={() => setActiveIndex(index)}
-                  className={cn(
-                    "flex items-center justify-between gap-4 border-b border-slate-200 py-3 text-left transition",
-                    index === activeIndex ? "text-slate-950" : "text-slate-500 hover:text-slate-900"
-                  )}
-                  aria-pressed={index === activeIndex}
-                >
-                  <span className="text-sm font-semibold uppercase tracking-[0.14em]">{card.name}</span>
-                  <span className={cn("h-px flex-1 transition", index === activeIndex ? "bg-secondary-500" : "bg-slate-200")} />
-                </button>
-              ))}
-            </div>
           </article>
 
           <article className="portfolio-visual-card">

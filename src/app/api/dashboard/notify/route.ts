@@ -11,7 +11,7 @@ import {
 
 export async function POST(request: Request) {
   try {
-    const payload = (await request.json()) as DashboardNotificationPayload;
+    const payload = validateDashboardNotificationPayload((await request.json()) as Partial<DashboardNotificationPayload>);
 
     switch (payload.type) {
       case "project_message":
@@ -65,4 +65,86 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
+}
+
+function validateDashboardNotificationPayload(payload: Partial<DashboardNotificationPayload>): DashboardNotificationPayload {
+  switch (payload.type) {
+    case "project_message":
+      return {
+        type: "project_message",
+        recipientEmail: requireEmail(payload.recipientEmail, "recipientEmail"),
+        recipientName: requireText(payload.recipientName, "recipientName"),
+        projectName: requireText(payload.projectName, "projectName"),
+        senderName: requireText(payload.senderName, "senderName"),
+        senderRole: payload.senderRole === "client" || payload.senderRole === "pm" ? payload.senderRole : invalidField("senderRole"),
+        message: requireText(payload.message, "message")
+      };
+    case "change_request":
+      return {
+        type: "change_request",
+        recipientEmail: requireEmail(payload.recipientEmail, "recipientEmail"),
+        recipientName: requireText(payload.recipientName, "recipientName"),
+        requestedBy: requireText(payload.requestedBy, "requestedBy"),
+        projectName: requireText(payload.projectName, "projectName"),
+        title: requireText(payload.title, "title"),
+        detail: requireText(payload.detail, "detail"),
+        priority: requireText(payload.priority, "priority")
+      };
+    case "deliverable_notification":
+      return {
+        type: "deliverable_notification",
+        recipientEmail: requireEmail(payload.recipientEmail, "recipientEmail"),
+        recipientName: requireText(payload.recipientName, "recipientName"),
+        projectName: requireText(payload.projectName, "projectName"),
+        title: requireText(payload.title, "title"),
+        kind: requireText(payload.kind, "kind"),
+        fileName: optionalText(payload.fileName),
+        registeredBy: requireText(payload.registeredBy, "registeredBy")
+      };
+    case "quote_assignment":
+      return {
+        type: "quote_assignment",
+        quoteCode: requireText(payload.quoteCode, "quoteCode"),
+        quoteTitle: requireText(payload.quoteTitle, "quoteTitle"),
+        clientEmail: requireEmail(payload.clientEmail, "clientEmail"),
+        clientName: requireText(payload.clientName, "clientName"),
+        pmEmail: requireEmail(payload.pmEmail, "pmEmail"),
+        pmName: requireText(payload.pmName, "pmName"),
+        projectName: requireText(payload.projectName, "projectName")
+      };
+    case "pm_account_created":
+      return {
+        type: "pm_account_created",
+        pmEmail: requireEmail(payload.pmEmail, "pmEmail"),
+        pmName: requireText(payload.pmName, "pmName")
+      };
+    default:
+      throw new Error("Tipo de notificacion no soportado.");
+  }
+}
+
+function requireText(value: unknown, field: string) {
+  if (typeof value !== "string" || !value.trim()) {
+    throw new Error(`Falta el campo ${field}.`);
+  }
+
+  return value.trim();
+}
+
+function optionalText(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function requireEmail(value: unknown, field: string) {
+  const normalized = requireText(value, field);
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+    throw new Error(`El campo ${field} debe ser un correo valido.`);
+  }
+
+  return normalized;
+}
+
+function invalidField(field: string): never {
+  throw new Error(`El campo ${field} no es valido.`);
 }
