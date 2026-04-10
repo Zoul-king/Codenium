@@ -6,7 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import { ContactIcon, ToolIcon, WhatsAppIcon } from "@/components/ui/icons";
 import { site } from "@/features/marketing/data/site";
 
-export function WhatsAppButton() {
+interface WhatsAppButtonProps {
+  contactEmail: string;
+}
+
+export function WhatsAppButton({ contactEmail }: WhatsAppButtonProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +48,7 @@ export function WhatsAppButton() {
             <ToolIcon className="size-4" />
             {site.contact.assistantLabel ?? "Asistente"}
           </Link>
-          <a href={`mailto:${site.contact.email}`} className="contact-hub-link" onClick={() => setOpen(false)}>
+          <a href={`mailto:${contactEmail}`} className="contact-hub-link" onClick={() => setOpen(false)}>
             <ContactIcon type="mail" />
             Correo
           </a>

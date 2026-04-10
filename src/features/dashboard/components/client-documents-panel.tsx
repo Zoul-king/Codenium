@@ -4,8 +4,10 @@ import { useMemo, useState } from "react";
 
 import { TextField } from "@/components/ui/form-controls";
 import { DashboardCard, DataRow, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
+import { getProjectClientEmail } from "@/features/dashboard/lib/recipients";
 import { getPrimaryProject, getProjectDocuments, getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
+import { sendDashboardNotification } from "@/lib/client-api";
 import { formatShortDate } from "@/lib/presenters";
 import type { Role } from "@/lib/types/domain";
 
@@ -21,6 +23,7 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
   const [title, setTitle] = useState("");
   const [kind, setKind] = useState("PDF");
   const [selectedFileName, setSelectedFileName] = useState("");
+  const [notice, setNotice] = useState("");
 
   const project = role === "client" ? clientProject : pmProjects.find((item) => item.id === selectedProjectId) ?? pmProjects[0];
   const documents = useMemo(
@@ -58,16 +61,18 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
 
           <form
             className="mt-6 grid gap-4"
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
 
               if (!project || !title.trim() || !selectedFileName) {
                 return;
               }
 
+              const nextTitle = title.trim();
+
               addProjectDocument({
                 projectId: project.id,
-                title: title.trim(),
+                title: nextTitle,
                 kind,
                 href: `#${selectedFileName.toLowerCase().replace(/\s+/g, "-")}`,
                 audience: "client"
@@ -76,6 +81,31 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
               setTitle("");
               setKind("PDF");
               setSelectedFileName("");
+
+              try {
+                const recipientEmail = getProjectClientEmail(state, project.id);
+                const recipientName = project.clientName;
+                const registeredBy = state.users.find((user) => user.id === project.pmId)?.name ?? "PM asignado";
+
+                if (!recipientEmail) {
+                  throw new Error("No encontramos el correo del cliente para notificar.");
+                }
+
+                await sendDashboardNotification({
+                  type: "deliverable_notification",
+                  recipientEmail,
+                  recipientName,
+                  projectName: project.name,
+                  title: nextTitle,
+                  kind,
+                  fileName: selectedFileName,
+                  registeredBy
+                });
+
+                setNotice("");
+              } catch (error) {
+                setNotice(error instanceof Error ? error.message : "No pudimos enviar la notificacion del entregable.");
+              }
             }}
           >
             <label className="grid gap-2 text-sm font-medium text-slate-700">
@@ -103,6 +133,7 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
             </label>
 
             {selectedFileName ? <p className="text-sm text-slate-500">Archivo listo: {selectedFileName}</p> : null}
+            {notice ? <p className="text-sm font-medium text-rose-600">{notice}</p> : null}
 
             <button type="submit" className="dashboard-button-primary w-fit">
               Registrar entregable

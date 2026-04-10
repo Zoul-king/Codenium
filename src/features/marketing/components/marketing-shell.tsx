@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/header";
 import { PageShell } from "@/features/marketing/components/page-shell";
 import { WhatsAppButton } from "@/features/marketing/components/whatsapp-button";
 import type { HeaderVariant } from "@/features/marketing/types";
+import { getPublicContactEmail } from "@/server/email/config";
 
 interface MarketingShellProps {
   children: ReactNode;
@@ -12,14 +13,16 @@ interface MarketingShellProps {
 }
 
 export function MarketingShell({ children, headerVariant }: MarketingShellProps) {
+  const contactEmail = getPublicContactEmail();
+
   return (
     <div className="page-shell">
-      <Header variant={headerVariant} />
+      <Header variant={headerVariant} contactEmail={contactEmail} />
       <PageShell>
         <main className="relative min-h-screen overflow-x-hidden">{children}</main>
       </PageShell>
-      <Footer />
-      <WhatsAppButton />
+      <Footer contactEmail={contactEmail} />
+      <WhatsAppButton contactEmail={contactEmail} />
     </div>
   );
 }

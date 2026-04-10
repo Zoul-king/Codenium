@@ -5,6 +5,8 @@ import { useMemo, useState, type ReactNode } from "react";
 
 import { ContactIcon } from "@/components/ui/icons";
 import { TextAreaField, TextField } from "@/components/ui/form-controls";
+import { submitPublicLead } from "@/lib/client-api";
+import type { PublicLeadSource } from "@/lib/email-payloads";
 import { site } from "@/features/marketing/data/site";
 import type { ContactIconType } from "@/features/marketing/types";
 import { cn } from "@/lib/utils";
@@ -24,6 +26,7 @@ interface ContactFormValues {
 }
 
 interface ContactFormProps {
+  source?: PublicLeadSource;
   kicker?: string;
   title?: string;
   description?: string;
@@ -35,6 +38,8 @@ interface ContactFormProps {
   hideContactInfo?: boolean;
   formCard?: boolean;
   hiddenFields?: Record<string, string>;
+  contactEmail?: string;
+  embedded?: boolean;
 }
 
 const defaultValues: ContactFormValues = {
@@ -46,6 +51,7 @@ const defaultValues: ContactFormValues = {
 };
 
 export function ContactForm({
+  source = "contact",
   kicker = "Contactanos",
   title = "Cuentanos que necesitas",
   description = "Compartenos el contexto y te ayudaremos a aterrizar el siguiente paso.",
@@ -56,10 +62,14 @@ export function ContactForm({
   reverseColumns = false,
   hideContactInfo = false,
   formCard = true,
-  hiddenFields
+  hiddenFields,
+  contactEmail = site.contact.email,
+  embedded = false
 }: ContactFormProps) {
   const [values, setValues] = useState<ContactFormValues>({ ...defaultValues, ...initialValues });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const hasSummary = Boolean(summary);
 
   const isDisabled = useMemo(
@@ -74,14 +84,35 @@ export function ContactForm({
     }));
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (isDisabled) {
+    if (isDisabled || submitting) {
       return;
     }
 
-    setSubmitted(true);
+    try {
+      setSubmitting(true);
+      setErrorMessage("");
+
+      await submitPublicLead({
+        source,
+        firstName: values.firstName.trim(),
+        lastName: values.lastName.trim(),
+        email: values.email.trim(),
+        phone: values.phone.trim(),
+        message: values.message.trim(),
+        originPath: source,
+        hiddenFields
+      });
+
+      setSubmitted(true);
+      setValues({ ...defaultValues });
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "No pudimos enviar tu solicitud. Intenta de nuevo.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const wrapperClassName = hasSummary
@@ -92,12 +123,14 @@ export function ContactForm({
 
   return (
     <section className="text-body-color" id="contact">
-      <div className="site-shell px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 lg:py-16">
-        <div className="contact mb-[26px] flex flex-col gap-4 text-center sm:mb-14 sm:text-left" data-animate="fadeInFromTop">
-          {kicker ? <span className="type-kicker">{kicker}</span> : null}
-          {title ? <h2 className="type-section-title">{title}</h2> : null}
-          {description ? <p className="max-w-2xl text-sm text-body-color sm:text-base">{description}</p> : null}
-        </div>
+      <div className={embedded ? "px-0 py-0" : "site-shell px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 lg:py-16"}>
+        {kicker || title || description ? (
+          <div className="contact mb-[26px] flex flex-col gap-4 text-center sm:mb-14 sm:text-left" data-animate="fadeInFromTop">
+            {kicker ? <span className="type-kicker">{kicker}</span> : null}
+            {title ? <h2 className="type-section-title">{title}</h2> : null}
+            {description ? <p className="max-w-2xl text-sm text-body-color sm:text-base">{description}</p> : null}
+          </div>
+        ) : null}
 
         {submitted ? (
           <div className="rounded-[24px] bg-white p-8 shadow-[0_16px_40px_rgba(14,20,36,0.08)]" data-animate="fadeIn">
@@ -112,7 +145,7 @@ export function ContactForm({
                 {hasSummary ? <div>{summary}</div> : null}
                 {!hasSummary ? (
                   <>
-                    <ContactInfoColumn label="Correo electronico" value={site.contact.email} icon="mail" boxed={false} />
+                    <ContactInfoColumn label="Correo electronico" value={contactEmail} icon="mail" boxed={false} />
                     <ContactInfoColumn label="Telefono" value={site.contact.phone} icon="phone" boxed={false} />
                     <ContactInfoColumn label="Ubicacion" value={`${site.contact.location}, ${site.contact.city}`} icon="location" boxed={false} />
                   </>
@@ -142,8 +175,10 @@ export function ContactForm({
                   ? Object.entries(hiddenFields).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} />)
                   : null}
 
-                <button type="submit" disabled={isDisabled} className="primary-button w-fit disabled:cursor-not-allowed disabled:opacity-70">
-                  {submitLabel}
+                {errorMessage && !submitted ? <p className="text-sm font-medium text-rose-600">{errorMessage}</p> : null}
+
+                <button type="submit" disabled={isDisabled || submitting} className="primary-button w-fit disabled:cursor-not-allowed disabled:opacity-70">
+                  {submitting ? "Enviando..." : submitLabel}
                 </button>
               </form>
             </div>

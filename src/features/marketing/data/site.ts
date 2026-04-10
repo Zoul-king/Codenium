@@ -25,7 +25,7 @@ export const site: SiteConfig = {
   contact: {
     location: "Texcoco",
     city: "Estado de México",
-    email: "GZM.manuel@gmail.com",
+    email: "",
     phone: "55 75 59 54",
     phoneRaw: "+5255755954",
     whatsapp: "https://wa.me/5255755954",

@@ -3,7 +3,11 @@ import Link from "next/link";
 import { BrandLogo, SocialIcon } from "@/components/ui/icons";
 import { site } from "@/features/marketing/data/site";
 
-export function Footer() {
+interface FooterProps {
+  contactEmail: string;
+}
+
+export function Footer({ contactEmail }: FooterProps) {
   return (
     <footer className="bg-[#0b0f1a]">
       <div className="section site-shell grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-4 lg:py-24">
@@ -44,7 +48,7 @@ export function Footer() {
         <div>
           <span className="mb-6 block text-xs font-bold uppercase tracking-[0.2em] text-white">Contacto</span>
           <ul className="flex flex-col gap-y-4">
-            <li className="text-sm text-slate-400">{site.contact.email}</li>
+            <li className="text-sm text-slate-400">{contactEmail}</li>
             <li>
               <a href={`tel:${site.contact.phoneRaw}`} className="text-sm text-slate-400 transition-colors hover:text-primary-400">
                 {site.contact.phone}

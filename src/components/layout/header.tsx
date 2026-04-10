@@ -11,9 +11,10 @@ import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   variant: HeaderVariant;
+  contactEmail: string;
 }
 
-export function Header({ variant }: HeaderProps) {
+export function Header({ variant, contactEmail }: HeaderProps) {
   const [accessOpen, setAccessOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isLight = variant === "white";
@@ -60,7 +61,7 @@ export function Header({ variant }: HeaderProps) {
       </header>
 
       <AccessOverlay open={accessOpen} onClose={() => setAccessOpen(false)} />
-      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
+      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} contactEmail={contactEmail} />
     </>
   );
 }
@@ -116,7 +117,7 @@ function AccessOverlay({ open, onClose }: OverlayProps) {
   );
 }
 
-function MobileMenu({ open, onClose }: OverlayProps) {
+function MobileMenu({ open, onClose, contactEmail }: OverlayProps & { contactEmail: string }) {
   return (
     <div className={cn("fixed inset-0 z-50 lg:hidden", open ? "pointer-events-auto" : "pointer-events-none")} aria-hidden={!open}>
       <div className={cn("absolute inset-0 bg-foreground transition-opacity duration-500", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
@@ -162,8 +163,8 @@ function MobileMenu({ open, onClose }: OverlayProps) {
           <div>
             <p className="text-sm font-semibold text-primary-500">Contacto</p>
             <div className="mt-3 space-y-2 text-sm text-body-color">
-              <a href={`mailto:${site.contact.email}`} className="block hover:text-primary-500">
-                {site.contact.email}
+              <a href={`mailto:${contactEmail}`} className="block hover:text-primary-500">
+                {contactEmail}
               </a>
               <a href={`tel:${site.contact.phoneRaw}`} className="block hover:text-primary-500">
                 {site.contact.phone}

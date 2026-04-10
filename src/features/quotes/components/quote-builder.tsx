@@ -102,6 +102,7 @@ export function QuoteBuilder() {
 
             <section id="quote-form" className="quote-panel">
               <ContactForm
+                source="quote"
                 kicker=""
                 title=""
                 description=""
@@ -110,6 +111,7 @@ export function QuoteBuilder() {
                 reverseColumns
                 hideContactInfo
                 formCard={false}
+                embedded
                 hiddenFields={hiddenFields}
               />
             </section>

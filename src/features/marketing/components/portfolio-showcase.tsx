@@ -49,8 +49,8 @@ export function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]" data-animate="fadeInFromBottom">
-          <article className="portfolio-story-card flex min-h-full flex-col">
-            <div key={activeCard.name} className="portfolio-story-copy flex min-h-full flex-col">
+          <article className="portfolio-story-card">
+            <div key={activeCard.name} className="portfolio-story-copy">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <h3 className="text-[32px] font-semibold leading-[1.02] tracking-[-0.05em] text-slate-950 lg:text-[46px]">{activeCard.name}</h3>
@@ -65,21 +65,19 @@ export function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
                 {activeCard.logo ? <Image src={activeCard.logo} alt={`${activeCard.name} logo`} width={144} height={48} className="h-10 w-auto shrink-0 object-contain lg:h-12" /> : null}
               </div>
 
-              <div className="mt-auto pt-8">
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <Link href="/quote#quote-form" className="primary-button">
-                    Cotizar proyecto similar
-                  </Link>
-                  <a
-                    href={activeCard.href ?? "#"}
-                    target={activeCard.href ? "_blank" : undefined}
-                    rel={activeCard.href ? "noreferrer" : undefined}
-                    className="accent-button inline-flex items-center gap-2"
-                  >
-                    Visitar sitio
-                    <ArrowRightIcon className="size-4" />
-                  </a>
-                </div>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/quote#quote-form" className="primary-button">
+                  Cotizar proyecto similar
+                </Link>
+                <a
+                  href={activeCard.href ?? "#"}
+                  target={activeCard.href ? "_blank" : undefined}
+                  rel={activeCard.href ? "noreferrer" : undefined}
+                  className="accent-button inline-flex items-center gap-2"
+                >
+                  Visitar sitio
+                  <ArrowRightIcon className="size-4" />
+                </a>
               </div>
             </div>
 

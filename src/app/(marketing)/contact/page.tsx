@@ -5,6 +5,7 @@ import { MarketingShell } from "@/features/marketing/components/marketing-shell"
 import { contactPage, faqs } from "@/features/marketing/data/contact";
 import { createMetadata } from "@/features/marketing/lib/metadata";
 import { parseQuoteSelectionParams } from "@/lib/quote-selection";
+import { getPublicContactEmail } from "@/server/email/config";
 
 export const metadata = createMetadata(contactPage);
 
@@ -26,12 +27,15 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
 
   const selection = parseQuoteSelectionParams(params);
   const selectedService = selection?.source === "service" ? selection.label : null;
+  const contactEmail = getPublicContactEmail();
 
   return (
     <MarketingShell headerVariant={contactPage.headerVariant}>
       <Hero hero={contactPage.hero} />
       <Faq items={faqs} />
       <ContactForm
+        source="contact"
+        contactEmail={contactEmail}
         summary={
           selectedService ? (
             <div className="rounded-[20px] border border-accent-200 bg-white px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.04)]">

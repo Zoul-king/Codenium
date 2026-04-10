@@ -3,44 +3,81 @@
 import { useState } from "react";
 
 import { TextAreaField, TextField } from "@/components/ui/form-controls";
-import { DashboardCard, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
+import { DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
+import { getProjectPmEmail } from "@/features/dashboard/lib/recipients";
+import { getPrimaryProject } from "@/features/dashboard/lib/selectors";
+import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
+import { sendDashboardNotification } from "@/lib/client-api";
 
 export function ChangeRequestPanel() {
+  const { state, addChangeRequest } = useDashboardWorkspace();
+  const project = getPrimaryProject(state, "client");
   const [changeType, setChangeType] = useState("alcance");
   const [priority, setPriority] = useState("media");
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!title.trim() || !detail.trim()) {
+    if (!project || !title.trim() || !detail.trim()) {
       return;
     }
+
+    const normalizedPriority = priority === "alta" ? "high" : priority === "baja" ? "low" : "medium";
+    const nextTitle = title.trim();
+    const nextDetail = `${detail.trim()}\n\nTipo de cambio: ${changeType}`;
+
+    addChangeRequest({
+      projectId: project.id,
+      clientId: project.clientId,
+      title: nextTitle,
+      detail: nextDetail,
+      priority: normalizedPriority
+    });
 
     setSubmitted(true);
     setTitle("");
     setDetail("");
+
+    try {
+      const recipientEmail = getProjectPmEmail(state, project.id);
+      const recipientName = state.users.find((user) => user.id === project.pmId)?.name ?? "PM asignado";
+
+      if (!recipientEmail) {
+        throw new Error("No encontramos el correo del PM para esta solicitud.");
+      }
+
+      await sendDashboardNotification({
+        type: "change_request",
+        recipientEmail,
+        recipientName,
+        requestedBy: project.clientName,
+        projectName: project.name,
+        title: nextTitle,
+        detail: nextDetail,
+        priority: normalizedPriority
+      });
+
+      setErrorMessage("");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "No pudimos enviar la notificacion del cambio.");
+    }
   }
 
   return (
-    <div className="grid h-full gap-5 xl:grid-cols-[0.82fr_1.18fr]">
-      <DashboardMutedCard>
-        <SectionHeading eyebrow="Solicitud de cambio" title="Pide un ajuste con contexto" description="El formulario ya separa tipo, prioridad y detalle para que el PM pueda responder mas rapido." />
-        <div className="mt-6 grid gap-4">
-          <div className="rounded-[22px] border border-slate-200 bg-white p-4">
-            <p className="text-sm font-semibold text-slate-500">Tipos sugeridos</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <StatusBadge tone="accent">Alcance</StatusBadge>
-              <StatusBadge>Contenido</StatusBadge>
-              <StatusBadge>UX</StatusBadge>
-              <StatusBadge>Prioridad de sprint</StatusBadge>
-            </div>
-          </div>
-          {submitted ? <div className="rounded-[20px] border border-emerald-100 bg-emerald-50 px-4 py-4 text-sm text-slate-700">Tu solicitud ya quedo lista para la siguiente revision con PM.</div> : null}
+    <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
+      <DashboardCard className="h-fit">
+        <SectionHeading eyebrow="Solicitud de cambio" title="Contexto rapido" />
+        <div className="mt-6 grid gap-4 text-sm leading-6 text-slate-600">
+          <p>Proyecto base: {project?.name ?? "Sin proyecto visible"}</p>
+          <p>Esta ruta usa el proyecto principal visible para el rol actual y mantiene la misma logica de notificacion al PM asignado.</p>
+          {submitted ? <p className="font-medium text-emerald-700">La solicitud ya quedo registrada en la vista local.</p> : null}
+          {errorMessage ? <p className="font-medium text-rose-600">{errorMessage}</p> : null}
         </div>
-      </DashboardMutedCard>
+      </DashboardCard>
 
       <DashboardCard>
         <SectionHeading eyebrow="Completar solicitud" title="Nuevo cambio" />

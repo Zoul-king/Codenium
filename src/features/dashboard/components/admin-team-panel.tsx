@@ -6,6 +6,7 @@ import { TextField } from "@/components/ui/form-controls";
 import { DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
 import { getClientUsers, getPmUsers } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
+import { sendDashboardNotification } from "@/lib/client-api";
 import type { UserState } from "@/lib/types/domain";
 
 export function AdminTeamPanel() {
@@ -13,6 +14,7 @@ export function AdminTeamPanel() {
   const clients = getClientUsers(state);
   const pms = getPmUsers(state);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
+  const [notice, setNotice] = useState("");
 
   function nextStateFor(current: UserState): UserState {
     return current === "active" ? "banned" : "active";
@@ -32,21 +34,35 @@ export function AdminTeamPanel() {
         <SectionHeading eyebrow="Crear PM" title="Nueva cuenta interna" />
         <form
           className="mt-6 grid gap-4"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
 
             if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim() || !form.phone.trim()) {
               return;
             }
 
+            const nextForm = { ...form };
             createPmAccount(form);
             setForm({ firstName: "", lastName: "", email: "", phone: "" });
+
+            try {
+              await sendDashboardNotification({
+                type: "pm_account_created",
+                pmEmail: nextForm.email,
+                pmName: `${nextForm.firstName} ${nextForm.lastName}`
+              });
+
+              setNotice("");
+            } catch (error) {
+              setNotice(error instanceof Error ? error.message : "No pudimos enviar el correo al nuevo PM.");
+            }
           }}
         >
           <TextField label="Nombre" placeholder="Nombre" value={form.firstName} onChange={(value) => setForm((current) => ({ ...current, firstName: value }))} />
           <TextField label="Apellidos" placeholder="Apellidos" value={form.lastName} onChange={(value) => setForm((current) => ({ ...current, lastName: value }))} />
           <TextField label="Correo" placeholder="correo@codenium.com" value={form.email} onChange={(value) => setForm((current) => ({ ...current, email: value }))} />
           <TextField label="Telefono" placeholder="+52..." value={form.phone} onChange={(value) => setForm((current) => ({ ...current, phone: value }))} />
+          {notice ? <p className="text-sm font-medium text-rose-600">{notice}</p> : null}
           <button type="submit" className="dashboard-button-primary w-fit">
             Crear PM
           </button>

@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 
 import { TextAreaField } from "@/components/ui/form-controls";
 import { DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
+import { getProjectPmEmail, getProjectClientEmail } from "@/features/dashboard/lib/recipients";
 import { getPrimaryProject, getPrimaryUser, getProjectMessages, getUserById, getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
+import { sendDashboardNotification } from "@/lib/client-api";
 import type { Role } from "@/lib/types/domain";
 
 interface ProjectChatPanelProps {
@@ -45,6 +47,7 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
   );
   const [activeProjectId, setActiveProjectId] = useState(role === "client" ? clientProject?.id ?? "" : projectOptions[0]?.id ?? "");
   const [draft, setDraft] = useState("");
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
     if (role === "pm" && clientOptions.length > 0 && !selectedClientId) {
@@ -67,15 +70,38 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
   const orderedMessages = useMemo(() => getProjectMessages(state, activeProject?.id), [activeProject?.id, state]);
   const counterpart = getUserById(state, role === "client" ? activeProject?.pmId : activeProject?.clientId);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!draft.trim() || !currentUser || !activeProject) {
       return;
     }
 
+    const nextMessage = draft.trim();
     addProjectMessage(activeProject.id, currentUser.id, role, draft.trim());
     setDraft("");
+
+    try {
+      const recipientEmail = role === "client" ? getProjectPmEmail(state, activeProject.id) : getProjectClientEmail(state, activeProject.id);
+
+      if (!recipientEmail || !counterpart) {
+        throw new Error("No encontramos el correo de la contraparte para notificar.");
+      }
+
+      await sendDashboardNotification({
+        type: "project_message",
+        recipientEmail,
+        recipientName: counterpart.name,
+        projectName: activeProject.name,
+        senderName: currentUser.name,
+        senderRole: role,
+        message: nextMessage
+      });
+
+      setNotice("");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "No pudimos enviar el correo del mensaje.");
+    }
   }
 
   return (
@@ -139,6 +165,7 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
 
         <form className="mt-5" onSubmit={handleSubmit}>
           <TextAreaField label="Mensaje" placeholder="Escribe un mensaje claro y accionable." rows={4} value={draft} onChange={setDraft} />
+          {notice ? <p className="mt-3 text-sm font-medium text-rose-600">{notice}</p> : null}
           <button type="submit" className="dashboard-button-primary mt-4">
             Enviar mensaje
           </button>

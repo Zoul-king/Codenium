@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 
-import { DataRow, DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
-import { getPmStats, getPmUsers, getVisibleQuotes } from "@/features/dashboard/lib/selectors";
+import { DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
+import { getPmStats, getPmUsers, getVisibleQuotes, getUserById } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
+import { sendDashboardNotification } from "@/lib/client-api";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
 import { formatLongDate, getQuoteStatusLabel } from "@/lib/presenters";
 
@@ -13,6 +14,7 @@ export function AdminQuotePanel() {
   const pmUsers = getPmUsers(state);
   const quotes = getVisibleQuotes(state, "admin");
   const [assignment, setAssignment] = useState<Record<string, string>>(Object.fromEntries(quotes.map((quote) => [quote.id, quote.pmId ?? ""])));
+  const [notice, setNotice] = useState("");
 
   return (
     <div className="grid h-full gap-6 xl:grid-cols-[minmax(0,1.15fr)_340px]">
@@ -72,7 +74,39 @@ export function AdminQuotePanel() {
                       type="button"
                       className="dashboard-button-primary"
                       disabled={!assignment[quote.id]}
-                      onClick={() => acceptQuote(quote.id, assignment[quote.id])}
+                      onClick={async () => {
+                        const pmId = assignment[quote.id];
+
+                        if (!pmId) {
+                          return;
+                        }
+
+                        acceptQuote(quote.id, pmId);
+
+                        try {
+                          const assignedPm = getUserById(state, pmId);
+                          const client = getUserById(state, quote.clientId);
+
+                          if (!assignedPm?.email || !client?.email) {
+                            throw new Error("No encontramos los correos del cliente o del PM asignado.");
+                          }
+
+                          await sendDashboardNotification({
+                            type: "quote_assignment",
+                            quoteCode: quote.code,
+                            quoteTitle: quote.title,
+                            clientEmail: client.email,
+                            clientName: client.name,
+                            pmEmail: assignedPm.email,
+                            pmName: assignedPm.name,
+                            projectName: quote.title
+                          });
+
+                          setNotice("");
+                        } catch (error) {
+                          setNotice(error instanceof Error ? error.message : "No pudimos enviar los correos de asignacion.");
+                        }
+                      }}
                     >
                       Convertir y aceptar
                     </button>
@@ -91,6 +125,7 @@ export function AdminQuotePanel() {
 
       <DashboardCard className="h-fit xl:sticky xl:top-6">
         <SectionHeading eyebrow="Asignacion" title="Capacidad visible" />
+        {notice ? <p className="mt-4 text-sm font-medium text-rose-600">{notice}</p> : null}
         <div className="mt-6 grid gap-4">
           {pmUsers.map((pm) => {
             const stats = getPmStats(state, pm.id);
