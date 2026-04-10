@@ -115,7 +115,7 @@ export function Pricing({
               </div>
               <Link
                 href={buildQuoteSelectionHref({ source: "plan", label: plan.title, profile: activeProfile })}
-                className="accent-button !justify-center bg-white"
+                className="accent-button !justify-center"
                 onClick={() => {
                   writePlanProfilePreference(activeProfile);
                   writeQuoteSelection({ source: "plan", label: plan.title, profile: activeProfile });

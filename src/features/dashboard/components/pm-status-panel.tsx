@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardCard, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
+import { DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
 import { getProjectChangeRequests, getUpcomingMilestones, getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { formatLongDate } from "@/lib/presenters";
@@ -12,26 +12,24 @@ export function PmStatusPanel() {
   const changes = projects.flatMap((project) => getProjectChangeRequests(state, project.id).map((change) => ({ ...change, projectName: project.name })));
 
   return (
-    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[1.02fr_0.98fr]">
+    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[minmax(0,1.04fr)_360px]">
       <DashboardCard className="flex min-h-0 flex-col">
-        <div className="border-b border-slate-200 pb-5">
-          <SectionHeading eyebrow="Hitos" title="Ejecucion por proyecto" />
-        </div>
+        <SectionHeading eyebrow="Hitos" title="Ejecucion por proyecto" />
 
         <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto">
-          <div className="grid gap-4">
+          <div className="grid gap-5">
             {milestones.map((milestone) => (
-              <div key={milestone.id} className="grid gap-4 border-b border-slate-100 pb-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
+              <div key={milestone.id} className="dashboard-gridline grid gap-3 pb-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <p className="text-lg font-semibold text-slate-950">{milestone.title}</p>
                     <p className="mt-1 text-sm text-slate-500">{milestone.projectName}</p>
                   </div>
-                  <StatusBadge tone={milestone.status === "done" ? "success" : milestone.status === "current" ? "accent" : "neutral"}>
+                  <p className="text-sm font-medium text-slate-500">
                     {milestone.status === "done" ? "Completado" : milestone.status === "current" ? "En curso" : "Pendiente"}
-                  </StatusBadge>
+                  </p>
                 </div>
-                <p className="text-sm leading-6 text-slate-600">{milestone.summary}</p>
+                <p className="text-sm leading-7 text-slate-600">{milestone.summary}</p>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm font-medium text-slate-500">{formatLongDate(milestone.date)}</p>
                   {milestone.status !== "done" ? (
@@ -46,24 +44,22 @@ export function PmStatusPanel() {
         </div>
       </DashboardCard>
 
-      <DashboardMutedCard>
-        <div className="border-b border-slate-200 pb-5">
-          <SectionHeading eyebrow="Cambios solicitados" title="Solicitudes del cliente" />
-        </div>
+      <DashboardCard className="h-fit xl:sticky xl:top-6">
+        <SectionHeading eyebrow="Cambios" title="Solicitudes activas" />
 
         <div className="mt-6 grid gap-4">
           {changes.map((change) => (
-            <div key={change.id} className="grid gap-2 border-b border-slate-100 pb-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <div key={change.id} className="dashboard-gridline grid gap-2 pb-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <p className="font-semibold text-slate-950">{change.title}</p>
-                <StatusBadge tone={change.priority === "high" ? "danger" : change.priority === "medium" ? "warning" : "accent"}>{change.priority}</StatusBadge>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{change.priority}</p>
               </div>
               <p className="text-sm text-slate-500">{change.projectName}</p>
               <p className="text-sm leading-6 text-slate-600">{change.detail}</p>
             </div>
           ))}
         </div>
-      </DashboardMutedCard>
+      </DashboardCard>
     </div>
   );
 }

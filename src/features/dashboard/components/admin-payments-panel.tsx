@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardCard, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
+import { DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
 import { getProjectById } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
@@ -12,54 +12,57 @@ export function AdminPaymentsPanel() {
   const accepted = state.payments.filter((payment) => payment.status === "paid");
 
   return (
-    <div className="grid h-full gap-5 xl:grid-cols-[1.1fr_0.9fr]">
+    <div className="grid h-full gap-6 xl:grid-cols-[minmax(0,1.08fr)_340px]">
       <DashboardCard>
-        <SectionHeading eyebrow="Pagos" title="Pendientes y aceptados" />
-        <div className="mt-6 grid gap-4">
+        <SectionHeading eyebrow="Pagos" title="Pendientes y programados" />
+        <div className="mt-8 grid gap-5">
           {pending.map((payment) => {
             const project = getProjectById(state, payment.projectId);
 
             return (
-              <div key={payment.id} className="rounded-[22px] border border-slate-200 bg-slate-50 p-5">
-                <div className="flex items-start justify-between gap-3">
+              <div key={payment.id} className="dashboard-gridline grid gap-3 pb-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-lg font-semibold text-slate-950">{payment.label}</p>
-                    <p className="mt-1 text-sm text-slate-500">{project?.name ?? "Sin proyecto"} · {project?.planTitle ?? "Sin plan"}</p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {project?.name ?? "Sin proyecto"} · {project?.selectionLabel ?? "Sin seleccion"}
+                    </p>
                   </div>
-                  <StatusBadge tone={payment.status === "pending" ? "warning" : "accent"}>{getPaymentStatusLabel(payment.status)}</StatusBadge>
+                  <p className="text-sm font-medium text-slate-500">{getPaymentStatusLabel(payment.status)}</p>
                 </div>
-                <p className="mt-4 text-2xl font-semibold text-slate-950">{formatCurrency(payment.amount)}</p>
-                <p className="mt-2 text-sm text-slate-600">Vence el {formatLongDate(payment.dueDate)}</p>
-                {payment.status === "pending" ? (
-                  <button type="button" className="dashboard-button-primary mt-5" onClick={() => markPaymentAsPaid(payment.id)}>
-                    Marcar aceptado
-                  </button>
-                ) : null}
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="text-2xl font-semibold tracking-[-0.04em] text-slate-950">{formatCurrency(payment.amount)}</p>
+                    <p className="mt-2 text-sm text-slate-600">Vence el {formatLongDate(payment.dueDate)}</p>
+                  </div>
+                  {payment.status === "pending" ? (
+                    <button type="button" className="dashboard-button-primary" onClick={() => markPaymentAsPaid(payment.id)}>
+                      Marcar aceptado
+                    </button>
+                  ) : null}
+                </div>
               </div>
             );
           })}
         </div>
       </DashboardCard>
 
-      <DashboardMutedCard>
-        <SectionHeading eyebrow="Aceptados" title="Historial reciente" />
-        <div className="mt-6 grid gap-3">
+      <DashboardCard className="h-fit xl:sticky xl:top-6">
+        <SectionHeading eyebrow="Historial" title="Pagos registrados" />
+        <div className="mt-6 grid gap-4">
           {accepted.map((payment) => {
             const project = getProjectById(state, payment.projectId);
 
             return (
-              <div key={payment.id} className="rounded-[20px] border border-slate-200 bg-white p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-semibold text-slate-950">{payment.label}</p>
-                  <StatusBadge tone="success">Pagado</StatusBadge>
-                </div>
-                <p className="mt-2 text-sm text-slate-600">{project?.name ?? "Sin proyecto"}</p>
-                <p className="mt-2 text-sm font-medium text-slate-500">{formatCurrency(payment.amount)}</p>
+              <div key={payment.id} className="dashboard-gridline grid gap-2 pb-4">
+                <p className="font-semibold text-slate-950">{payment.label}</p>
+                <p className="text-sm text-slate-600">{project?.name ?? "Sin proyecto"}</p>
+                <p className="text-sm text-slate-500">{formatCurrency(payment.amount)}</p>
               </div>
             );
           })}
         </div>
-      </DashboardMutedCard>
+      </DashboardCard>
     </div>
   );
 }

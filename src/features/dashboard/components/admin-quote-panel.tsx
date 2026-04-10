@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { DashboardCard, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
+import { DataRow, DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
 import { getPmStats, getPmUsers, getVisibleQuotes } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
@@ -12,43 +12,41 @@ export function AdminQuotePanel() {
   const { state, acceptQuote, setQuoteStatus } = useDashboardWorkspace();
   const pmUsers = getPmUsers(state);
   const quotes = getVisibleQuotes(state, "admin");
-  const [assignment, setAssignment] = useState<Record<string, string>>(
-    Object.fromEntries(quotes.map((quote) => [quote.id, quote.pmId ?? ""]))
-  );
+  const [assignment, setAssignment] = useState<Record<string, string>>(Object.fromEntries(quotes.map((quote) => [quote.id, quote.pmId ?? ""])));
 
   return (
-    <div className="grid h-full gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+    <div className="grid h-full gap-6 xl:grid-cols-[minmax(0,1.15fr)_340px]">
       <DashboardCard>
-        <SectionHeading eyebrow="Cotizaciones" title="Precotizaciones y conversion formal" />
-        <div className="mt-6 grid gap-4">
+        <SectionHeading eyebrow="Cotizaciones" title="Entrada comercial" />
+        <div className="mt-8 grid gap-6">
           {quotes.map((quote) => {
             const selectedPm = pmUsers.find((pm) => pm.id === assignment[quote.id]);
             const pmStats = selectedPm ? getPmStats(state, selectedPm.id) : null;
 
             return (
-              <div key={quote.id} className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
-                <div className="flex items-start justify-between gap-4">
+              <div key={quote.id} className="dashboard-gridline grid gap-5 pb-6">
+                <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">{quote.code}</p>
-                    <h2 className="mt-2 text-xl font-semibold text-slate-950">{quote.title}</h2>
-                    <p className="mt-2 text-sm text-slate-600">{quote.clientName} - {formatLongDate(quote.createdAt)}</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{quote.code}</p>
+                    <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{quote.title}</h3>
+                    <p className="mt-2 text-sm text-slate-600">
+                      {quote.clientName} · {formatLongDate(quote.createdAt)}
+                    </p>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <StatusBadge tone={quote.quoteKind === "prequote" ? "warning" : "accent"}>
-                      {quote.quoteKind === "prequote" ? "Precotizacion" : "Cotizacion formal"}
-                    </StatusBadge>
-                    <StatusBadge tone={quote.status === "approved" ? "success" : quote.status === "review" ? "warning" : "accent"}>{getQuoteStatusLabel(quote.status)}</StatusBadge>
+                  <div className="text-right text-sm text-slate-500">
+                    <p>{quote.quoteKind === "prequote" ? "Precotizacion" : "Cotizacion formal"}</p>
+                    <p className="mt-1 font-semibold text-slate-950">{getQuoteStatusLabel(quote.status)}</p>
                   </div>
                 </div>
 
-                <div className="mt-5 grid gap-4 md:grid-cols-4">
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <InfoCell label="Origen" value={quote.intakeSource === "service" ? "Servicio" : "Plan"} />
+                  <InfoCell label="Seleccion" value={quote.selectionLabel} />
                   <InfoCell label="Perfil" value={quote.planProfile === "business" ? "Empresarial" : "Personal"} />
-                  <InfoCell label="Plan" value={quote.planTitle} />
                   <InfoCell label="Estimado" value={`${formatCurrency(quote.estimate.build.min)} - ${formatCurrency(quote.estimate.build.max)}`} />
-                  <InfoCell label="Infraestructura" value={quote.infrastructure} />
                 </div>
 
-                <div className="mt-5 grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-[1fr_auto] md:items-end">
+                <div className="grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
                   <label className="grid gap-2 text-sm font-medium text-slate-700">
                     Asignar PM
                     <select
@@ -62,12 +60,13 @@ export function AdminQuotePanel() {
 
                         return (
                           <option key={pm.id} value={pm.id}>
-                            {pm.name} - {stats.activeProjects} activos / {stats.completedProjects} completados
+                            {pm.name} - {stats.activeProjects} activos / {stats.completedProjects} cerrados
                           </option>
                         );
                       })}
                     </select>
                   </label>
+
                   <div className="flex flex-wrap gap-3">
                     <button
                       type="button"
@@ -83,44 +82,37 @@ export function AdminQuotePanel() {
                   </div>
                 </div>
 
-                {pmStats ? (
-                  <div className="mt-4 rounded-[18px] border border-slate-200 bg-white px-4 py-4 text-sm text-slate-700">
-                    {selectedPm?.name} tiene {pmStats.activeProjects} proyectos activos y {pmStats.completedProjects} completados.
-                  </div>
-                ) : null}
+                {pmStats ? <p className="text-sm text-slate-500">{selectedPm?.name} lleva {pmStats.activeProjects} activos y {pmStats.completedProjects} cerrados.</p> : null}
               </div>
             );
           })}
         </div>
       </DashboardCard>
 
-      <DashboardMutedCard>
-        <SectionHeading eyebrow="Contexto" title="Asignaciones visibles" />
+      <DashboardCard className="h-fit xl:sticky xl:top-6">
+        <SectionHeading eyebrow="Asignacion" title="Capacidad visible" />
         <div className="mt-6 grid gap-4">
           {pmUsers.map((pm) => {
             const stats = getPmStats(state, pm.id);
 
             return (
-              <div key={pm.id} className="rounded-[22px] border border-slate-200 bg-white p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-lg font-semibold text-slate-950">{pm.name}</p>
-                  <StatusBadge tone={stats.activeProjects >= 2 ? "warning" : "success"}>{stats.activeProjects >= 2 ? "Carga alta" : "Disponible"}</StatusBadge>
-                </div>
-                <p className="mt-2 text-sm text-slate-600">{stats.activeProjects} activos y {stats.completedProjects} completados.</p>
+              <div key={pm.id} className="dashboard-gridline grid gap-2 pb-4">
+                <p className="font-semibold text-slate-950">{pm.name}</p>
+                <p className="text-sm text-slate-600">{stats.activeProjects} activos · {stats.completedProjects} cerrados</p>
               </div>
             );
           })}
         </div>
-      </DashboardMutedCard>
+      </DashboardCard>
     </div>
   );
 }
 
 function InfoCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-3">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</p>
-      <p className="mt-2 font-semibold text-slate-950">{value}</p>
+    <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+      <p className="mt-2 text-sm font-semibold leading-6 text-slate-950">{value}</p>
     </div>
   );
 }

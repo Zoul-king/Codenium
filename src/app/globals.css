@@ -159,6 +159,10 @@
     @apply inline-flex items-center justify-center rounded-[5px] border border-accent-500 bg-white px-6 py-2 text-sm font-extrabold text-accent-500 transition-all duration-300 ease-in-out hover:bg-accent-500 hover:text-white lg:text-base;
   }
 
+  .accent-button-solid {
+    @apply inline-flex items-center justify-center rounded-[5px] border border-accent-500 bg-accent-500 px-6 py-2 text-sm font-extrabold text-white transition-all duration-300 ease-in-out hover:bg-white hover:text-accent-500 lg:text-base;
+  }
+
   .nav-underline {
     @apply relative inline-flex items-center;
   }
@@ -222,12 +226,12 @@
   }
 
   .logo-marquee-card {
-    @apply mx-3 flex h-[124px] w-[220px] shrink-0 items-center justify-center rounded-[26px] border border-slate-200 bg-white/92 px-8 shadow-[0_16px_36px_rgba(15,23,42,0.06)] backdrop-blur-sm;
+    @apply mx-3 flex h-[124px] w-[220px] shrink-0 items-center justify-center rounded-[26px] border border-slate-200 bg-white/92 px-3 py-3 shadow-[0_16px_36px_rgba(15,23,42,0.06)] backdrop-blur-sm;
   }
 
   .logo-marquee-image {
-    @apply h-11 w-auto object-contain opacity-90 transition duration-300;
-    filter: grayscale(1);
+    @apply h-full w-full object-cover opacity-95 transition duration-300;
+    filter: grayscale(0.15);
   }
 
   .logo-marquee-card:hover .logo-marquee-image {
@@ -454,6 +458,14 @@
 
   .quote-subpanel {
     @apply rounded-[22px] border border-slate-200 bg-white/92 p-5;
+  }
+
+  .dashboard-surface {
+    @apply rounded-[22px] border border-slate-200 bg-white/82 p-5 shadow-none;
+  }
+
+  .dashboard-gridline {
+    @apply border-b border-slate-200/90 pb-4;
   }
 
   .solutions-grid {

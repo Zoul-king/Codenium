@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { TextAreaField } from "@/components/ui/form-controls";
-import { DashboardCard, DashboardMutedCard, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
+import { DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
 import { getPrimaryProject, getPrimaryUser, getProjectMessages, getUserById, getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
-import type { ProjectRecord, Role } from "@/lib/types/domain";
+import type { Role } from "@/lib/types/domain";
 
 interface ProjectChatPanelProps {
   role: Extract<Role, "client" | "pm">;
@@ -39,11 +39,11 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
   }, [pmProjects, role, state]);
 
   const [selectedClientId, setSelectedClientId] = useState(clientOptions[0]?.id ?? "");
-  const pmProjectOptions = useMemo(
+  const projectOptions = useMemo(
     () => pmProjects.filter((project) => (selectedClientId ? project.clientId === selectedClientId : true)),
     [pmProjects, selectedClientId]
   );
-  const [activeProjectId, setActiveProjectId] = useState(role === "client" ? clientProject?.id ?? "" : pmProjectOptions[0]?.id ?? "");
+  const [activeProjectId, setActiveProjectId] = useState(role === "client" ? clientProject?.id ?? "" : projectOptions[0]?.id ?? "");
   const [draft, setDraft] = useState("");
 
   useEffect(() => {
@@ -58,15 +58,12 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
       return;
     }
 
-    if (pmProjectOptions.length > 0 && !pmProjectOptions.some((project) => project.id === activeProjectId)) {
-      setActiveProjectId(pmProjectOptions[0].id);
+    if (projectOptions.length > 0 && !projectOptions.some((project) => project.id === activeProjectId)) {
+      setActiveProjectId(projectOptions[0].id);
     }
-  }, [activeProjectId, clientProject?.id, pmProjectOptions, role]);
+  }, [activeProjectId, clientProject?.id, projectOptions, role]);
 
-  const activeProject =
-    role === "client"
-      ? clientProject
-      : pmProjectOptions.find((project) => project.id === activeProjectId) ?? pmProjectOptions[0];
+  const activeProject = role === "client" ? clientProject : projectOptions.find((project) => project.id === activeProjectId) ?? projectOptions[0];
   const orderedMessages = useMemo(() => getProjectMessages(state, activeProject?.id), [activeProject?.id, state]);
   const counterpart = getUserById(state, role === "client" ? activeProject?.pmId : activeProject?.clientId);
 
@@ -82,15 +79,12 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
   }
 
   return (
-    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
+    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
       {role === "pm" ? (
-        <DashboardMutedCard className="flex min-h-0 flex-col">
-          <div className="border-b border-slate-200 pb-5">
-            <p className="dashboard-eyebrow">Chat con cliente</p>
-            <h2 className="mt-2 text-[26px] font-semibold tracking-[-0.04em] text-slate-950">Selecciona el hilo</h2>
-          </div>
+        <DashboardCard className="h-fit xl:sticky xl:top-6">
+          <SectionHeading eyebrow="Chat con clientes" title="Selecciona el hilo" />
 
-          <div className="mt-6 grid gap-4">
+          <div className="mt-6 grid gap-5">
             <label className="grid gap-2 text-sm font-medium text-slate-700">
               Usuario
               <select value={selectedClientId} onChange={(event) => setSelectedClientId(event.target.value)} className="dashboard-select">
@@ -104,41 +98,35 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
 
             <div className="grid gap-2">
               <p className="text-sm font-medium text-slate-700">Proyecto</p>
-              {pmProjectOptions.map((project) => (
+              {projectOptions.map((project) => (
                 <button
                   key={project.id}
                   type="button"
                   onClick={() => setActiveProjectId(project.id)}
-                  className={`rounded-[16px] border px-4 py-4 text-left transition ${
-                    project.id === activeProject?.id ? "border-primary-200 bg-primary-50" : "border-slate-200 bg-white hover:border-slate-300"
+                  className={`border-b px-0 py-3 text-left transition ${
+                    project.id === activeProject?.id ? "border-slate-950 text-slate-950" : "border-slate-200 text-slate-500 hover:text-slate-900"
                   }`}
                 >
-                  <p className="font-semibold text-slate-950">{project.name}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{project.summary}</p>
+                  <p className="font-semibold">{project.name}</p>
+                  <p className="mt-1 text-sm leading-6">{project.clientName}</p>
                 </button>
               ))}
             </div>
           </div>
-        </DashboardMutedCard>
+        </DashboardCard>
       ) : null}
 
       <DashboardCard className="flex min-h-0 flex-col">
-        <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-5">
-          <div>
-            <h2 className="text-[28px] font-semibold tracking-[-0.04em] text-slate-950">{activeProject?.name ?? "Sin proyecto seleccionado"}</h2>
-            <p className="mt-2 text-sm text-slate-600">{counterpart ? counterpart.name : "Sin contraparte visible"} </p>
-          </div>
-          {activeProject ? <StatusBadge tone="accent">{role === "client" ? "PM asignado" : "Cliente activo"}</StatusBadge> : null}
-        </div>
+        <SectionHeading eyebrow="Conversacion" title={activeProject?.name ?? "Sin proyecto seleccionado"} description={counterpart ? counterpart.name : undefined} />
 
-        <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto rounded-[20px] border border-slate-200 bg-slate-50 p-4">
-          <div className="space-y-3">
+        <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto border-y border-slate-200 py-5">
+          <div className="space-y-4">
             {orderedMessages.map((message) => {
               const isOwn = message.senderId === currentUser?.id;
 
               return (
                 <div key={message.id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[82%] rounded-[18px] px-4 py-3 ${isOwn ? "bg-slate-950 text-white" : "border border-slate-200 bg-white text-slate-700"}`}>
+                  <div className={`max-w-[82%] rounded-[18px] px-4 py-3 ${isOwn ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-800"}`}>
                     <p className={`text-xs font-semibold uppercase tracking-[0.12em] ${isOwn ? "text-white/60" : "text-slate-500"}`}>{message.senderName}</p>
                     <p className="mt-2 text-sm leading-6">{message.preview}</p>
                     <p className={`mt-2 text-xs ${isOwn ? "text-white/55" : "text-slate-400"}`}>{message.sentAt}</p>
@@ -149,7 +137,7 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
           </div>
         </div>
 
-        <form className="mt-5 border-t border-slate-200 pt-5" onSubmit={handleSubmit}>
+        <form className="mt-5" onSubmit={handleSubmit}>
           <TextAreaField label="Mensaje" placeholder="Escribe un mensaje claro y accionable." rows={4} value={draft} onChange={setDraft} />
           <button type="submit" className="dashboard-button-primary mt-4">
             Enviar mensaje

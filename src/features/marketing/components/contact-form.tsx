@@ -34,6 +34,7 @@ interface ContactFormProps {
   reverseColumns?: boolean;
   hideContactInfo?: boolean;
   formCard?: boolean;
+  hiddenFields?: Record<string, string>;
 }
 
 const defaultValues: ContactFormValues = {
@@ -54,7 +55,8 @@ export function ContactForm({
   initialValues,
   reverseColumns = false,
   hideContactInfo = false,
-  formCard = true
+  formCard = true,
+  hiddenFields
 }: ContactFormProps) {
   const [values, setValues] = useState<ContactFormValues>({ ...defaultValues, ...initialValues });
   const [submitted, setSubmitted] = useState(false);
@@ -136,6 +138,9 @@ export function ContactForm({
                   <TextField label="Numero de telefono *" placeholder="Numero de telefono" value={values.phone} onChange={(value) => updateValue("phone", value)} />
                 </div>
                 <TextAreaField label="Mensaje *" placeholder="Cuentanos brevemente que necesitas" value={values.message} onChange={(value) => updateValue("message", value)} />
+                {hiddenFields
+                  ? Object.entries(hiddenFields).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} />)
+                  : null}
 
                 <button type="submit" disabled={isDisabled} className="primary-button w-fit disabled:cursor-not-allowed disabled:opacity-70">
                   {submitLabel}

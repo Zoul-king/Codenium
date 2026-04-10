@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { DashboardCard, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
+import { DataRow, DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
 import { getPrimaryProject, getProjectPayments } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
@@ -12,27 +12,22 @@ export function PaymentsPanel() {
   const { state } = useDashboardWorkspace();
   const project = getPrimaryProject(state, "client");
   const payments = getProjectPayments(state, project?.id);
-  const completed = payments.filter((payment) => payment.status === "paid");
-  const pending = payments.filter((payment) => payment.status !== "paid");
+  const completed = payments.filter((payment) => payment.status === "paid").length;
+  const pending = payments.filter((payment) => payment.status !== "paid").length;
 
   return (
-    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[minmax(0,1.15fr)_320px]">
       <DashboardCard className="flex min-h-0 flex-col">
-        <div className="border-b border-slate-200 pb-5">
-          <SectionHeading eyebrow="Pagos" title={project?.name ?? "Sin proyecto"} />
-        </div>
+        <SectionHeading eyebrow="Pagos" title={project?.name ?? "Sin proyecto"} />
 
-        <div className="mt-6 grid gap-4">
+        <div className="mt-8 grid gap-5">
           {payments.map((payment) => (
-            <div key={payment.id} className="grid gap-4 border-b border-slate-100 pb-4 sm:grid-cols-[minmax(0,1fr)_160px] sm:items-center">
+            <div key={payment.id} className="dashboard-gridline grid gap-3 pb-5 sm:grid-cols-[minmax(0,1fr)_160px] sm:items-end">
               <div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <p className="text-lg font-semibold text-slate-950">{payment.label}</p>
-                  <StatusBadge tone={payment.status === "paid" ? "success" : payment.status === "pending" ? "warning" : "neutral"}>
-                    {getPaymentStatusLabel(payment.status)}
-                  </StatusBadge>
-                </div>
-                <p className="mt-2 text-sm text-slate-600">Vence el {formatLongDate(payment.dueDate)}</p>
+                <p className="text-lg font-semibold text-slate-950">{payment.label}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {getPaymentStatusLabel(payment.status)} · vence el {formatLongDate(payment.dueDate)}
+                </p>
               </div>
               <div className="text-left sm:text-right">
                 <p className="text-xl font-semibold tracking-[-0.03em] text-slate-950">{formatCurrency(payment.amount)}</p>
@@ -42,25 +37,15 @@ export function PaymentsPanel() {
         </div>
       </DashboardCard>
 
-      <DashboardMutedCard className="flex min-h-0 flex-col">
-        <div className="border-b border-slate-200 pb-5">
-          <SectionHeading eyebrow="Resumen" title="Estado del flujo financiero" />
+      <DashboardCard className="h-fit xl:sticky xl:top-6">
+        <SectionHeading eyebrow="Estado" title="Flujo financiero" />
+        <div className="mt-6">
+          <DataRow label="Pagados" value={String(completed)} className="pt-0" />
+          <DataRow label="Pendientes" value={String(pending)} />
+          <DataRow label="Canal" value="Mercado Pago" />
+          <DataRow label="Accion" value={<Link href="/contact" className="dashboard-link">Confirmar pago con administracion</Link>} className="border-b-0 pb-0" />
         </div>
-
-        <div className="mt-6 grid gap-4">
-          <div className="rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Pagos completados</p>
-            <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-slate-950">{completed.length}</p>
-          </div>
-          <div className="rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Pendientes o programados</p>
-            <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-slate-950">{pending.length}</p>
-          </div>
-          <Link href="/contact" className="dashboard-button-primary w-fit">
-            Confirmar pago con administracion
-          </Link>
-        </div>
-      </DashboardMutedCard>
+      </DashboardCard>
     </div>
   );
 }

@@ -50,20 +50,14 @@ export const services: ServiceItem[] = [
 ];
 
 export const clientLogos: ClientLogo[] = [
-  { alt: "Google", src: "https://logo.clearbit.com/google.com", href: "https://www.google.com" },
-  { alt: "Microsoft", src: "https://logo.clearbit.com/microsoft.com", href: "https://www.microsoft.com" },
-  { alt: "Amazon", src: "https://logo.clearbit.com/amazon.com", href: "https://www.amazon.com" },
-  { alt: "GitHub", src: "https://logo.clearbit.com/github.com", href: "https://github.com" },
-  { alt: "Slack", src: "https://logo.clearbit.com/slack.com", href: "https://slack.com" },
-  { alt: "Stripe", src: "https://logo.clearbit.com/stripe.com", href: "https://stripe.com" },
-  { alt: "Shopify", src: "https://logo.clearbit.com/shopify.com", href: "https://www.shopify.com" },
-  { alt: "Notion", src: "https://logo.clearbit.com/notion.so", href: "https://www.notion.so" },
-  { alt: "Codenium Footer", src: "/images/brand/codenium-footer.svg" },
-  { alt: "Codenium Header", src: "/images/brand/codenium-header.svg" },
-  { alt: "Codenium Footer", src: "/images/brand/codenium-footer.svg" },
-  { alt: "Codenium Header", src: "/images/brand/codenium-header.svg" },
-  { alt: "Codenium Footer", src: "/images/brand/codenium-footer.svg" },
-  { alt: "Codenium Header", src: "/images/brand/codenium-header.svg" }
+  { alt: "Apple", src: "/images/brand/tech-apple.svg", href: "https://www.apple.com" },
+  { alt: "NVIDIA", src: "/images/brand/tech-nvidia.svg", href: "https://www.nvidia.com" },
+  { alt: "Oracle", src: "/images/brand/tech-oracle.svg", href: "https://www.oracle.com" },
+  { alt: "Meta", src: "/images/brand/tech-meta.svg", href: "https://about.meta.com" },
+  { alt: "OpenAI", src: "/images/brand/tech-openai.svg", href: "https://openai.com" },
+  { alt: "Adobe", src: "/images/brand/tech-adobe.svg", href: "https://www.adobe.com" },
+  { alt: "Netflix", src: "/images/brand/tech-netflix.svg", href: "https://www.netflix.com" },
+  { alt: "Samsung", src: "/images/brand/tech-samsung.svg", href: "https://www.samsung.com" }
 ];
 
 export const benefits: BenefitItem[] = [

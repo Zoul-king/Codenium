@@ -20,6 +20,12 @@ interface MetricPillProps {
   tone?: "default" | "accent";
 }
 
+interface DataRowProps {
+  label: string;
+  value: ReactNode;
+  className?: string;
+}
+
 export function DashboardCard({ className, children }: CardProps) {
   return <article className={cn("dashboard-card", className)}>{children}</article>;
 }
@@ -37,6 +43,15 @@ export function SectionHeading({ eyebrow, title, description, action }: SectionH
         {description ? <p className="dashboard-copy mt-2 max-w-2xl">{description}</p> : null}
       </div>
       {action}
+    </div>
+  );
+}
+
+export function DataRow({ label, value, className }: DataRowProps) {
+  return (
+    <div className={cn("grid gap-2 border-b border-slate-200 py-3 sm:grid-cols-[180px_minmax(0,1fr)] sm:items-start", className)}>
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+      <div className="text-sm leading-6 text-slate-900">{value}</div>
     </div>
   );
 }

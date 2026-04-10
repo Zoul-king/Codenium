@@ -2,7 +2,7 @@
 
 import { ServiceIcon } from "@/components/ui/icons";
 import type { ServiceItem } from "@/features/marketing/types";
-import { buildQuoteSelectionHref, writeQuoteSelection } from "@/lib/quote-selection";
+import { buildContactSelectionHref, writeQuoteSelection } from "@/lib/quote-selection";
 
 interface ServicesProps {
   items: ServiceItem[];
@@ -49,7 +49,7 @@ export function Services({ items, compact = false }: ServicesProps) {
           {items.map((service, index) => (
             <a
               key={service.title}
-              href={buildQuoteSelectionHref({ source: "service", label: service.title })}
+              href={buildContactSelectionHref({ source: "service", label: service.title })}
               className="service-card mx-auto block w-full max-w-[360px] min-h-[230px] rounded-[24px] p-8"
               data-animate="fadeInFromBottom"
               data-delay={String(index * 0.06)}

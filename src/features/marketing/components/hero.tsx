@@ -23,7 +23,7 @@ export function Hero({ hero }: HeroProps) {
               <Link className="primary-button" href={hero.primaryCta.href} aria-label={hero.primaryCta.label}>
                 {hero.primaryCta.label}
               </Link>
-              <Link className="secondary-button" href={hero.secondaryCta.href} aria-label={hero.secondaryCta.label}>
+              <Link className="accent-button" href={hero.secondaryCta.href} aria-label={hero.secondaryCta.label}>
                 {hero.secondaryCta.label}
               </Link>
             </div>

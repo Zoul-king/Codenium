@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import type { ServicePricingItem } from "@/features/marketing/types";
-import { buildQuoteSelectionHref, writeQuoteSelection } from "@/lib/quote-selection";
+import { buildContactSelectionHref, writeQuoteSelection } from "@/lib/quote-selection";
 
 interface ServicesPricingProps {
   items: ServicePricingItem[];
@@ -37,8 +37,8 @@ export function ServicesPricing({ items }: ServicesPricingProps) {
               </div>
 
               <Link
-                href={buildQuoteSelectionHref({ source: "service", label: item.title })}
-                className="primary-button mt-10 !justify-center"
+                href={buildContactSelectionHref({ source: "service", label: item.title })}
+                className="accent-button-solid mt-10 !justify-center"
                 onClick={() => writeQuoteSelection({ source: "service", label: item.title })}
               >
                 Solicitar servicio

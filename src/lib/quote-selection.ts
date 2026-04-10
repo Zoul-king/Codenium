@@ -2,7 +2,7 @@ import type { ReadonlyURLSearchParams } from "next/navigation";
 
 import type { PlanProfile } from "@/lib/types/domain";
 
-const STORAGE_KEY = "codenium.quote-selection";
+const STORAGE_KEY = "codenium.intake-selection";
 
 export type QuoteSelectionSource = "plan" | "service";
 
@@ -25,6 +25,15 @@ export function buildQuoteSelectionHref(selection: QuoteSelection, hash = "quote
   return `/quote?${params.toString()}#${hash}`;
 }
 
+export function buildContactSelectionHref(selection: QuoteSelection, hash = "contact") {
+  const params = new URLSearchParams({
+    source: selection.source,
+    label: selection.label
+  });
+
+  return `/contact?${params.toString()}#${hash}`;
+}
+
 export function readQuoteSelection(): QuoteSelection | null {
   if (typeof window === "undefined") {
     return null;
@@ -39,6 +48,14 @@ export function writeQuoteSelection(selection: QuoteSelection) {
   }
 
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(selection));
+}
+
+export function clearQuoteSelection() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(STORAGE_KEY);
 }
 
 export function parseQuoteSelectionParams(searchParams: URLSearchParams | ReadonlyURLSearchParams): QuoteSelection | null {
