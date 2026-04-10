@@ -31,7 +31,7 @@ export function ClientMilestonesPanel() {
           <SectionHeading
             eyebrow="Hitos y cambios"
             title={project.name}
-            description={`Avance por partes: ${completedCount} de ${milestones.length} hitos completados.`}
+            description={`${completedCount} de ${milestones.length} hitos completados.`}
           />
         </div>
 
@@ -94,7 +94,7 @@ export function ClientMilestonesPanel() {
 
       <DashboardMutedCard>
         <div className="border-b border-slate-200 pb-5">
-          <SectionHeading eyebrow="Solicitar cambio" title="Registrar ajuste para el PM" description="La solicitud se guarda en la sesion actual y aparece en el panel del PM para este mismo proyecto." />
+          <SectionHeading eyebrow="Solicitar cambio" title="Registrar ajuste para el PM" />
         </div>
 
         <form

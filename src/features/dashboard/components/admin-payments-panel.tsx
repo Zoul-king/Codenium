@@ -14,7 +14,7 @@ export function AdminPaymentsPanel() {
   return (
     <div className="grid h-full gap-5 xl:grid-cols-[1.1fr_0.9fr]">
       <DashboardCard>
-        <SectionHeading eyebrow="Pagos" title="Pendientes y aceptados" description="Administracion ve los pagos ligados a proyectos y puede marcarlos como aceptados para reflejar el cambio en cliente." />
+        <SectionHeading eyebrow="Pagos" title="Pendientes y aceptados" />
         <div className="mt-6 grid gap-4">
           {pending.map((payment) => {
             const project = getProjectById(state, payment.projectId);

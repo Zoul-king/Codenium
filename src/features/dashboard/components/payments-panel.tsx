@@ -19,7 +19,7 @@ export function PaymentsPanel() {
     <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
       <DashboardCard className="flex min-h-0 flex-col">
         <div className="border-b border-slate-200 pb-5">
-          <SectionHeading eyebrow="Pagos" title={project?.name ?? "Sin proyecto"} description="Los pagos se habilitan segun el avance que el PM confirma en hitos." />
+          <SectionHeading eyebrow="Pagos" title={project?.name ?? "Sin proyecto"} />
         </div>
 
         <div className="mt-6 grid gap-4">
@@ -55,11 +55,6 @@ export function PaymentsPanel() {
           <div className="rounded-[18px] border border-slate-200 bg-white px-5 py-5">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Pendientes o programados</p>
             <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-slate-950">{pending.length}</p>
-          </div>
-          <div className="rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-            <p className="text-sm leading-7 text-slate-600">
-              Si un hito sigue en curso, el pago relacionado permanece bloqueado o pendiente hasta que el PM lo marque como finalizado.
-            </p>
           </div>
           <Link href="/contact" className="dashboard-button-primary w-fit">
             Confirmar pago con administracion

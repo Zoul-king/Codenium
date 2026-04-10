@@ -11,7 +11,7 @@ interface BenefitsProps {
 export function Benefits({ items }: BenefitsProps) {
   return (
     <section className="soft-section relative w-full">
-      <div className="section site-shell relative z-20 flex min-h-[70vh] flex-col items-center gap-x-5 gap-y-[50px] py-16 sm:flex-row lg:gap-[50px]">
+      <div className="section site-shell relative z-20 flex min-h-[70vh] flex-col items-center gap-x-5 gap-y-10 py-16 sm:flex-row lg:gap-[50px]">
         <div className="grid w-full grid-cols-1 gap-5 min-[900px]:grid-cols-2">
           {site.assets.gallery.map((image, index) => (
             <div
@@ -25,31 +25,26 @@ export function Benefits({ items }: BenefitsProps) {
           ))}
         </div>
         <article className="flex w-full flex-col items-start text-left" data-animate="fadeIn">
-          <div className="mb-6 flex flex-col gap-4">
-            <span className="type-kicker">¿Por qué Codenium?</span>
+          <div className="mb-5 flex flex-col gap-3">
+            <span className="type-kicker-accent">Por que Codenium?</span>
             <h2 className="type-section-title">
-              Construimos <span className="text-secondary-500">más que software</span>
+              Construimos <span className="text-secondary-500">mas que software</span>
             </h2>
           </div>
-          <div className="grid w-full grid-cols-1 gap-2">
+          <div className="grid w-full grid-cols-1 gap-1">
             {items.map((item) => (
-              <div key={item.title} className="flex items-start gap-4 rounded-xl border border-transparent p-3 transition-all duration-300 hover:border-slate-100 hover:bg-slate-50 md:p-4">
-                <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-50 text-secondary-500">
+              <div key={item.title} className="flex items-start gap-3 py-2.5">
+                <div className="mt-1 shrink-0 text-secondary-500">
                   <CheckIcon />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className="text-[17px] font-bold text-slate-900">
-                    {item.title}
-                  </span>
-                  <p className="text-sm leading-relaxed text-slate-600">
-                    {item.body}
-                  </p>
+                  <span className="text-[17px] font-bold text-slate-900">{item.title}</span>
+                  <p className="text-sm leading-relaxed text-slate-600">{item.body}</p>
                 </div>
               </div>
             ))}
           </div>
         </article>
-
       </div>
       <svg width="407" height="598" viewBox="0 0 407 598" fill="none" className="absolute top-0 z-10 w-full">
         <g filter="url(#benefit-glow)">

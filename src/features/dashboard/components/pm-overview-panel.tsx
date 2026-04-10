@@ -20,10 +20,10 @@ export function PmOverviewPanel() {
 
 function ProjectColumn({ title, items }: { title: string; items: ReturnType<typeof getVisibleProjects> }) {
   return (
-    <section className="rounded-[18px] border border-slate-200 bg-white px-6 py-6">
+    <section className="rounded-[18px] border border-slate-200 bg-white/78 px-6 py-6">
       <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-5">
         <div>
-          <p className="dashboard-eyebrow">Proyectos</p>
+          <p className="dashboard-eyebrow">Pipeline</p>
           <h2 className="mt-2 text-[28px] font-semibold tracking-[-0.04em] text-slate-950">{title}</h2>
         </div>
         <span className="rounded-full border border-slate-200 px-3 py-1 text-sm font-semibold text-slate-500">{items.length}</span>

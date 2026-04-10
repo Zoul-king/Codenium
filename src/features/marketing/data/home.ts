@@ -57,7 +57,13 @@ export const clientLogos: ClientLogo[] = [
   { alt: "Slack", src: "https://logo.clearbit.com/slack.com", href: "https://slack.com" },
   { alt: "Stripe", src: "https://logo.clearbit.com/stripe.com", href: "https://stripe.com" },
   { alt: "Shopify", src: "https://logo.clearbit.com/shopify.com", href: "https://www.shopify.com" },
-  { alt: "Notion", src: "https://logo.clearbit.com/notion.so", href: "https://www.notion.so" }
+  { alt: "Notion", src: "https://logo.clearbit.com/notion.so", href: "https://www.notion.so" },
+  { alt: "Codenium Footer", src: "/images/brand/codenium-footer.svg" },
+  { alt: "Codenium Header", src: "/images/brand/codenium-header.svg" },
+  { alt: "Codenium Footer", src: "/images/brand/codenium-footer.svg" },
+  { alt: "Codenium Header", src: "/images/brand/codenium-header.svg" },
+  { alt: "Codenium Footer", src: "/images/brand/codenium-footer.svg" },
+  { alt: "Codenium Header", src: "/images/brand/codenium-header.svg" }
 ];
 
 export const benefits: BenefitItem[] = [
@@ -65,6 +71,5 @@ export const benefits: BenefitItem[] = [
   { title: "Panel de seguimiento propio", body: "Control total sobre el avance de tu proyecto en tiempo real." },
   { title: "Acompanamiento continuo", body: "Asesoria constante para tomar las mejores decisiones digitales." },
   { title: "Comunicacion centralizada", body: "Toda la conversacion y archivos en un solo lugar seguro." },
-  { title: "Entregables visibles", body: "Hitos claros con resultados tangibles en cada etapa." },
-  { title: "Prioridades aterrizadas", body: "Enfoque en lo que realmente genera valor para tu negocio." }
+  { title: "Entregables visibles", body: "Hitos claros con resultados tangibles en cada etapa." }
 ];

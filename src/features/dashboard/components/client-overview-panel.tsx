@@ -18,7 +18,7 @@ export function ClientOverviewPanel() {
           <SectionHeading
             eyebrow="Proyectos"
             title="Todavia no tienes proyectos activos"
-            description="Cuando una cotizacion pase a ejecucion, aqui veras nombre, avance y acceso directo a hitos y cambios."
+            description="Cuando una cotizacion pase a ejecucion, aqui veras nombre, avance y acceso directo al seguimiento."
           />
         </DashboardCard>
       </div>
@@ -28,7 +28,7 @@ export function ClientOverviewPanel() {
   return (
     <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-6">
       <div className="border-b border-slate-200 pb-5">
-        <SectionHeading eyebrow="Proyectos" title="Tus proyectos" description="Selecciona un proyecto para revisar hitos, cambios y seguimiento operativo." />
+        <SectionHeading eyebrow="Proyectos" title="Tus proyectos" />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
@@ -36,7 +36,7 @@ export function ClientOverviewPanel() {
           <Link
             key={project.id}
             href="/dashboard/client/milestones"
-            className="grid gap-4 rounded-[18px] border border-slate-200 bg-white px-5 py-5 transition hover:border-primary-200 hover:bg-primary-50/50"
+            className="grid gap-4 rounded-[18px] border border-slate-200 bg-white/85 px-5 py-5 transition hover:border-primary-200 hover:bg-primary-50/50"
           >
             <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
               <div>

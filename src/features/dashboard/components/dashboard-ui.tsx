@@ -34,7 +34,7 @@ export function SectionHeading({ eyebrow, title, description, action }: SectionH
       <div>
         {eyebrow ? <p className="dashboard-eyebrow">{eyebrow}</p> : null}
         <h1 className="dashboard-title mt-2">{title}</h1>
-        {description ? <p className="dashboard-copy mt-3 max-w-2xl">{description}</p> : null}
+        {description ? <p className="dashboard-copy mt-2 max-w-2xl">{description}</p> : null}
       </div>
       {action}
     </div>

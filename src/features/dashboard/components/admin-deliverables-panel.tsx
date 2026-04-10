@@ -12,7 +12,7 @@ export function AdminDeliverablesPanel() {
   return (
     <div className="grid h-full gap-5 xl:grid-cols-[1fr_1fr]">
       <DashboardCard>
-        <SectionHeading eyebrow="Entregables" title="Plantillas listas para cliente" description="No se agrego auditorias a la UI principal; la arquitectura de documentos queda lista para crecer desde aqui." />
+        <SectionHeading eyebrow="Entregables" title="Plantillas listas para cliente" />
         <div className="mt-6 grid gap-4">
           {templates.map((template) => (
             <div key={template.id} className="rounded-[22px] border border-slate-200 bg-slate-50 p-5">

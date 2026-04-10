@@ -37,12 +37,14 @@ export function QuoteEstimator({ draft, onChange }: QuoteEstimatorProps) {
   }
 
   return (
-    <div className="rounded-[28px] border border-white bg-gradient-to-br from-transparent to-white/85 p-6 shadow-[0_18px_44px_rgba(14,20,36,0.08)]">
-      <div className="max-w-2xl space-y-3">
-        <span className="type-kicker">Cotizador</span>
+    <div className="quote-panel">
+      <div className="flex flex-col gap-3 border-b border-slate-200 pb-5">
         <h2 className="text-[28px] font-bold leading-8 text-body-color lg:text-[34px] lg:leading-[42px]">
           Escoge lo mas cercano a tu proyecto para obtener una cotizacion inicial
         </h2>
+        <p className="max-w-3xl text-sm leading-7 text-slate-600">
+          Define categoria, objetivo, infraestructura, tiempos y capacidades para aterrizar un rango de trabajo mas claro.
+        </p>
       </div>
 
       <div className="mt-6 space-y-3">

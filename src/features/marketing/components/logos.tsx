@@ -1,4 +1,5 @@
 import type { ClientLogo } from "@/features/marketing/types";
+import { cn } from "@/lib/utils";
 
 interface LogosProps {
   items: ClientLogo[];
@@ -11,7 +12,7 @@ export function Logos({ items }: LogosProps) {
     <section className="section relative bg-foreground">
       <div className="site-shell flex min-h-[52vh] flex-col gap-10 py-16">
         <article className="flex w-full flex-col gap-4 text-center md:text-left" data-animate="fadeInFromTop">
-          <span className="type-kicker">Nuestros clientes</span>
+          <span className="type-kicker-accent">Nuestros clientes</span>
           <h2 className="text-[28px] font-bold leading-8 tracking-[-0.03em] text-slate-950 lg:text-[40px] lg:leading-[48px]">
             Empresas que <span className="text-primary-500">inspiran</span> productos digitales de alto nivel
           </h2>
@@ -22,22 +23,26 @@ export function Logos({ items }: LogosProps) {
 
         <article className="logo-marquee-shell" data-animate="fadeInFromBottom" aria-label="Empresas tecnologicas de referencia">
           <div className="logo-marquee-track">
-            {repeated.map((item, index) => (
-              <a
-                key={`${item.alt}-${index}`}
-                href={item.href ?? "#"}
-                target={item.href ? "_blank" : undefined}
-                rel={item.href ? "noreferrer" : undefined}
-                className="logo-marquee-card"
-                aria-label={item.alt}
-              >
-                {item.src ? (
-                  <img src={item.src} alt={item.alt} className="logo-marquee-image" loading="lazy" />
-                ) : (
-                  <span className="text-xl font-semibold tracking-[-0.04em] text-slate-800">{item.alt}</span>
-                )}
-              </a>
-            ))}
+            {repeated.map((item, index) => {
+              const isCodeniumLogo = item.src?.includes("codenium-");
+
+              return (
+                <a
+                  key={`${item.alt}-${index}`}
+                  href={item.href ?? "#"}
+                  target={item.href ? "_blank" : undefined}
+                  rel={item.href ? "noreferrer" : undefined}
+                  className="logo-marquee-card"
+                  aria-label={item.alt}
+                >
+                  {item.src ? (
+                    <img src={item.src} alt={item.alt} className={cn("logo-marquee-image", isCodeniumLogo ? "brightness-0 opacity-100" : null)} loading="lazy" />
+                  ) : (
+                    <span className="text-xl font-semibold tracking-[-0.04em] text-slate-800">{item.alt}</span>
+                  )}
+                </a>
+              );
+            })}
           </div>
         </article>
       </div>

@@ -1,5 +1,4 @@
 import { Hero } from "@/features/marketing/components/hero";
-import { PortfolioHighlights } from "@/features/marketing/components/portfolio-highlights";
 import { MarketingShell } from "@/features/marketing/components/marketing-shell";
 import { PortfolioShowcase } from "@/features/marketing/components/portfolio-showcase";
 import { portfolioCards, portfolioPage } from "@/features/marketing/data/portfolio";
@@ -11,7 +10,6 @@ export default function PortfolioPage() {
   return (
     <MarketingShell headerVariant={portfolioPage.headerVariant}>
       <Hero hero={portfolioPage.hero} />
-      <PortfolioHighlights />
       <PortfolioShowcase cards={portfolioCards} />
     </MarketingShell>
   );

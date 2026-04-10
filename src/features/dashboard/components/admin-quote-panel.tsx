@@ -19,7 +19,7 @@ export function AdminQuotePanel() {
   return (
     <div className="grid h-full gap-5 xl:grid-cols-[1.2fr_0.8fr]">
       <DashboardCard>
-        <SectionHeading eyebrow="Cotizaciones" title="Precotizaciones y conversion formal" description="Aceptar una precotizacion la convierte en cotizacion formal y crea el proyecto visible para el resto del sistema." />
+        <SectionHeading eyebrow="Cotizaciones" title="Precotizaciones y conversion formal" />
         <div className="mt-6 grid gap-4">
           {quotes.map((quote) => {
             const selectedPm = pmUsers.find((pm) => pm.id === assignment[quote.id]);

@@ -33,7 +33,7 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
     <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[1.02fr_0.98fr]">
       <DashboardCard className="flex min-h-0 flex-col">
         <div className="border-b border-slate-200 pb-5">
-          <SectionHeading eyebrow="Entregables" title={project?.name ?? "Sin proyecto"} description="Documentos visibles dentro de la demo actual, conectados al proyecto seleccionado." />
+          <SectionHeading eyebrow="Entregables" title={project?.name ?? "Sin proyecto"} />
         </div>
 
         <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto">
@@ -60,7 +60,7 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
       {role === "pm" ? (
         <DashboardMutedCard>
           <div className="border-b border-slate-200 pb-5">
-            <SectionHeading eyebrow="Subir archivo" title="Enviar entregable al proyecto" description="Selecciona cliente y proyecto, luego registra el archivo para que aparezca tambien en el panel del cliente." />
+            <SectionHeading eyebrow="Subir archivo" title="Enviar entregable al proyecto" />
           </div>
 
           <form
@@ -108,13 +108,7 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
           <div className="border-b border-slate-200 pb-5">
             <SectionHeading eyebrow="Contexto" title={project?.planTitle ?? "Plan activo"} />
           </div>
-          <div className="mt-6 grid gap-4">
-            <div className="rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-              <p className="text-sm leading-7 text-slate-600">
-                Los entregables se muestran con relacion al proyecto activo y al plan contratado para que el seguimiento no dependa de mensajes dispersos.
-              </p>
-            </div>
-          </div>
+          <div className="mt-6 text-sm text-slate-600">Documentos vinculados al proyecto y al plan activo.</div>
         </DashboardMutedCard>
       )}
     </div>

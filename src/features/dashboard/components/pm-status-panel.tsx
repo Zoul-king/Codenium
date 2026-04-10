@@ -15,7 +15,7 @@ export function PmStatusPanel() {
     <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[1.02fr_0.98fr]">
       <DashboardCard className="flex min-h-0 flex-col">
         <div className="border-b border-slate-200 pb-5">
-          <SectionHeading eyebrow="Hitos" title="Ejecucion por proyecto" description="Finalizar un hito desbloquea el pago relacionado en el panel del cliente." />
+          <SectionHeading eyebrow="Hitos" title="Ejecucion por proyecto" />
         </div>
 
         <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto">

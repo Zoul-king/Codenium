@@ -36,7 +36,7 @@ export function AdminOverviewPanel() {
     <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
       <DashboardCard className="flex min-h-0 flex-col">
         <div className="border-b border-slate-200 pb-5">
-          <SectionHeading eyebrow="Metricas" title="Resumen administrativo del dia" description="Lectura real sobre actividad, cotizaciones, usuarios y proyectos del sistema demo." />
+          <SectionHeading eyebrow="Metricas" title="Pulso administrativo del dia" />
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">

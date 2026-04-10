@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import type { PlanCatalog } from "@/features/marketing/types";
 import { readPlanProfilePreference, writePlanProfilePreference } from "@/lib/plan-profile";
+import { buildQuoteSelectionHref, writeQuoteSelection } from "@/lib/quote-selection";
 import type { PlanProfile } from "@/lib/types/domain";
 import { cn } from "@/lib/utils";
 
@@ -112,7 +113,14 @@ export function Pricing({
                   ))}
                 </ul>
               </div>
-              <Link href="/quote" className="primary-button !justify-center">
+              <Link
+                href={buildQuoteSelectionHref({ source: "plan", label: plan.title, profile: activeProfile })}
+                className="accent-button !justify-center bg-white"
+                onClick={() => {
+                  writePlanProfilePreference(activeProfile);
+                  writeQuoteSelection({ source: "plan", label: plan.title, profile: activeProfile });
+                }}
+              >
                 Obtener estimado
               </Link>
             </article>

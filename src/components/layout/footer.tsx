@@ -8,7 +8,7 @@ export function Footer() {
     <footer className="bg-[#0b0f1a]">
       <div className="section site-shell grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-4 lg:py-24">
         <div className="lg:col-span-2">
-          <BrandLogo variant="white" className="w-[140px]" />
+          <BrandLogo variant="footer" className="w-[176px] md:w-[212px]" />
           <p className="mt-6 max-w-sm text-sm leading-8 text-slate-400">
             {site.footer.body}
           </p>

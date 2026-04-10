@@ -33,6 +33,7 @@ interface ContactFormProps {
   initialValues?: Partial<ContactFormValues>;
   reverseColumns?: boolean;
   hideContactInfo?: boolean;
+  formCard?: boolean;
 }
 
 const defaultValues: ContactFormValues = {
@@ -52,7 +53,8 @@ export function ContactForm({
   successMessage = "Recibimos tu mensaje. Muy pronto daremos seguimiento para continuar contigo.",
   initialValues,
   reverseColumns = false,
-  hideContactInfo = false
+  hideContactInfo = false,
+  formCard = true
 }: ContactFormProps) {
   const [values, setValues] = useState<ContactFormValues>({ ...defaultValues, ...initialValues });
   const [submitted, setSubmitted] = useState(false);
@@ -90,9 +92,9 @@ export function ContactForm({
     <section className="text-body-color" id="contact">
       <div className="site-shell px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 lg:py-16">
         <div className="contact mb-[26px] flex flex-col gap-4 text-center sm:mb-14 sm:text-left" data-animate="fadeInFromTop">
-          <span className="type-kicker">{kicker}</span>
-          <h2 className="type-section-title">{title}</h2>
-          <p className="max-w-2xl text-sm text-body-color sm:text-base">{description}</p>
+          {kicker ? <span className="type-kicker">{kicker}</span> : null}
+          {title ? <h2 className="type-section-title">{title}</h2> : null}
+          {description ? <p className="max-w-2xl text-sm text-body-color sm:text-base">{description}</p> : null}
         </div>
 
         {submitted ? (
@@ -118,7 +120,11 @@ export function ContactForm({
 
             <div className={cn(hasSummary ? (reverseColumns ? "lg:order-first" : "") : hideContactInfo ? "w-full max-w-4xl" : "col-span-1 w-full sm:col-span-2")} data-animate="fadeInFromRight" data-delay="0.12">
               <form
-                className={hasSummary || hideContactInfo ? "flex w-full flex-col gap-6 rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)] sm:p-8" : "flex w-full flex-col gap-6"}
+                className={
+                  hasSummary || hideContactInfo
+                    ? cn("flex w-full flex-col gap-6", formCard ? "rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)] sm:p-8" : "p-0")
+                    : "flex w-full flex-col gap-6"
+                }
                 onSubmit={handleSubmit}
               >
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -146,13 +152,13 @@ export function ContactForm({
 export function ContactStrip() {
   return (
     <section className="section overflow-hidden bg-foreground">
-      <div className="site-shell flex flex-col gap-10 py-16 lg:flex-row lg:items-center lg:justify-between lg:gap-[50px]">
-        <article className="contact flex w-full flex-col items-center gap-5 text-center lg:max-w-[640px] lg:items-start lg:gap-6 lg:text-left" data-animate="fadeInFromLeft">
-          <span className="type-kicker">Contactanos</span>
+      <div className="site-shell flex flex-col gap-10 py-16">
+        <article className="contact flex w-full flex-col items-center gap-5 text-center lg:max-w-[860px] lg:items-start lg:gap-6 lg:text-left" data-animate="fadeInFromLeft">
+          <span className="type-kicker-accent">Contactanos</span>
           <h2 className="type-section-title">
             Tienes algun <span className="text-primary-500">proyecto</span> en mente?
           </h2>
-          <p className="max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
+          <p className="max-w-[760px] text-sm leading-7 text-slate-600 sm:text-base">
             Comparte tu idea y te ayudaremos a convertirla en un siguiente paso claro.
             Nuestro equipo esta listo para asesorarte en la mejor ruta tecnica para tu negocio.
           </p>
@@ -160,30 +166,13 @@ export function ContactStrip() {
             <Link href="/quote" className="primary-button">
               Cotizar proyecto
             </Link>
-            <Link href="/contact" className="inline-flex items-center justify-center rounded-[5px] border border-primary-500 bg-white px-6 py-2 text-sm font-extrabold text-primary-500 transition-all duration-500 ease-in-out hover:bg-primary-500 hover:text-white lg:text-base">
+            <Link href="/contact" className="accent-button">
               Enviar mensaje
             </Link>
           </div>
         </article>
-        <article className="info-cards grid w-full gap-4 sm:grid-cols-3 lg:w-auto lg:shrink-0 lg:grid-cols-1" data-animate="fadeInFromRight" data-delay="0.12">
-          <ContactInfoRow label="Correo electronico" value={site.contact.email} icon="mail" />
-          <ContactInfoRow label="Telefono" value={site.contact.phone} icon="phone" />
-          <ContactInfoRow label="Ubicacion" value={`${site.contact.location}, ${site.contact.city}`} icon="location" />
-        </article>
       </div>
     </section>
-  );
-}
-
-function ContactInfoRow({ label, value, icon }: ContactInfoProps) {
-  return (
-    <div className="flex w-full items-start gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:bg-primary-50">
-      <ContactIcon type={icon} />
-      <div>
-        <span className="mb-1 inline-block text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</span>
-        <p className="text-sm font-medium text-slate-900">{value}</p>
-      </div>
-    </div>
   );
 }
 

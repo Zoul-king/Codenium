@@ -25,7 +25,7 @@ export function AdminTeamPanel() {
   return (
     <div className="grid h-full gap-5 xl:grid-cols-[1.1fr_0.9fr]">
       <DashboardCard>
-        <SectionHeading eyebrow="Usuarios" title="Clientes y PM visibles" description="Administracion puede revisar estados, banear o reactivar cuentas y crear nuevos PMs para la demo." />
+        <SectionHeading eyebrow="Usuarios" title="Clientes y PM visibles" />
         <div className="mt-6 grid gap-5 lg:grid-cols-2">
           <UserColumn title="Clientes" items={clients} onToggleState={setUserState} nextStateFor={nextStateFor} />
           <UserColumn title="Project Managers" items={pms} onToggleState={setUserState} nextStateFor={nextStateFor} />
