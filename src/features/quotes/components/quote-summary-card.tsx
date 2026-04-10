@@ -1,61 +1,51 @@
 import { getInfrastructureLabel, getSelectedQuoteModules } from "@/features/quotes/lib/content";
-import { formatCurrency, getQuoteViability } from "@/features/quotes/lib/estimate";
+import { formatCurrency } from "@/features/quotes/lib/estimate";
 import { quoteProjectTypes } from "@/lib/mocks";
+import type { QuoteSelection } from "@/lib/quote-selection";
 import type { QuoteDraft, QuoteEstimate } from "@/lib/types/domain";
 
 interface QuoteSummaryCardProps {
   draft: QuoteDraft;
   estimate: QuoteEstimate;
+  selection: QuoteSelection | null;
   compact?: boolean;
 }
 
-export function QuoteSummaryCard({ draft, estimate, compact = false }: QuoteSummaryCardProps) {
+export function QuoteSummaryCard({ draft, estimate, selection, compact = false }: QuoteSummaryCardProps) {
   const projectType = quoteProjectTypes.find((item) => item.key === draft.projectType);
   const selectedModules = getSelectedQuoteModules(draft.modules);
   const featureModules = selectedModules.filter((item) => item.group === "feature");
-  const serviceModules = selectedModules.filter((item) => item.group === "service");
-  const viability = getQuoteViability(draft, estimate);
-  const timelineLabel = draft.timelinePreference === "1-4" ? "1 a 4 meses" : draft.timelinePreference === "5-7" ? "5 a 7 meses" : "8 a 12 meses";
-  const planLabel = draft.planProfile === "business" ? "Perfil empresarial" : "Perfil personal";
+  const timelineLabel = draft.timelinePreference === "1-4" ? "de 1 a 4 meses" : draft.timelinePreference === "5-7" ? "de 5 a 7 meses" : draft.timelinePreference === "8-12" ? "de 8 a 12 meses" : "Pendiente";
+  const compactList = featureModules.length > 0 ? featureModules.map((item) => item.label).join(", ") : "Pendiente";
 
   return (
-    <aside className={compact ? "rounded-[24px] border border-slate-200 bg-slate-50 p-5" : "quote-sticky rounded-[24px] border border-white bg-gradient-to-br from-transparent to-white/80 p-5 shadow-[0_16px_30px_rgba(15,23,32,0.06)]"}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-secondary-600">Resumen del proyecto</p>
+    <aside className={compact ? "rounded-[24px] border border-slate-200 bg-slate-50 p-5" : "quote-sticky quote-panel"}>
+      <div className="dashboard-gridline">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-500">Resumen</p>
+        <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-body-color">
+          {estimate.build.max > 0 ? `${formatCurrency(estimate.build.min)} - ${formatCurrency(estimate.build.max)}` : "Pendiente"}
+        </p>
+      </div>
 
-      <div className="mt-4 rounded-[18px] bg-white p-4 shadow-[0_10px_18px_rgba(15,23,32,0.04)]">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-500">Estimado inicial</p>
-          <p className="mt-1.5 text-2xl font-semibold tracking-[-0.04em] text-body-color">
-            {formatCurrency(estimate.build.min)} - {formatCurrency(estimate.build.max)}
-          </p>
-          <p className="mt-2 text-sm leading-6 text-body-color/75">Un rango orientativo para ordenar alcance, prioridades y el siguiente paso.</p>
-        </div>
-
-        <div className="mt-5 space-y-4 border-t border-black/10 pt-4">
-          <DetailItem label="Perfil" value={planLabel} />
-          <DetailItem label="Categoria" value={projectType?.label ?? "Sin definir"} />
-          <DetailItem label="Objetivo" value={draft.objective.trim() || "Aun no escribes el objetivo del proyecto."} />
-          <DetailItem label="Infraestructura" value={getInfrastructureLabel(draft.infrastructure)} />
-          <DetailItem label="Tiempo deseado" value={timelineLabel} />
-          <DetailItem label="Capacidades" value={featureModules.length > 0 ? featureModules.map((item) => item.label).join(", ") : "Sin adicionales por ahora"} />
-          <DetailItem label="Soporte posterior" value={serviceModules.length > 0 ? serviceModules.map((item) => item.label).join(", ") : "No incluido por ahora"} />
-        </div>
-
-        <div className="mt-5 border-t border-black/10 pt-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-secondary-600">Lectura de viabilidad</p>
-          <p className="mt-2 text-sm font-semibold text-body-color">{viability.label}</p>
-          <p className="mt-2 text-sm leading-6 text-body-color/75">{viability.description}</p>
-        </div>
+      <div className="mt-5 grid gap-4">
+        <SummaryRow label="Plan seleccionado" value={selection?.source === "plan" ? selection.label : "Pendiente"} />
+        <SummaryRow label="Categoria" value={projectType?.label ?? "Pendiente"} />
+        <SummaryRow label="Objetivo" value={draft.objective.trim() || "Pendiente"} />
+        <SummaryRow label="Infraestructura" value={draft.infrastructure ? getInfrastructureLabel(draft.infrastructure) : "Pendiente"} />
+        <SummaryRow label="Tiempo aproximado" value={timelineLabel} />
+        <SummaryRow label="Capacidades complementarias" value={compactList} />
       </div>
     </aside>
   );
 }
 
-function DetailItem({ label, value }: { label: string; value: string }) {
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  const isPending = value === "Pendiente";
+
   return (
-    <div>
+    <div className="grid gap-1 border-b border-slate-200 pb-3">
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-body-color/45">{label}</p>
-      <p className="mt-1.5 text-sm font-semibold leading-6 text-body-color">{value}</p>
+      <p className={isPending ? "text-sm font-medium text-slate-500" : "text-sm font-semibold leading-6 text-body-color"}>{value}</p>
     </div>
   );
 }

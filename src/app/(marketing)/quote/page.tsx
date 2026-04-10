@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { Hero } from "@/features/marketing/components/hero";
 import { MarketingShell } from "@/features/marketing/components/marketing-shell";
 import { quotePage } from "@/features/marketing/data/quote";
@@ -10,7 +12,9 @@ export default function QuotePage() {
   return (
     <MarketingShell headerVariant={quotePage.headerVariant}>
       <Hero hero={quotePage.hero} />
-      <QuoteBuilder />
+      <Suspense fallback={null}>
+        <QuoteBuilder />
+      </Suspense>
     </MarketingShell>
   );
 }

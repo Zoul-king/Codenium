@@ -5,6 +5,8 @@ import { useMemo, useState, type ReactNode } from "react";
 
 import { ContactIcon } from "@/components/ui/icons";
 import { TextAreaField, TextField } from "@/components/ui/form-controls";
+import { submitPublicLead } from "@/lib/client-api";
+import type { PublicLeadSource } from "@/lib/email-payloads";
 import { site } from "@/features/marketing/data/site";
 import type { ContactIconType } from "@/features/marketing/types";
 import { cn } from "@/lib/utils";
@@ -24,6 +26,7 @@ interface ContactFormValues {
 }
 
 interface ContactFormProps {
+  source?: PublicLeadSource;
   kicker?: string;
   title?: string;
   description?: string;
@@ -33,6 +36,10 @@ interface ContactFormProps {
   initialValues?: Partial<ContactFormValues>;
   reverseColumns?: boolean;
   hideContactInfo?: boolean;
+  formCard?: boolean;
+  hiddenFields?: Record<string, string>;
+  contactEmail?: string;
+  embedded?: boolean;
 }
 
 const defaultValues: ContactFormValues = {
@@ -44,6 +51,7 @@ const defaultValues: ContactFormValues = {
 };
 
 export function ContactForm({
+  source = "contact",
   kicker = "Contactanos",
   title = "Cuentanos que necesitas",
   description = "Compartenos el contexto y te ayudaremos a aterrizar el siguiente paso.",
@@ -52,10 +60,16 @@ export function ContactForm({
   successMessage = "Recibimos tu mensaje. Muy pronto daremos seguimiento para continuar contigo.",
   initialValues,
   reverseColumns = false,
-  hideContactInfo = false
+  hideContactInfo = false,
+  formCard = true,
+  hiddenFields,
+  contactEmail = site.contact.email,
+  embedded = false
 }: ContactFormProps) {
   const [values, setValues] = useState<ContactFormValues>({ ...defaultValues, ...initialValues });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const hasSummary = Boolean(summary);
 
   const isDisabled = useMemo(
@@ -70,14 +84,35 @@ export function ContactForm({
     }));
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (isDisabled) {
+    if (isDisabled || submitting) {
       return;
     }
 
-    setSubmitted(true);
+    try {
+      setSubmitting(true);
+      setErrorMessage("");
+
+      await submitPublicLead({
+        source,
+        firstName: values.firstName.trim(),
+        lastName: values.lastName.trim(),
+        email: values.email.trim(),
+        phone: values.phone.trim(),
+        message: values.message.trim(),
+        originPath: source,
+        hiddenFields
+      });
+
+      setSubmitted(true);
+      setValues({ ...defaultValues });
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "No pudimos enviar tu solicitud. Intenta de nuevo.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const wrapperClassName = hasSummary
@@ -88,12 +123,14 @@ export function ContactForm({
 
   return (
     <section className="text-body-color" id="contact">
-      <div className="site-shell px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 lg:py-16">
-        <div className="contact mb-[26px] flex flex-col gap-4 text-center sm:mb-14 sm:text-left" data-animate="fadeInFromTop">
-          <span className="type-kicker">{kicker}</span>
-          <h2 className="type-section-title">{title}</h2>
-          <p className="max-w-2xl text-sm text-body-color sm:text-base">{description}</p>
-        </div>
+      <div className={embedded ? "px-0 py-0" : "site-shell px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 lg:py-16"}>
+        {kicker || title || description ? (
+          <div className="contact mb-[26px] flex flex-col gap-4 text-center sm:mb-14 sm:text-left" data-animate="fadeInFromTop">
+            {kicker ? <span className="type-kicker">{kicker}</span> : null}
+            {title ? <h2 className="type-section-title">{title}</h2> : null}
+            {description ? <p className="max-w-2xl text-sm text-body-color sm:text-base">{description}</p> : null}
+          </div>
+        ) : null}
 
         {submitted ? (
           <div className="rounded-[24px] bg-white p-8 shadow-[0_16px_40px_rgba(14,20,36,0.08)]" data-animate="fadeIn">
@@ -108,7 +145,7 @@ export function ContactForm({
                 {hasSummary ? <div>{summary}</div> : null}
                 {!hasSummary ? (
                   <>
-                    <ContactInfoColumn label="Correo electronico" value={site.contact.email} icon="mail" boxed={false} />
+                    <ContactInfoColumn label="Correo electronico" value={contactEmail} icon="mail" boxed={false} />
                     <ContactInfoColumn label="Telefono" value={site.contact.phone} icon="phone" boxed={false} />
                     <ContactInfoColumn label="Ubicacion" value={`${site.contact.location}, ${site.contact.city}`} icon="location" boxed={false} />
                   </>
@@ -118,7 +155,11 @@ export function ContactForm({
 
             <div className={cn(hasSummary ? (reverseColumns ? "lg:order-first" : "") : hideContactInfo ? "w-full max-w-4xl" : "col-span-1 w-full sm:col-span-2")} data-animate="fadeInFromRight" data-delay="0.12">
               <form
-                className={hasSummary || hideContactInfo ? "flex w-full flex-col gap-6 rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)] sm:p-8" : "flex w-full flex-col gap-6"}
+                className={
+                  hasSummary || hideContactInfo
+                    ? cn("flex w-full flex-col gap-6", formCard ? "rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)] sm:p-8" : "p-0")
+                    : "flex w-full flex-col gap-6"
+                }
                 onSubmit={handleSubmit}
               >
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -130,9 +171,14 @@ export function ContactForm({
                   <TextField label="Numero de telefono *" placeholder="Numero de telefono" value={values.phone} onChange={(value) => updateValue("phone", value)} />
                 </div>
                 <TextAreaField label="Mensaje *" placeholder="Cuentanos brevemente que necesitas" value={values.message} onChange={(value) => updateValue("message", value)} />
+                {hiddenFields
+                  ? Object.entries(hiddenFields).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} />)
+                  : null}
 
-                <button type="submit" disabled={isDisabled} className="primary-button w-fit disabled:cursor-not-allowed disabled:opacity-70">
-                  {submitLabel}
+                {errorMessage && !submitted ? <p className="text-sm font-medium text-rose-600">{errorMessage}</p> : null}
+
+                <button type="submit" disabled={isDisabled || submitting} className="primary-button w-fit disabled:cursor-not-allowed disabled:opacity-70">
+                  {submitting ? "Enviando..." : submitLabel}
                 </button>
               </form>
             </div>
@@ -146,13 +192,13 @@ export function ContactForm({
 export function ContactStrip() {
   return (
     <section className="section overflow-hidden bg-foreground">
-      <div className="site-shell flex flex-col gap-10 py-16 lg:flex-row lg:items-center lg:justify-between lg:gap-[50px]">
-        <article className="contact flex w-full flex-col items-center gap-5 text-center lg:max-w-[640px] lg:items-start lg:gap-6 lg:text-left" data-animate="fadeInFromLeft">
-          <span className="type-kicker">Contactanos</span>
+      <div className="site-shell flex flex-col gap-10 py-16">
+        <article className="contact flex w-full flex-col items-center gap-5 text-center lg:max-w-[860px] lg:items-start lg:gap-6 lg:text-left" data-animate="fadeInFromLeft">
+          <span className="type-kicker-accent">Contactanos</span>
           <h2 className="type-section-title">
             Tienes algun <span className="text-primary-500">proyecto</span> en mente?
           </h2>
-          <p className="max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
+          <p className="max-w-[760px] text-sm leading-7 text-slate-600 sm:text-base">
             Comparte tu idea y te ayudaremos a convertirla en un siguiente paso claro.
             Nuestro equipo esta listo para asesorarte en la mejor ruta tecnica para tu negocio.
           </p>
@@ -160,30 +206,13 @@ export function ContactStrip() {
             <Link href="/quote" className="primary-button">
               Cotizar proyecto
             </Link>
-            <Link href="/contact" className="inline-flex items-center justify-center rounded-[5px] border border-primary-500 bg-white px-6 py-2 text-sm font-extrabold text-primary-500 transition-all duration-500 ease-in-out hover:bg-primary-500 hover:text-white lg:text-base">
+            <Link href="/contact" className="accent-button">
               Enviar mensaje
             </Link>
           </div>
         </article>
-        <article className="info-cards grid w-full gap-4 sm:grid-cols-3 lg:w-auto lg:shrink-0 lg:grid-cols-1" data-animate="fadeInFromRight" data-delay="0.12">
-          <ContactInfoRow label="Correo electronico" value={site.contact.email} icon="mail" />
-          <ContactInfoRow label="Telefono" value={site.contact.phone} icon="phone" />
-          <ContactInfoRow label="Ubicacion" value={`${site.contact.location}, ${site.contact.city}`} icon="location" />
-        </article>
       </div>
     </section>
-  );
-}
-
-function ContactInfoRow({ label, value, icon }: ContactInfoProps) {
-  return (
-    <div className="flex w-full items-start gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:bg-primary-50">
-      <ContactIcon type={icon} />
-      <div>
-        <span className="mb-1 inline-block text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</span>
-        <p className="text-sm font-medium text-slate-900">{value}</p>
-      </div>
-    </div>
   );
 }
 

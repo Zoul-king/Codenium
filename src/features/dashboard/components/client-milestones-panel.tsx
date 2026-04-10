@@ -4,8 +4,10 @@ import { useState } from "react";
 
 import { TextAreaField, TextField } from "@/components/ui/form-controls";
 import { DashboardCard, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
+import { getProjectPmEmail } from "@/features/dashboard/lib/recipients";
 import { getPrimaryProject, getProjectChangeRequests, getProjectMilestones } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
+import { sendDashboardNotification } from "@/lib/client-api";
 import { formatLongDate } from "@/lib/presenters";
 
 export function ClientMilestonesPanel() {
@@ -16,6 +18,7 @@ export function ClientMilestonesPanel() {
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [priority, setPriority] = useState<"high" | "medium" | "low">("medium");
+  const [notice, setNotice] = useState("");
 
   if (!project) {
     return null;
@@ -31,7 +34,7 @@ export function ClientMilestonesPanel() {
           <SectionHeading
             eyebrow="Hitos y cambios"
             title={project.name}
-            description={`Avance por partes: ${completedCount} de ${milestones.length} hitos completados.`}
+            description={`${completedCount} de ${milestones.length} hitos completados.`}
           />
         </div>
 
@@ -94,28 +97,56 @@ export function ClientMilestonesPanel() {
 
       <DashboardMutedCard>
         <div className="border-b border-slate-200 pb-5">
-          <SectionHeading eyebrow="Solicitar cambio" title="Registrar ajuste para el PM" description="La solicitud se guarda en la sesion actual y aparece en el panel del PM para este mismo proyecto." />
+          <SectionHeading eyebrow="Solicitar cambio" title="Registrar ajuste para el PM" />
         </div>
 
         <form
           className="mt-6 grid gap-4"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
 
             if (!title.trim() || !detail.trim()) {
               return;
             }
 
+            const nextTitle = title.trim();
+            const nextDetail = detail.trim();
+
             addChangeRequest({
               projectId: project.id,
               clientId: project.clientId,
-              title: title.trim(),
-              detail: detail.trim(),
+              title: nextTitle,
+              detail: nextDetail,
               priority
             });
 
             setTitle("");
             setDetail("");
+
+            try {
+              const recipientEmail = getProjectPmEmail(state, project.id);
+
+              const pmName = state.users.find((user) => user.id === project.pmId)?.name ?? "PM asignado";
+
+              if (!recipientEmail) {
+                throw new Error("No encontramos el correo del PM asignado.");
+              }
+
+              await sendDashboardNotification({
+                type: "change_request",
+                recipientEmail,
+                recipientName: pmName,
+                requestedBy: project.clientName,
+                projectName: project.name,
+                title: nextTitle,
+                detail: nextDetail,
+                priority
+              });
+
+              setNotice("");
+            } catch (error) {
+              setNotice(error instanceof Error ? error.message : "No pudimos enviar la notificacion del cambio.");
+            }
           }}
         >
           <TextField label="Titulo del cambio" placeholder="Ej. Ajustar orden del home comercial" value={title} onChange={setTitle} />
@@ -128,6 +159,7 @@ export function ClientMilestonesPanel() {
             </select>
           </label>
           <TextAreaField label="Descripcion" placeholder="Explica el cambio y el impacto esperado." rows={6} value={detail} onChange={setDetail} />
+          {notice ? <p className="text-sm font-medium text-rose-600">{notice}</p> : null}
           <button type="submit" className="dashboard-button-primary w-fit">
             Enviar solicitud
           </button>

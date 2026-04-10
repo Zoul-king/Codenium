@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 
 import type { ServicePricingItem } from "@/features/marketing/types";
+import { buildContactSelectionHref, writeQuoteSelection } from "@/lib/quote-selection";
 
 interface ServicesPricingProps {
   items: ServicePricingItem[];
@@ -11,8 +14,8 @@ export function ServicesPricing({ items }: ServicesPricingProps) {
     <section className="soft-section relative">
       <div className="section site-shell relative z-20 py-20 text-black">
         <div className="mb-12 text-center lg:text-left" data-animate="fadeInFromTop">
-          <span className="type-kicker">Nuestros servicios</span>
-          <h2 className="type-section-title mt-4">¿Como podemos ayudarte?</h2>
+          <span className="type-kicker-accent">Nuestros servicios</span>
+          <h2 className="type-section-title mt-4">Como podemos ayudarte?</h2>
         </div>
 
         <div className="grid grid-cols-1 gap-[22px] xl:grid-cols-3">
@@ -33,7 +36,11 @@ export function ServicesPricing({ items }: ServicesPricingProps) {
                 <p className="text-sm leading-7 text-slate-600 lg:text-base lg:leading-7">{item.description}</p>
               </div>
 
-              <Link href="/contact" className="primary-button mt-10 !justify-center">
+              <Link
+                href={buildContactSelectionHref({ source: "service", label: item.title })}
+                className="accent-button-solid mt-10 !justify-center"
+                onClick={() => writeQuoteSelection({ source: "service", label: item.title })}
+              >
                 Solicitar servicio
               </Link>
             </article>

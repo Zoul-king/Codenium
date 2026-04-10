@@ -3,9 +3,11 @@
 import { useMemo, useState } from "react";
 
 import { TextField } from "@/components/ui/form-controls";
-import { DashboardCard, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
+import { DashboardCard, DataRow, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
+import { getProjectClientEmail } from "@/features/dashboard/lib/recipients";
 import { getPrimaryProject, getProjectDocuments, getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
+import { sendDashboardNotification } from "@/lib/client-api";
 import { formatShortDate } from "@/lib/presenters";
 import type { Role } from "@/lib/types/domain";
 
@@ -20,7 +22,8 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
   const [selectedProjectId, setSelectedProjectId] = useState(pmProjects[0]?.id ?? "");
   const [title, setTitle] = useState("");
   const [kind, setKind] = useState("PDF");
-  const [href, setHref] = useState("");
+  const [selectedFileName, setSelectedFileName] = useState("");
+  const [notice, setNotice] = useState("");
 
   const project = role === "client" ? clientProject : pmProjects.find((item) => item.id === selectedProjectId) ?? pmProjects[0];
   const documents = useMemo(
@@ -30,27 +33,22 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
   );
 
   return (
-    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[1.02fr_0.98fr]">
+    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[minmax(0,1.06fr)_340px]">
       <DashboardCard className="flex min-h-0 flex-col">
-        <div className="border-b border-slate-200 pb-5">
-          <SectionHeading eyebrow="Entregables" title={project?.name ?? "Sin proyecto"} description="Documentos visibles dentro de la demo actual, conectados al proyecto seleccionado." />
-        </div>
+        <SectionHeading eyebrow="Entregables" title={project?.name ?? "Sin proyecto"} />
 
         <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto">
-          <div className="grid gap-4">
+          <div className="grid gap-5">
             {documents.map((document) => (
-              <div key={document.id} className="grid gap-4 border-b border-slate-100 pb-4 sm:grid-cols-[minmax(0,1fr)_120px] sm:items-start">
-                <div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <p className="text-lg font-semibold text-slate-950">{document.title}</p>
-                    <StatusBadge tone="accent">{document.kind}</StatusBadge>
-                  </div>
-                  <p className="mt-2 text-sm text-slate-500">Actualizado el {formatShortDate(document.updatedAt)}</p>
-                  <a href={document.href} className="dashboard-link mt-3 inline-flex">
-                    Abrir documento
-                  </a>
+              <div key={document.id} className="dashboard-gridline grid gap-2 pb-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-lg font-semibold text-slate-950">{document.title}</p>
+                  <p className="text-sm font-medium text-slate-500">{document.kind}</p>
                 </div>
-                <div className="text-left text-sm text-slate-500 sm:text-right">{document.audience === "shared" ? "Compartido" : "Cliente"}</div>
+                <p className="text-sm text-slate-500">Actualizado el {formatShortDate(document.updatedAt)}</p>
+                <a href={document.href} className="dashboard-link mt-1 inline-flex">
+                  Abrir documento
+                </a>
               </div>
             ))}
           </div>
@@ -58,31 +56,56 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
       </DashboardCard>
 
       {role === "pm" ? (
-        <DashboardMutedCard>
-          <div className="border-b border-slate-200 pb-5">
-            <SectionHeading eyebrow="Subir archivo" title="Enviar entregable al proyecto" description="Selecciona cliente y proyecto, luego registra el archivo para que aparezca tambien en el panel del cliente." />
-          </div>
+        <DashboardCard className="h-fit xl:sticky xl:top-6">
+          <SectionHeading eyebrow="Subir PDF" title="Registrar entregable" />
 
           <form
             className="mt-6 grid gap-4"
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
 
-              if (!project || !title.trim()) {
+              if (!project || !title.trim() || !selectedFileName) {
                 return;
               }
 
+              const nextTitle = title.trim();
+
               addProjectDocument({
                 projectId: project.id,
-                title: title.trim(),
+                title: nextTitle,
                 kind,
-                href,
+                href: `#${selectedFileName.toLowerCase().replace(/\s+/g, "-")}`,
                 audience: "client"
               });
 
               setTitle("");
               setKind("PDF");
-              setHref("");
+              setSelectedFileName("");
+
+              try {
+                const recipientEmail = getProjectClientEmail(state, project.id);
+                const recipientName = project.clientName;
+                const registeredBy = state.users.find((user) => user.id === project.pmId)?.name ?? "PM asignado";
+
+                if (!recipientEmail) {
+                  throw new Error("No encontramos el correo del cliente para notificar.");
+                }
+
+                await sendDashboardNotification({
+                  type: "deliverable_notification",
+                  recipientEmail,
+                  recipientName,
+                  projectName: project.name,
+                  title: nextTitle,
+                  kind,
+                  fileName: selectedFileName,
+                  registeredBy
+                });
+
+                setNotice("");
+              } catch (error) {
+                setNotice(error instanceof Error ? error.message : "No pudimos enviar la notificacion del entregable.");
+              }
             }}
           >
             <label className="grid gap-2 text-sm font-medium text-slate-700">
@@ -95,27 +118,37 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
                 ))}
               </select>
             </label>
-            <TextField label="Nombre del archivo" placeholder="Ej. Wireframes validados" value={title} onChange={setTitle} />
-            <TextField label="Tipo" placeholder="PDF, Figma, Sheet..." value={kind} onChange={setKind} />
-            <TextField label="Enlace o referencia" placeholder="https://... o deja vacio para demo interna" value={href} onChange={setHref} />
+
+            <TextField label="Nombre del archivo" placeholder="Ej. Propuesta validada" value={title} onChange={setTitle} />
+            <TextField label="Tipo" placeholder="PDF" value={kind} onChange={setKind} />
+
+            <label className="grid gap-2 text-sm font-medium text-slate-700">
+              PDF
+              <input
+                type="file"
+                accept="application/pdf"
+                className="block w-full rounded-[16px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"
+                onChange={(event) => setSelectedFileName(event.target.files?.[0]?.name ?? "")}
+              />
+            </label>
+
+            {selectedFileName ? <p className="text-sm text-slate-500">Archivo listo: {selectedFileName}</p> : null}
+            {notice ? <p className="text-sm font-medium text-rose-600">{notice}</p> : null}
+
             <button type="submit" className="dashboard-button-primary w-fit">
               Registrar entregable
             </button>
           </form>
-        </DashboardMutedCard>
+        </DashboardCard>
       ) : (
-        <DashboardMutedCard>
-          <div className="border-b border-slate-200 pb-5">
-            <SectionHeading eyebrow="Contexto" title={project?.planTitle ?? "Plan activo"} />
+        <DashboardCard className="h-fit xl:sticky xl:top-6">
+          <SectionHeading eyebrow="Resumen" title={project?.selectionLabel ?? "Proyecto activo"} />
+          <div className="mt-6">
+            <DataRow label="Origen" value={project?.intakeSource === "service" ? "Servicio" : "Plan"} className="pt-0" />
+            <DataRow label="Entrega mas cercana" value={documents[0] ? formatShortDate(documents[0].updatedAt) : "Pendiente"} />
+            <DataRow label="Documentos visibles" value={String(documents.length)} className="border-b-0 pb-0" />
           </div>
-          <div className="mt-6 grid gap-4">
-            <div className="rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-              <p className="text-sm leading-7 text-slate-600">
-                Los entregables se muestran con relacion al proyecto activo y al plan contratado para que el seguimiento no dependa de mensajes dispersos.
-              </p>
-            </div>
-          </div>
-        </DashboardMutedCard>
+        </DashboardCard>
       )}
     </div>
   );

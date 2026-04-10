@@ -21,6 +21,7 @@ export type QuoteProjectType =
   | "web-app"
   | "automation"
   | "redesign";
+export type IntakeSource = "plan" | "service";
 
 export type QuoteModuleKey =
   | "custom-design"
@@ -77,10 +78,10 @@ export interface QuoteModuleOption {
 
 export interface QuoteDraft {
   planProfile: PlanProfile;
-  projectType: QuoteProjectType;
+  projectType: QuoteProjectType | null;
   objective: string;
-  infrastructure: InfrastructureOption;
-  timelinePreference: QuoteTimelinePreference;
+  infrastructure: InfrastructureOption | null;
+  timelinePreference: QuoteTimelinePreference | null;
   modules: QuoteModuleKey[];
 }
 
@@ -102,6 +103,8 @@ export interface QuoteRecord {
   id: string;
   code: string;
   title: string;
+  intakeSource: IntakeSource;
+  selectionLabel: string;
   quoteKind: QuoteKind;
   role: Role;
   clientId: string;
@@ -112,7 +115,7 @@ export interface QuoteRecord {
   acceptedAt?: string;
   planProfile: PlanProfile;
   planTitle: string;
-  projectType: QuoteProjectType;
+  projectType: QuoteProjectType | null;
   infrastructure: InfrastructureOption;
   modules: QuoteModuleKey[];
   estimate: QuoteEstimate;
@@ -130,6 +133,8 @@ export interface ProjectRecord {
   pmId: string;
   quoteCode: string;
   quoteId: string;
+  intakeSource: IntakeSource;
+  selectionLabel: string;
   planProfile: PlanProfile;
   planTitle: string;
   summary: string;

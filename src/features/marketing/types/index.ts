@@ -114,6 +114,8 @@ export interface SiteConfig {
     brand: {
       pink: string;
       white: string;
+      header: string;
+      footer: string;
     };
     hero: {
       home: string;

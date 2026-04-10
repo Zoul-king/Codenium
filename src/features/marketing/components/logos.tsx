@@ -11,12 +11,12 @@ export function Logos({ items }: LogosProps) {
     <section className="section relative bg-foreground">
       <div className="site-shell flex min-h-[52vh] flex-col gap-10 py-16">
         <article className="flex w-full flex-col gap-4 text-center md:text-left" data-animate="fadeInFromTop">
-          <span className="type-kicker">Nuestros clientes</span>
+          <span className="type-kicker-accent">Nuestros clientes</span>
           <h2 className="text-[28px] font-bold leading-8 tracking-[-0.03em] text-slate-950 lg:text-[40px] lg:leading-[48px]">
             Empresas que <span className="text-primary-500">inspiran</span> productos digitales de alto nivel
           </h2>
           <p className="mx-auto max-w-3xl text-sm leading-7 text-slate-600 md:mx-0 md:text-base">
-            Reimaginamos la banda de clientes como una referencia visual continua: una cinta sobria, automatica y sin cortes bruscos, alineada con el resto del sistema.
+            Referencias visuales del ecosistema tecnologico que inspiran estandares de producto, ejecucion y detalle.
           </p>
         </article>
 

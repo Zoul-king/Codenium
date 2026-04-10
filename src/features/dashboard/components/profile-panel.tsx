@@ -35,7 +35,7 @@ export function ProfilePanel({ role }: ProfilePanelProps) {
       <section className="rounded-[18px] border border-slate-200 bg-[linear-gradient(180deg,rgba(248,250,252,0.74)_0%,rgba(241,245,249,0.62)_100%)] px-6 py-6">
         <div className="border-b border-slate-200 pb-5">
           <p className="dashboard-eyebrow">{role === "client" ? "Seguimiento" : "Relacion operativa"}</p>
-          <h2 className="mt-2 text-[28px] font-semibold tracking-[-0.04em] text-slate-950">{role === "client" ? "Tu PM asignado y plan" : "Cliente principal y plan"}</h2>
+          <h2 className="mt-2 text-[28px] font-semibold tracking-[-0.04em] text-slate-950">{role === "client" ? "Tu PM asignado y proyecto" : "Cliente principal y proyecto"}</h2>
         </div>
 
         <div className="mt-6 grid gap-4">
@@ -43,15 +43,16 @@ export function ProfilePanel({ role }: ProfilePanelProps) {
             <>
               <ProfileRow label="PM asignado" value={pm?.name ?? "Pendiente"} />
               <ProfileRow label="Correo PM" value={pm?.email ?? "-"} />
-              <ProfileRow label="Plan contratado" value={project?.planTitle ?? "Sin proyecto"} />
-              <ProfileRow label="Perfil contratado" value={project?.planProfile === "business" ? "Empresarial" : "Personal"} />
+              <ProfileRow label="Origen" value={project?.intakeSource === "service" ? "Servicio" : "Plan"} />
+              <ProfileRow label="Seleccion contratada" value={project?.selectionLabel ?? "Sin proyecto"} />
             </>
           ) : (
             <>
               <ProfileRow label="Cliente principal" value={client?.name ?? "Pendiente"} />
               <ProfileRow label="Correo cliente" value={client?.email ?? "-"} />
               <ProfileRow label="Proyecto activo" value={project?.name ?? "Sin proyecto"} />
-              <ProfileRow label="Plan del proyecto" value={project?.planTitle ?? "Sin proyecto"} />
+              <ProfileRow label="Origen" value={project?.intakeSource === "service" ? "Servicio" : "Plan"} />
+              <ProfileRow label="Seleccion del proyecto" value={project?.selectionLabel ?? "Sin proyecto"} />
             </>
           )}
         </div>

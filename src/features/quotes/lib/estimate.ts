@@ -40,11 +40,19 @@ function sumTimeline(modules: QuoteModuleKey[]) {
 }
 
 export function calculateQuoteEstimate(draft: QuoteDraft): QuoteEstimate {
-  const projectType = quoteProjectTypes.find((item) => item.key === draft.projectType) ?? quoteProjectTypes[0];
+  const projectType = quoteProjectTypes.find((item) => item.key === draft.projectType);
   const buildModules = draft.modules.filter((item) => item !== "maintenance");
   const buildRange = sumModuleRange(buildModules, "price");
   const monthlyRange = sumModuleRange(draft.modules, "monthly");
   const timelineRange = sumTimeline(buildModules);
+  if (!projectType || !draft.infrastructure) {
+    return {
+      build: { min: 0, max: 0 },
+      monthly: monthlyRange,
+      timelineWeeks: { min: 0, max: 0 }
+    };
+  }
+
   const infrastructureRange =
     draft.infrastructure === "new"
       ? { build: { min: 6000, max: 12000 }, timeline: { min: 1, max: 2 } }
@@ -68,6 +76,14 @@ export function calculateQuoteEstimate(draft: QuoteDraft): QuoteEstimate {
 }
 
 export function getQuoteViability(draft: QuoteDraft, estimate: QuoteEstimate) {
+  if (!draft.projectType || !draft.infrastructure || !draft.timelinePreference) {
+    return {
+      tone: "pending" as const,
+      label: "Pendiente",
+      description: "Completa las variables principales para leer viabilidad con mas precision."
+    };
+  }
+
   const featureCount = draft.modules.filter((item) => item !== "maintenance").length;
   const timelineMax = estimate.timelineWeeks.max;
   const buildMax = estimate.build.max;

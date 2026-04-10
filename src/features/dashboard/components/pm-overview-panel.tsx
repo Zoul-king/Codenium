@@ -1,5 +1,6 @@
 "use client";
 
+import { DataRow, DashboardCard, ProgressBar, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
 import { getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { formatShortDate, getProjectStatusLabel } from "@/lib/presenters";
@@ -11,44 +12,51 @@ export function PmOverviewPanel() {
   const completedProjects = projects.filter((project) => project.status === "done");
 
   return (
-    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[1fr_1fr]">
-      <ProjectColumn title="En proceso" items={activeProjects} />
-      <ProjectColumn title="Terminados" items={completedProjects} />
-    </div>
-  );
-}
+    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[minmax(0,1.2fr)_320px]">
+      <DashboardCard className="flex min-h-0 flex-col">
+        <SectionHeading eyebrow="Pipeline" title="Tus proyectos" />
 
-function ProjectColumn({ title, items }: { title: string; items: ReturnType<typeof getVisibleProjects> }) {
-  return (
-    <section className="rounded-[18px] border border-slate-200 bg-white px-6 py-6">
-      <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-5">
-        <div>
-          <p className="dashboard-eyebrow">Proyectos</p>
-          <h2 className="mt-2 text-[28px] font-semibold tracking-[-0.04em] text-slate-950">{title}</h2>
-        </div>
-        <span className="rounded-full border border-slate-200 px-3 py-1 text-sm font-semibold text-slate-500">{items.length}</span>
-      </div>
-
-      <div className="mt-6 grid gap-4">
-        {items.map((project) => (
-          <div key={project.id} className="grid gap-4 border-b border-slate-100 pb-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-lg font-semibold text-slate-950">{project.name}</p>
-                <p className="mt-1 text-sm text-slate-500">{project.clientName}</p>
+        <div className="mt-8 grid gap-6">
+          {projects.map((project) => (
+            <article key={project.id} className="dashboard-gridline grid gap-4 pb-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-semibold tracking-[-0.03em] text-slate-950">{project.name}</h3>
+                  <p className="mt-1 text-sm text-slate-500">{project.clientName}</p>
+                </div>
+                <p className="text-sm font-medium text-slate-500">{getProjectStatusLabel(project.status)}</p>
               </div>
-              <span className="rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                {getProjectStatusLabel(project.status)}
-              </span>
-            </div>
-            <p className="text-sm leading-6 text-slate-600">{project.summary}</p>
-            <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
-              <p>Entrega: {formatShortDate(project.dueDate)}</p>
-              <p>Avance: {project.progress}%</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
+
+              <p className="text-sm leading-7 text-slate-600">{project.summary}</p>
+
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-end">
+                <div>
+                  <div className="mb-2 flex items-center justify-between text-sm font-medium text-slate-600">
+                    <span>Avance</span>
+                    <span>{project.progress}%</span>
+                  </div>
+                  <ProgressBar value={project.progress} />
+                </div>
+
+                <div className="grid gap-2 text-sm text-slate-600 lg:text-right">
+                  <p>{project.intakeSource === "service" ? "Servicio" : "Plan"}: {project.selectionLabel}</p>
+                  <p>Entrega: {formatShortDate(project.dueDate)}</p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </DashboardCard>
+
+      <DashboardCard className="h-fit xl:sticky xl:top-6">
+        <SectionHeading eyebrow="Carga" title="Lectura operativa" />
+        <div className="mt-6">
+          <DataRow label="En proceso" value={String(activeProjects.length)} className="pt-0" />
+          <DataRow label="Terminados" value={String(completedProjects.length)} />
+          <DataRow label="Servicios activos" value={String(activeProjects.filter((project) => project.intakeSource === "service").length)} />
+          <DataRow label="Planes activos" value={String(activeProjects.filter((project) => project.intakeSource === "plan").length)} className="border-b-0 pb-0" />
+        </div>
+      </DashboardCard>
+    </div>
   );
 }

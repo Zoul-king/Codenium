@@ -3,9 +3,10 @@
 import { useState } from "react";
 
 import { TextField } from "@/components/ui/form-controls";
-import { DashboardCard, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
+import { DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
 import { getClientUsers, getPmUsers } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
+import { sendDashboardNotification } from "@/lib/client-api";
 import type { UserState } from "@/lib/types/domain";
 
 export function AdminTeamPanel() {
@@ -13,49 +14,60 @@ export function AdminTeamPanel() {
   const clients = getClientUsers(state);
   const pms = getPmUsers(state);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
+  const [notice, setNotice] = useState("");
 
   function nextStateFor(current: UserState): UserState {
-    if (current === "active") {
-      return "banned";
-    }
-
-    return "active";
+    return current === "active" ? "banned" : "active";
   }
 
   return (
-    <div className="grid h-full gap-5 xl:grid-cols-[1.1fr_0.9fr]">
+    <div className="grid h-full gap-6 xl:grid-cols-[minmax(0,1.08fr)_340px]">
       <DashboardCard>
-        <SectionHeading eyebrow="Usuarios" title="Clientes y PM visibles" description="Administracion puede revisar estados, banear o reactivar cuentas y crear nuevos PMs para la demo." />
-        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+        <SectionHeading eyebrow="Usuarios" title="Clientes y project managers" />
+        <div className="mt-8 grid gap-8 lg:grid-cols-2">
           <UserColumn title="Clientes" items={clients} onToggleState={setUserState} nextStateFor={nextStateFor} />
-          <UserColumn title="Project Managers" items={pms} onToggleState={setUserState} nextStateFor={nextStateFor} />
+          <UserColumn title="Project managers" items={pms} onToggleState={setUserState} nextStateFor={nextStateFor} />
         </div>
       </DashboardCard>
 
-      <DashboardMutedCard>
+      <DashboardCard className="h-fit xl:sticky xl:top-6">
         <SectionHeading eyebrow="Crear PM" title="Nueva cuenta interna" />
         <form
-          className="mt-6 grid gap-4 rounded-[22px] border border-slate-200 bg-white p-5"
-          onSubmit={(event) => {
+          className="mt-6 grid gap-4"
+          onSubmit={async (event) => {
             event.preventDefault();
 
             if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim() || !form.phone.trim()) {
               return;
             }
 
+            const nextForm = { ...form };
             createPmAccount(form);
             setForm({ firstName: "", lastName: "", email: "", phone: "" });
+
+            try {
+              await sendDashboardNotification({
+                type: "pm_account_created",
+                pmEmail: nextForm.email,
+                pmName: `${nextForm.firstName} ${nextForm.lastName}`
+              });
+
+              setNotice("");
+            } catch (error) {
+              setNotice(error instanceof Error ? error.message : "No pudimos enviar el correo al nuevo PM.");
+            }
           }}
         >
           <TextField label="Nombre" placeholder="Nombre" value={form.firstName} onChange={(value) => setForm((current) => ({ ...current, firstName: value }))} />
           <TextField label="Apellidos" placeholder="Apellidos" value={form.lastName} onChange={(value) => setForm((current) => ({ ...current, lastName: value }))} />
           <TextField label="Correo" placeholder="correo@codenium.com" value={form.email} onChange={(value) => setForm((current) => ({ ...current, email: value }))} />
           <TextField label="Telefono" placeholder="+52..." value={form.phone} onChange={(value) => setForm((current) => ({ ...current, phone: value }))} />
+          {notice ? <p className="text-sm font-medium text-rose-600">{notice}</p> : null}
           <button type="submit" className="dashboard-button-primary w-fit">
             Crear PM
           </button>
         </form>
-      </DashboardMutedCard>
+      </DashboardCard>
     </div>
   );
 }
@@ -72,28 +84,28 @@ function UserColumn({
   nextStateFor: (state: UserState) => UserState;
 }) {
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
-      <div className="flex items-center justify-between gap-3">
+    <section>
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-4">
         <h3 className="text-lg font-semibold text-slate-950">{title}</h3>
         <span className="text-sm font-semibold text-slate-500">{items.length}</span>
       </div>
-      <div className="mt-4 grid gap-3">
+      <div className="mt-4 grid gap-4">
         {items.map((user) => (
-          <div key={user.id} className="rounded-[18px] border border-slate-200 bg-white p-4">
-            <div className="flex items-start justify-between gap-3">
+          <div key={user.id} className="dashboard-gridline grid gap-3 pb-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-semibold text-slate-950">{user.name}</p>
                 <p className="mt-1 text-sm text-slate-500">{user.company ?? user.email}</p>
               </div>
-              <StatusBadge tone={user.state === "active" ? "success" : user.state === "inactive" ? "warning" : "danger"}>{user.state}</StatusBadge>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{user.state}</p>
             </div>
-            <p className="mt-2 text-sm text-slate-600">{user.email}</p>
-            <button type="button" className="dashboard-button-secondary mt-4" onClick={() => onToggleState(user.id, nextStateFor(user.state))}>
+            <p className="text-sm text-slate-600">{user.email}</p>
+            <button type="button" className="dashboard-button-secondary w-fit" onClick={() => onToggleState(user.id, nextStateFor(user.state))}>
               {user.state === "banned" ? "Reactivar" : "Banear"}
             </button>
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

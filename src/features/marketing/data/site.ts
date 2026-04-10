@@ -51,7 +51,9 @@ export const site: SiteConfig = {
   assets: {
     brand: {
       pink: "/images/brand/logo-pink.webp",
-      white: "/images/brand/logo-white.webp"
+      white: "/images/brand/logo-white.webp",
+      header: "/images/brand/codenium-header.svg",
+      footer: "/images/brand/codenium-footer.svg"
     },
     hero: {
       home: "/images/marketing/hero-home.webp",

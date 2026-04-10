@@ -11,9 +11,10 @@ import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   variant: HeaderVariant;
+  contactEmail: string;
 }
 
-export function Header({ variant }: HeaderProps) {
+export function Header({ variant, contactEmail }: HeaderProps) {
   const [accessOpen, setAccessOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isLight = variant === "white";
@@ -25,7 +26,7 @@ export function Header({ variant }: HeaderProps) {
       <header className="absolute inset-x-0 top-0 z-30 h-28">
         <div className={cn("site-shell flex items-center justify-between px-3 py-6", textClassName)}>
           <Link href="/" aria-label="Inicio">
-            <BrandLogo variant={isLight ? "white" : "brand"} className="w-[112px] xl:ml-[-16px]" priority />
+            <BrandLogo variant="header" className="w-[108px] md:w-[126px] xl:ml-[-6px]" priority />
           </Link>
 
           <nav className="hidden items-center gap-7 lg:flex">
@@ -60,7 +61,7 @@ export function Header({ variant }: HeaderProps) {
       </header>
 
       <AccessOverlay open={accessOpen} onClose={() => setAccessOpen(false)} />
-      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
+      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} contactEmail={contactEmail} />
     </>
   );
 }
@@ -116,7 +117,7 @@ function AccessOverlay({ open, onClose }: OverlayProps) {
   );
 }
 
-function MobileMenu({ open, onClose }: OverlayProps) {
+function MobileMenu({ open, onClose, contactEmail }: OverlayProps & { contactEmail: string }) {
   return (
     <div className={cn("fixed inset-0 z-50 lg:hidden", open ? "pointer-events-auto" : "pointer-events-none")} aria-hidden={!open}>
       <div className={cn("absolute inset-0 bg-foreground transition-opacity duration-500", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
@@ -128,7 +129,7 @@ function MobileMenu({ open, onClose }: OverlayProps) {
       >
         <div className="flex items-center justify-between">
           <Link href="/" aria-label="Inicio" onClick={onClose}>
-            <BrandLogo variant="brand" className="w-[112px]" />
+            <BrandLogo variant="header" className="w-[104px]" />
           </Link>
           <button type="button" onClick={onClose} className="group flex items-center gap-2 text-body-color transition-colors hover:text-primary-500 type-menu-trigger">
             <CloseIcon className="size-4" />
@@ -162,8 +163,8 @@ function MobileMenu({ open, onClose }: OverlayProps) {
           <div>
             <p className="text-sm font-semibold text-primary-500">Contacto</p>
             <div className="mt-3 space-y-2 text-sm text-body-color">
-              <a href={`mailto:${site.contact.email}`} className="block hover:text-primary-500">
-                {site.contact.email}
+              <a href={`mailto:${contactEmail}`} className="block hover:text-primary-500">
+                {contactEmail}
               </a>
               <a href={`tel:${site.contact.phoneRaw}`} className="block hover:text-primary-500">
                 {site.contact.phone}

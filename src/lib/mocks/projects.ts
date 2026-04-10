@@ -13,6 +13,8 @@ export const mockProjects: ProjectRecord[] = [
     pmId: "user-pm-1",
     quoteCode: "CD-24001",
     quoteId: "quote-1",
+    intakeSource: "plan",
+    selectionLabel: "Plan PYMES",
     planProfile: "personal",
     planTitle: "Plan PYMES",
     summary: "Portal corporativo con flujo comercial, panel interno y una base documental activa."
@@ -29,6 +31,8 @@ export const mockProjects: ProjectRecord[] = [
     pmId: "user-pm-1",
     quoteCode: "CD-24002",
     quoteId: "quote-2",
+    intakeSource: "plan",
+    selectionLabel: "Suite Commerce Enterprise",
     planProfile: "business",
     planTitle: "Suite Commerce Enterprise",
     summary: "Ecommerce con catalogo, checkout y operacion comercial conectada a pagos."
@@ -45,8 +49,28 @@ export const mockProjects: ProjectRecord[] = [
     pmId: "user-pm-2",
     quoteCode: "CD-24003",
     quoteId: "quote-3",
+    intakeSource: "plan",
+    selectionLabel: "Plataforma Operativa Corporativa",
     planProfile: "business",
     planTitle: "Plataforma Operativa Corporativa",
     summary: "Plataforma operativa con trazabilidad, reportes y visibilidad para el equipo interno."
+  },
+  {
+    id: "project-4",
+    name: "Automation Sprint Laura Medina",
+    clientId: "user-client-3",
+    clientName: "Laura Medina",
+    clientCompany: "Nexa Retail",
+    status: "discovery",
+    progress: 16,
+    dueDate: "2026-05-16",
+    pmId: "user-pm-2",
+    quoteCode: "CD-24006",
+    quoteId: "quote-6",
+    intakeSource: "service",
+    selectionLabel: "Automatizacion e integraciones",
+    planProfile: "business",
+    planTitle: "Servicio coordinado",
+    summary: "Implementacion orientada a automatizar seguimiento comercial, integraciones y reportes sin depender de un plan empaquetado."
   }
 ];

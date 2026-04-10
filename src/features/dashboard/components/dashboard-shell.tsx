@@ -18,39 +18,48 @@ const panelLabelByRole: Record<Role, string> = {
 };
 
 export function DashboardShell({ role, activeKey, children }: DashboardShellProps) {
+  const activeItem = dashboardNav[role].find((item) => item.key === activeKey);
+
   return (
-    <section className="h-full px-3 py-3 lg:px-4 lg:py-4">
-      <div className="grid h-full overflow-hidden rounded-[28px] border border-white/70 bg-white/90 shadow-[0_22px_56px_rgba(15,23,42,0.08)] backdrop-blur-[10px] lg:grid-cols-[260px_1fr]">
-        <aside className="flex min-h-0 flex-col border-b border-slate-200/80 bg-[linear-gradient(180deg,rgba(248,250,252,0.98)_0%,rgba(241,245,249,0.92)_100%)] p-4 lg:border-b-0 lg:border-r">
-          <div className="border-b border-slate-200/80 pb-4">
-            <h2 className="text-xl font-bold tracking-tight text-slate-950">{panelLabelByRole[role]}</h2>
+    <section className="min-h-screen bg-[#0b1020] px-3 py-3 lg:px-4 lg:py-4">
+      <div className="grid min-h-[calc(100vh-1.5rem)] overflow-hidden rounded-[28px] border border-white/10 bg-[#0f172a] shadow-[0_30px_80px_rgba(2,8,23,0.45)] lg:grid-cols-[276px_minmax(0,1fr)]">
+        <aside className="flex min-h-0 flex-col border-b border-white/10 bg-[linear-gradient(180deg,#0f172a_0%,#111b31_100%)] px-4 py-5 lg:border-b-0 lg:border-r lg:px-5">
+          <div className="border-b border-white/10 pb-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Workspace</p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-white">{panelLabelByRole[role]}</h2>
           </div>
 
-          <nav className="custom-scrollbar mt-4 flex-1 space-y-1 overflow-y-auto pr-2">
+          <nav className="custom-scrollbar mt-5 flex-1 space-y-1 overflow-y-auto pr-1">
             {dashboardNav[role].map((item) => (
               <Link
                 key={item.key}
                 href={item.href}
-                className={`flex items-center rounded-xl px-3 py-2.5 text-sm font-bold transition-all duration-200 ${
-                  item.key === activeKey
-                    ? "bg-primary-500 text-white shadow-md shadow-primary-500/20"
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                }`}
+                className={`dashboard-sidebar-link ${item.key === activeKey ? "is-active" : ""}`}
               >
-                {item.label}
+                <span>{item.label}</span>
               </Link>
             ))}
           </nav>
 
-          <div className="mt-10 border-t border-slate-100 pt-5">
+          <div className="mt-8 border-t border-white/10 pt-5">
             <SidebarActions />
           </div>
         </aside>
 
-        <main className="relative flex min-h-0 flex-col overflow-hidden bg-white/82">
-          <div className="custom-scrollbar flex-1 overflow-y-auto p-4 lg:p-6">
-            {children}
+        <main className="min-w-0 bg-[linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)]">
+          <div className="border-b border-slate-200 bg-white/72 px-5 py-4 backdrop-blur-xl lg:px-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{panelLabelByRole[role]}</p>
+                <h1 className="mt-2 text-xl font-semibold tracking-[-0.04em] text-slate-950">{activeItem?.label ?? "Dashboard"}</h1>
+              </div>
+              <div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                Vista operativa
+              </div>
+            </div>
           </div>
+
+          <div className="px-4 py-5 lg:px-8 lg:py-7">{children}</div>
         </main>
       </div>
     </section>

@@ -125,9 +125,14 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
                   pmId,
                   quoteCode: quote.code,
                   quoteId: quote.id,
+                  intakeSource: quote.intakeSource,
+                  selectionLabel: quote.selectionLabel,
                   planProfile: quote.planProfile,
                   planTitle: quote.planTitle,
-                  summary: `Proyecto convertido desde ${quote.code} para ${quote.clientName}, con ${pm?.name ?? "PM por confirmar"} como responsable operativo.`
+                  summary:
+                    quote.intakeSource === "service"
+                      ? `Servicio ${quote.selectionLabel.toLowerCase()} convertido en proyecto operativo para ${quote.clientName}, con ${pm?.name ?? "PM por confirmar"} como responsable.`
+                      : `Proyecto convertido desde ${quote.selectionLabel.toLowerCase()} para ${quote.clientName}, con ${pm?.name ?? "PM por confirmar"} como responsable operativo.`
                 }
               ];
 

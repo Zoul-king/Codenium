@@ -39,7 +39,7 @@ export function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
     <section className="section soft-section bg-foreground">
       <div className="site-shell py-16 lg:py-24">
         <div className="mb-12 flex flex-col items-start gap-4" data-animate="fadeInFromTop">
-          <span className="font-semibold uppercase tracking-[0.18em] text-primary-500">Portafolio activo</span>
+          <span className="font-semibold uppercase tracking-[0.18em] text-secondary-600">Proyectos desarrollados</span>
           <h2 className="text-[28px] font-bold leading-tight tracking-[-0.04em] text-slate-950 lg:text-[42px]">
             Proyectos que se <span className="text-secondary-600">recorren</span> como un flujo continuo
           </h2>
@@ -51,31 +51,29 @@ export function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
         <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]" data-animate="fadeInFromBottom">
           <article className="portfolio-story-card">
             <div key={activeCard.name} className="portfolio-story-copy">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="rounded-full bg-primary-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-primary-600">{activeCard.year}</span>
-                {activeCard.logo ? <Image src={activeCard.logo} alt={`${activeCard.name} logo`} width={120} height={40} className="h-7 w-auto object-contain" /> : null}
-              </div>
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <h3 className="text-[32px] font-semibold leading-[1.02] tracking-[-0.05em] text-slate-950 lg:text-[46px]">{activeCard.name}</h3>
+                  <p className="mt-5 max-w-xl text-sm leading-7 text-slate-600 lg:text-base">{activeCard.description}</p>
+                  <div className="mt-5 grid gap-2 text-sm leading-6 text-slate-600">
+                    <p>Enfoque principal: {activeCard.tags[0] ?? "Producto digital"}</p>
+                    <p>Resultado visible: {activeCard.tags[1] ?? "Experiencia mas clara para el usuario"}</p>
+                    <p>Escala del proyecto: {activeCard.tags[2] ?? "Implementacion lista para crecer"}</p>
+                  </div>
+                </div>
 
-              <h3 className="mt-6 text-[32px] font-semibold leading-[1.02] tracking-[-0.05em] text-slate-950 lg:text-[46px]">{activeCard.name}</h3>
-              <p className="mt-5 max-w-xl text-sm leading-7 text-slate-600 lg:text-base">{activeCard.description}</p>
-
-              <div className="mt-6 flex flex-wrap gap-2">
-                {activeCard.tags.map((tag) => (
-                  <span key={tag} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
-                    {tag}
-                  </span>
-                ))}
+                {activeCard.logo ? <Image src={activeCard.logo} alt={`${activeCard.name} logo`} width={144} height={48} className="h-10 w-auto shrink-0 object-contain lg:h-12" /> : null}
               </div>
 
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/quote" className="primary-button">
-                  Cotizar
+                <Link href="/quote#quote-form" className="primary-button">
+                  Cotizar proyecto similar
                 </Link>
                 <a
                   href={activeCard.href ?? "#"}
                   target={activeCard.href ? "_blank" : undefined}
                   rel={activeCard.href ? "noreferrer" : undefined}
-                  className="inline-flex items-center gap-2 rounded-[14px] border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:border-primary-300 hover:text-primary-500"
+                  className="accent-button inline-flex items-center gap-2"
                 >
                   Visitar sitio
                   <ArrowRightIcon className="size-4" />
@@ -83,19 +81,20 @@ export function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-2">
+            <div className="mt-8 grid gap-2 border-t border-slate-200 pt-5">
               {cards.map((card, index) => (
                 <button
                   key={card.name}
                   type="button"
                   onClick={() => setActiveIndex(index)}
                   className={cn(
-                    "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
-                    index === activeIndex ? "border-primary-500 bg-primary-500 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-primary-200 hover:text-primary-500"
+                    "flex items-center justify-between gap-4 border-b border-slate-200 py-3 text-left transition",
+                    index === activeIndex ? "text-slate-950" : "text-slate-500 hover:text-slate-900"
                   )}
                   aria-pressed={index === activeIndex}
                 >
-                  {card.name}
+                  <span className="text-sm font-semibold uppercase tracking-[0.14em]">{card.name}</span>
+                  <span className={cn("h-px flex-1 transition", index === activeIndex ? "bg-secondary-500" : "bg-slate-200")} />
                 </button>
               ))}
             </div>

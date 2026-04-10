@@ -49,10 +49,11 @@ export function getQuoteSectionSummary(
   }
 
   if (sectionKey === "infrastructure") {
-    return getInfrastructureLabel(draft.infrastructure);
+    return draft.infrastructure ? getInfrastructureLabel(draft.infrastructure) : "Pendiente";
   }
 
   if (sectionKey === "timeline") {
+    if (!draft.timelinePreference) return "Pendiente";
     if (draft.timelinePreference === "1-4") return "Entre 1 y 4 meses.";
     if (draft.timelinePreference === "5-7") return "Entre 5 y 7 meses.";
     return "Entre 8 y 12 meses.";

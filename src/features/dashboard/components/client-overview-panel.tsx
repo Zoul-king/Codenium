@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 
-import { DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
+import { DataRow, DashboardCard, ProgressBar, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
 import { getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
-import { getProjectStatusLabel } from "@/lib/presenters";
+import { formatShortDate, getProjectStatusLabel } from "@/lib/presenters";
 
 export function ClientOverviewPanel() {
   const { state } = useDashboardWorkspace();
@@ -13,63 +13,60 @@ export function ClientOverviewPanel() {
 
   if (projects.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <DashboardCard className="max-w-2xl">
-          <SectionHeading
-            eyebrow="Proyectos"
-            title="Todavia no tienes proyectos activos"
-            description="Cuando una cotizacion pase a ejecucion, aqui veras nombre, avance y acceso directo a hitos y cambios."
-          />
-        </DashboardCard>
-      </div>
+      <DashboardCard className="max-w-3xl">
+        <SectionHeading eyebrow="Resumen" title="Todavia no tienes proyectos activos" />
+      </DashboardCard>
     );
   }
 
+  const activeProject = projects[0];
+  const completedProjects = projects.filter((project) => project.status === "done").length;
+
   return (
-    <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-6">
-      <div className="border-b border-slate-200 pb-5">
-        <SectionHeading eyebrow="Proyectos" title="Tus proyectos" description="Selecciona un proyecto para revisar hitos, cambios y seguimiento operativo." />
-      </div>
+    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[minmax(0,1.25fr)_340px]">
+      <DashboardCard className="flex min-h-0 flex-col">
+        <SectionHeading eyebrow="Resumen" title="Tus proyectos" />
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        {projects.map((project) => (
-          <Link
-            key={project.id}
-            href="/dashboard/client/milestones"
-            className="grid gap-4 rounded-[18px] border border-slate-200 bg-white px-5 py-5 transition hover:border-primary-200 hover:bg-primary-50/50"
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-xl font-semibold tracking-[-0.03em] text-slate-950">{project.name}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{project.summary}</p>
-              </div>
-              <span className="rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                {getProjectStatusLabel(project.status)}
-              </span>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_160px] sm:items-end">
-              <div>
-                <div className="mb-2 flex items-center justify-between text-sm font-medium text-slate-600">
-                  <span>Avance</span>
-                  <span>{project.progress}%</span>
+        <div className="mt-8 grid gap-8">
+          {projects.map((project) => (
+            <article key={project.id} className="dashboard-gridline grid gap-5 pb-6 last:border-b-0 last:pb-0">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="max-w-2xl">
+                  <h3 className="text-2xl font-semibold tracking-[-0.04em] text-slate-950">{project.name}</h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">{project.summary}</p>
                 </div>
-                <div className="h-2 rounded-full bg-slate-200">
-                  <div
-                    className="h-full rounded-full bg-[linear-gradient(90deg,#224a78_0%,#3f7aa3_48%,#68b8b2_100%)]"
-                    style={{ width: `${Math.max(0, Math.min(100, project.progress))}%` }}
-                  />
+                <div className="text-sm font-semibold text-slate-500">{getProjectStatusLabel(project.status)}</div>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-end">
+                <div>
+                  <div className="mb-2 flex items-center justify-between text-sm font-medium text-slate-600">
+                    <span>Avance</span>
+                    <span>{project.progress}%</span>
+                  </div>
+                  <ProgressBar value={project.progress} />
+                </div>
+
+                <div className="grid gap-2 text-sm text-slate-600 lg:text-right">
+                  <p>{project.intakeSource === "service" ? "Servicio" : "Plan"}: {project.selectionLabel}</p>
+                  <p>Entrega estimada: {formatShortDate(project.dueDate)}</p>
                 </div>
               </div>
+            </article>
+          ))}
+        </div>
+      </DashboardCard>
 
-              <div className="border-l border-slate-200 pl-4 text-sm text-slate-600 sm:text-right">
-                <p className="font-semibold text-slate-900">{project.planTitle}</p>
-                <p className="mt-2">Ir a hitos y cambios</p>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+      <DashboardCard className="h-fit xl:sticky xl:top-6">
+        <SectionHeading eyebrow="Lectura rapida" title={activeProject.name} />
+        <div className="mt-6">
+          <DataRow label="Plan o servicio" value={activeProject.selectionLabel} className="pt-0" />
+          <DataRow label="Origen" value={activeProject.intakeSource === "service" ? "Servicio" : "Plan"} />
+          <DataRow label="Estado" value={getProjectStatusLabel(activeProject.status)} />
+          <DataRow label="Proyectos cerrados" value={String(completedProjects)} />
+          <DataRow label="Siguiente paso" value={<Link href="/dashboard/client/milestones" className="dashboard-link">Ir a hitos y cambios</Link>} className="border-b-0 pb-0" />
+        </div>
+      </DashboardCard>
     </div>
   );
 }
