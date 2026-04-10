@@ -1,5 +1,6 @@
 export * from "@/lib/mocks/auth";
 export * from "@/lib/mocks/catalogs";
+export * from "@/lib/mocks/change-requests";
 export * from "@/lib/mocks/messages";
 export * from "@/lib/mocks/project-meta";
 export * from "@/lib/mocks/projects";

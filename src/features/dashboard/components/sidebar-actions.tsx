@@ -14,11 +14,11 @@ export function SidebarActions() {
 
   return (
     <div className="space-y-3">
-      <button type="button" onClick={handleLogout} className="dashboard-button-primary w-full justify-center">
-        Cerrar sesion
-      </button>
       <button type="button" onClick={() => router.push("/")} className="dashboard-button-secondary w-full justify-center">
         Volver al inicio
+      </button>
+      <button type="button" onClick={handleLogout} className="dashboard-button-primary w-full justify-center">
+        Cerrar sesion
       </button>
     </div>
   );

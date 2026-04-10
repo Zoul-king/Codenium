@@ -10,3 +10,7 @@ export function resolveRole(role: string): Role | null {
 export function isValidDashboardSection(role: Role, section: string) {
   return dashboardNav[role].some((item) => item.key === section);
 }
+
+export function getDefaultDashboardSection(role: Role) {
+  return dashboardNav[role][0]?.key ?? "projects";
+}

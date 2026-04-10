@@ -45,16 +45,24 @@ export function calculateQuoteEstimate(draft: QuoteDraft): QuoteEstimate {
   const buildRange = sumModuleRange(buildModules, "price");
   const monthlyRange = sumModuleRange(draft.modules, "monthly");
   const timelineRange = sumTimeline(buildModules);
+  const infrastructureRange =
+    draft.infrastructure === "new"
+      ? { build: { min: 6000, max: 12000 }, timeline: { min: 1, max: 2 } }
+      : draft.infrastructure === "existing"
+        ? { build: { min: 2000, max: 6000 }, timeline: { min: 0, max: 1 } }
+        : draft.infrastructure === "cloud"
+          ? { build: { min: 9000, max: 22000 }, timeline: { min: 1, max: 3 } }
+          : { build: { min: 12000, max: 26000 }, timeline: { min: 2, max: 4 } };
 
   return {
     build: {
-      min: projectType.base.min + buildRange.min,
-      max: projectType.base.max + buildRange.max
+      min: projectType.base.min + buildRange.min + infrastructureRange.build.min,
+      max: projectType.base.max + buildRange.max + infrastructureRange.build.max
     },
     monthly: monthlyRange,
     timelineWeeks: {
-      min: projectType.timelineWeeks.min + timelineRange.min,
-      max: projectType.timelineWeeks.max + timelineRange.max
+      min: projectType.timelineWeeks.min + timelineRange.min + infrastructureRange.timeline.min,
+      max: projectType.timelineWeeks.max + timelineRange.max + infrastructureRange.timeline.max
     }
   };
 }

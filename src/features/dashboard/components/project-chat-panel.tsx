@@ -5,32 +5,27 @@ import { useMemo, useState } from "react";
 import { TextAreaField } from "@/components/ui/form-controls";
 import { DashboardCard, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
 import { getPrimaryProject, getPrimaryUser, getProjectMessages, getVisibleProjects } from "@/features/dashboard/lib/selectors";
+import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import type { ProjectRecord, Role } from "@/lib/types/domain";
 
 interface ProjectChatPanelProps {
-  role: Role;
+  role: Extract<Role, "client" | "pm">;
 }
 
 export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
+  const { state, addProjectMessage } = useDashboardWorkspace();
   const availableProjects: ProjectRecord[] =
     role === "client"
       ? (() => {
-          const project = getPrimaryProject("client");
+          const project = getPrimaryProject(state, "client");
           return project ? [project] : [];
         })()
-      : getVisibleProjects("pm");
+      : getVisibleProjects(state, "pm");
   const [activeProjectId, setActiveProjectId] = useState(availableProjects[0]?.id ?? "");
-  const activeProject = availableProjects.find((project) => project?.id === activeProjectId) ?? availableProjects[0];
-  const currentUser = getPrimaryUser(role);
+  const activeProject = availableProjects.find((project) => project.id === activeProjectId) ?? availableProjects[0];
+  const currentUser = getPrimaryUser(state, role);
   const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState(() => getProjectMessages(activeProject?.id));
-
-  const orderedMessages = useMemo(() => messages.slice().reverse(), [messages]);
-
-  function selectProject(projectId: string) {
-    setActiveProjectId(projectId);
-    setMessages(getProjectMessages(projectId));
-  }
+  const orderedMessages = useMemo(() => getProjectMessages(state, activeProject?.id).slice().reverse(), [state, activeProject?.id]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,22 +34,7 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
       return;
     }
 
-    setMessages((current) => [
-      ...current,
-      {
-        id: `local-${current.length + 1}`,
-        thread: activeProject.name,
-        senderId: currentUser.id,
-        recipientId: role === "client" ? activeProject.pmId : activeProject.clientId,
-        projectId: activeProject.id,
-        quoteId: activeProject.quoteId,
-        senderName: currentUser.name,
-        role,
-        preview: draft.trim(),
-        sentAt: "Ahora",
-        status: "read"
-      }
-    ]);
+    addProjectMessage(activeProject.id, currentUser.id, role, draft.trim());
     setDraft("");
   }
 
@@ -65,18 +45,18 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
         <div className="mt-6 grid gap-3">
           {availableProjects.map((project) => (
             <button
-              key={project?.id}
+              key={project.id}
               type="button"
-              onClick={() => project?.id && selectProject(project.id)}
+              onClick={() => setActiveProjectId(project.id)}
               className={`rounded-[20px] border p-4 text-left transition ${
-                project?.id === activeProject?.id ? "border-primary-200 bg-primary-50" : "border-slate-200 bg-white hover:border-slate-300"
+                project.id === activeProject?.id ? "border-primary-200 bg-primary-50" : "border-slate-200 bg-white hover:border-slate-300"
               }`}
             >
               <div className="flex items-center justify-between gap-3">
-                <p className="font-semibold text-slate-950">{project?.name}</p>
-                <StatusBadge tone={project?.id === activeProject?.id ? "accent" : "neutral"}>{project?.id === activeProject?.id ? "Activo" : "Abrir"}</StatusBadge>
+                <p className="font-semibold text-slate-950">{project.name}</p>
+                <StatusBadge tone={project.id === activeProject?.id ? "accent" : "neutral"}>{project.id === activeProject?.id ? "Activo" : "Abrir"}</StatusBadge>
               </div>
-              <p className="mt-2 text-sm text-slate-600">{project?.summary}</p>
+              <p className="mt-2 text-sm text-slate-600">{project.summary}</p>
             </button>
           ))}
         </div>
@@ -84,7 +64,7 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
 
       <DashboardCard>
         <div className="flex h-full flex-col">
-          <SectionHeading eyebrow="Chat" title={activeProject?.name ?? "Sin proyecto"} description="Estructura de conversacion mas clara, con lista lateral y mensajes en una sola columna." />
+          <SectionHeading eyebrow="Chat" title={activeProject?.name ?? "Sin proyecto"} description="Cliente y PM leen la misma conversacion del proyecto dentro de la sesion actual." />
           <div className="mt-6 flex-1 space-y-3 rounded-[24px] border border-slate-200 bg-slate-50 p-4">
             {orderedMessages.map((message) => {
               const isOwn = message.senderId === currentUser?.id;

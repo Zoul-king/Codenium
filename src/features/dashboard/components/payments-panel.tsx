@@ -1,22 +1,28 @@
+"use client";
+
 import Link from "next/link";
 
 import { DashboardCard, DashboardMutedCard, MetricPill, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
 import { getPrimaryProject, getProjectPayments } from "@/features/dashboard/lib/selectors";
+import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
 import { formatLongDate, getPaymentStatusLabel } from "@/lib/presenters";
 
 export function PaymentsPanel() {
-  const project = getPrimaryProject("client");
-  const payments = getProjectPayments(project?.id);
+  const { state } = useDashboardWorkspace();
+  const project = getPrimaryProject(state, "client");
+  const payments = getProjectPayments(state, project?.id);
   const nextPayment = payments.find((payment) => payment.status !== "paid");
+  const paidTotal = payments.filter((payment) => payment.status === "paid").reduce((total, payment) => total + payment.amount, 0);
 
   return (
     <div className="grid h-full gap-5 xl:grid-cols-[0.95fr_1.05fr]">
       <DashboardCard>
-        <SectionHeading eyebrow="Pagos" title="Estado financiero del proyecto" description="Mostramos lo pagado, lo siguiente y la accion principal sin ruido extra." />
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <SectionHeading eyebrow="Pagos" title="Estado financiero del proyecto" description="El panel conecta plan contratado, hitos completados y pagos ya desbloqueados." />
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <MetricPill label="Proyecto" value={project?.name ?? "Sin proyecto"} tone="accent" />
-          <MetricPill label="Siguiente pago" value={nextPayment ? formatCurrency(nextPayment.amount) : "Sin pendientes"} />
+          <MetricPill label="Pagado" value={formatCurrency(paidTotal)} />
+          <MetricPill label="Plan" value={project?.planProfile === "business" ? "Empresarial" : "Personal"} />
         </div>
         {nextPayment ? (
           <div className="mt-6 rounded-[24px] border border-slate-200 bg-slate-50 p-5">
@@ -28,6 +34,7 @@ export function PaymentsPanel() {
               <StatusBadge tone={nextPayment.status === "pending" ? "warning" : "accent"}>{getPaymentStatusLabel(nextPayment.status)}</StatusBadge>
             </div>
             <p className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-slate-950">{formatCurrency(nextPayment.amount)}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">Cuando el PM completa el hito asociado, este pago se activa aqui sin cambiar de panel.</p>
             <Link href="/contact" className="dashboard-button-primary mt-5 inline-flex">
               Confirmar pago con administracion
             </Link>

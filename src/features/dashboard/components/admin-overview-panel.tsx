@@ -1,77 +1,77 @@
-import Link from "next/link";
+"use client";
 
 import { DashboardCard, DashboardMutedCard, MetricPill, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
-import { getPmStats, getPmUsers, getProjectsAtRisk } from "@/features/dashboard/lib/selectors";
-import { mockQuotes } from "@/lib/mocks";
-import { getQuoteStatusLabel } from "@/lib/presenters";
+import { getClientUsers, getPmUsers, getProjectsAtRisk, getVisibleQuotes } from "@/features/dashboard/lib/selectors";
+import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 
 export function AdminOverviewPanel() {
-  const openQuotes = mockQuotes.filter((quote) => quote.status !== "approved");
-  const riskyProjects = getProjectsAtRisk();
-  const pmUsers = getPmUsers();
+  const { state } = useDashboardWorkspace();
+  const quotes = getVisibleQuotes(state, "admin");
+  const prequotes = quotes.filter((quote) => quote.quoteKind === "prequote");
+  const riskyProjects = getProjectsAtRisk(state);
+  const pmUsers = getPmUsers(state);
+  const clients = getClientUsers(state);
 
   return (
-    <div className="grid h-full gap-4 xl:grid-cols-[1.15fr_0.85fr] xl:grid-rows-[minmax(0,1fr)_minmax(0,0.88fr)]">
-      <DashboardCard className="xl:row-span-2">
-        <SectionHeading eyebrow="Operación comercial" title="Cotizaciones activas" description="Prioriza aprobación, ajustes y asignación de PM." action={<Link href="/dashboard/admin/quotes" className="dashboard-link">Ir a cotizaciones</Link>} />
-        <div className="mt-4 grid gap-2">
-          {openQuotes.map((quote) => (
-            <div key={quote.id} className="rounded-2xl border border-slate-100 bg-slate-50 p-3 transition-colors hover:bg-slate-100">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{quote.code}</p>
-                  <p className="mt-1 text-base font-bold text-slate-900">{quote.title}</p>
-                  <p className="text-xs text-slate-500">{quote.clientName}</p>
+    <div className="grid h-full gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+      <DashboardCard>
+        <SectionHeading eyebrow="Metricas" title="Lectura ejecutiva del sistema" description="La operacion enlaza precotizaciones, proyectos en riesgo, usuarios y pagos pendientes desde un mismo tablero." />
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <MetricPill label="Precotizaciones" value={String(prequotes.length)} tone="accent" />
+          <MetricPill label="Proyectos en riesgo" value={String(riskyProjects.length)} />
+          <MetricPill label="Clientes activos" value={String(clients.filter((user) => user.state === "active").length)} />
+          <MetricPill label="PMs activos" value={String(pmUsers.filter((user) => user.state === "active").length)} />
+        </div>
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-semibold text-slate-500">Cotizaciones para convertir</p>
+            <div className="mt-4 grid gap-3">
+              {prequotes.map((quote) => (
+                <div key={quote.id} className="rounded-[18px] border border-slate-200 bg-white p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-semibold text-slate-950">{quote.title}</p>
+                    <StatusBadge tone="warning">Precotizacion</StatusBadge>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-600">{quote.clientName}</p>
                 </div>
-                <StatusBadge tone={quote.status === "review" ? "warning" : "accent"}>{getQuoteStatusLabel(quote.status)}</StatusBadge>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-semibold text-slate-500">Alertas operativas</p>
+            <div className="mt-4 grid gap-3">
+              {riskyProjects.map((project) => (
+                <div key={project.id} className="rounded-[18px] border border-rose-100 bg-rose-50 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-semibold text-slate-950">{project.name}</p>
+                    <StatusBadge tone="danger">Seguimiento</StatusBadge>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-600">{project.clientName} · {project.progress}% completado</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </DashboardCard>
 
       <DashboardMutedCard>
-        <SectionHeading eyebrow="Proyectos en riesgo" title="Actividad sensible" />
-        <div className="mt-4 grid gap-2">
-          {riskyProjects.map((project) => (
-            <div key={project.id} className="rounded-2xl border border-rose-50 bg-rose-50/50 p-3 pr-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-bold text-slate-900">{project.name}</p>
-                <StatusBadge tone="danger">{project.progress <= 45 ? "Bajo progreso" : "Cercano"}</StatusBadge>
-              </div>
-              <p className="mt-1 text-xs text-slate-600">{project.clientName} · {project.progress}% completado</p>
-            </div>
-          ))}
+        <SectionHeading eyebrow="Coordinacion" title="Flujo entre roles" />
+        <div className="mt-6 grid gap-3">
+          <div className="rounded-[20px] border border-slate-200 bg-white p-4">
+            <p className="font-semibold text-slate-950">Admin → Cliente y PM</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Acepta precotizaciones, asigna PM y valida pagos o entregables visibles para ambos frentes.</p>
+          </div>
+          <div className="rounded-[20px] border border-slate-200 bg-white p-4">
+            <p className="font-semibold text-slate-950">PM → Cliente</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Al cerrar un hito, el cliente ve el impacto inmediato en pagos y seguimiento operativo.</p>
+          </div>
+          <div className="rounded-[20px] border border-slate-200 bg-white p-4">
+            <p className="font-semibold text-slate-950">Cliente → PM</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">El cliente registra cambios y mensajes dentro del mismo proyecto conectado.</p>
+          </div>
         </div>
       </DashboardMutedCard>
-
-      <div className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
-        <DashboardMutedCard>
-          <SectionHeading eyebrow="PMs" title="Carga de equipo" action={<Link href="/dashboard/admin/team" className="dashboard-link">Ver más</Link>} />
-          <div className="mt-4 grid gap-2">
-            {pmUsers.map((pm) => {
-              const stats = getPmStats(pm.id);
-
-              return (
-                <div key={pm.id} className="rounded-xl border border-slate-100 bg-white p-3">
-                  <p className="text-sm font-bold text-slate-900">{pm.name}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">{stats.activeProjects} activos · {stats.completedProjects} listos</p>
-                </div>
-              );
-            })}
-          </div>
-        </DashboardMutedCard>
-
-        <DashboardCard>
-          <SectionHeading eyebrow="Métricas" title="Lectura rápida" />
-          <div className="mt-4 grid gap-2">
-            <MetricPill label="Cotizaciones" value={String(openQuotes.length)} tone="accent" />
-            <MetricPill label="En riesgo" value={String(riskyProjects.length)} />
-            <MetricPill label="PMs" value={String(pmUsers.length)} />
-          </div>
-        </DashboardCard>
-      </div>
     </div>
-
   );
 }

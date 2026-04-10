@@ -12,9 +12,9 @@ interface DashboardShellProps {
 }
 
 const panelLabelByRole: Record<Role, string> = {
-  client: "Panel de cliente",
-  pm: "Panel de PM",
-  admin: "Panel de admin"
+  client: "Cliente",
+  pm: "Project Manager",
+  admin: "Admin"
 };
 
 export function DashboardShell({ role, activeKey, children }: DashboardShellProps) {
@@ -23,7 +23,7 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
       <div className="grid h-full gap-4 lg:grid-cols-[260px_1fr]">
         <aside className="flex flex-col rounded-[24px] border border-white/70 bg-white/92 p-4 shadow-sm backdrop-blur-[10px] lg:h-full">
           <div className="border-b border-slate-100 pb-4">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Workspace</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Workspace conectado</span>
             <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">{panelLabelByRole[role]}</h2>
           </div>
 
@@ -43,7 +43,7 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
             ))}
           </nav>
 
-          <div className="mt-4 border-t border-slate-100 pt-4">
+          <div className="mt-10 border-t border-slate-100 pt-5">
             <SidebarActions />
           </div>
         </aside>

@@ -1,4 +1,6 @@
 export type Role = "client" | "pm" | "admin";
+export type PlanProfile = "personal" | "business";
+export type InfrastructureOption = "new" | "existing" | "cloud" | "hybrid";
 
 export type PermissionKey =
   | "quotes:read"
@@ -38,6 +40,7 @@ export type QuoteModuleKey =
 export type QuoteTimelinePreference = "1-4" | "5-7" | "8-12";
 
 export type QuoteStatus = "draft" | "sent" | "review" | "approved";
+export type QuoteKind = "prequote" | "formal";
 
 export type ProjectStatus = "discovery" | "design" | "build" | "qa" | "done";
 
@@ -46,6 +49,8 @@ export type MessageStatus = "unread" | "read";
 export type MilestoneStatus = "done" | "current" | "next";
 
 export type PaymentStatus = "paid" | "pending" | "scheduled";
+export type UserState = "active" | "inactive" | "banned";
+export type ChangeRequestStatus = "new" | "in_review" | "planned" | "done";
 
 export interface EstimateRange {
   min: number;
@@ -71,8 +76,10 @@ export interface QuoteModuleOption {
 }
 
 export interface QuoteDraft {
+  planProfile: PlanProfile;
   projectType: QuoteProjectType;
   objective: string;
+  infrastructure: InfrastructureOption;
   timelinePreference: QuoteTimelinePreference;
   modules: QuoteModuleKey[];
 }
@@ -95,13 +102,17 @@ export interface QuoteRecord {
   id: string;
   code: string;
   title: string;
+  quoteKind: QuoteKind;
   role: Role;
   clientId: string;
   clientName: string;
   pmId?: string;
   status: QuoteStatus;
   createdAt: string;
+  planProfile: PlanProfile;
+  planTitle: string;
   projectType: QuoteProjectType;
+  infrastructure: InfrastructureOption;
   modules: QuoteModuleKey[];
   estimate: QuoteEstimate;
 }
@@ -111,12 +122,15 @@ export interface ProjectRecord {
   name: string;
   clientId: string;
   clientName: string;
+  clientCompany?: string;
   status: ProjectStatus;
   progress: number;
   dueDate: string;
   pmId: string;
   quoteCode: string;
   quoteId: string;
+  planProfile: PlanProfile;
+  planTitle: string;
   summary: string;
 }
 
@@ -141,6 +155,7 @@ export interface ProjectMilestoneRecord {
   summary: string;
   date: string;
   status: MilestoneStatus;
+  unlocksPaymentId?: string;
 }
 
 export interface ProjectDocumentRecord {
@@ -150,6 +165,8 @@ export interface ProjectDocumentRecord {
   kind: string;
   updatedAt: string;
   href: string;
+  audience?: Role | "shared";
+  template?: boolean;
 }
 
 export interface PaymentRecord {
@@ -160,6 +177,7 @@ export interface PaymentRecord {
   dueDate: string;
   provider: "Mercado Pago";
   status: PaymentStatus;
+  milestoneId?: string;
 }
 
 export interface UserRecord {
@@ -173,6 +191,18 @@ export interface UserRecord {
   role: Role;
   title: string;
   activeProjects: number;
+  state: UserState;
+}
+
+export interface ChangeRequestRecord {
+  id: string;
+  projectId: string;
+  clientId: string;
+  title: string;
+  detail: string;
+  priority: "high" | "medium" | "low";
+  status: ChangeRequestStatus;
+  requestedAt: string;
 }
 
 export interface AuthAccountRecord {

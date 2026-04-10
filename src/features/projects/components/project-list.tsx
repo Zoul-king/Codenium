@@ -1,5 +1,8 @@
+"use client";
+
 import { DashboardCard, DashboardMutedCard, ProgressBar, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
 import { getUserById, getVisibleProjects } from "@/features/dashboard/lib/selectors";
+import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { formatLongDate, getProjectStatusLabel } from "@/lib/presenters";
 import type { Role } from "@/lib/types/domain";
 
@@ -8,7 +11,8 @@ interface ProjectListProps {
 }
 
 export function ProjectList({ role }: ProjectListProps) {
-  const items = getVisibleProjects(role);
+  const { state } = useDashboardWorkspace();
+  const items = getVisibleProjects(state, role);
 
   return (
     <div className="grid h-full gap-5 xl:grid-cols-[1.15fr_0.85fr]">
@@ -20,7 +24,7 @@ export function ProjectList({ role }: ProjectListProps) {
         />
         <div className="mt-6 grid gap-4">
           {items.map((project) => {
-            const pm = getUserById(project.pmId);
+            const pm = getUserById(state, project.pmId);
 
             return (
               <div key={project.id} className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">

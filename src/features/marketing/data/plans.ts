@@ -1,5 +1,5 @@
 import { site } from "@/features/marketing/data/site";
-import type { MarketingPageData, PlanItem, ServiceItem } from "@/features/marketing/types";
+import type { MarketingPageData, PlanCatalog } from "@/features/marketing/types";
 
 export const plansPage: MarketingPageData = {
   slug: "/plans",
@@ -12,54 +12,64 @@ export const plansPage: MarketingPageData = {
     kind: "image",
     title: "Planes y",
     accent: "servicios",
-    body: "Descubre soluciones pensadas para distintas etapas de crecimiento, con una estructura clara y opciones fáciles de comparar.",
+    body: "Descubre soluciones pensadas para distintas etapas de crecimiento, con una estructura clara y opciones faciles de comparar.",
     image: site.assets.hero.plans
   }
 };
 
-export const planServices: ServiceItem[] = [
-  {
-    title: "Corrección de errores",
-    body: "Resolución ágil de fallos técnicos en plataformas existentes para asegurar su estabilidad y rendimiento óptimo.",
-    icon: "code"
-  },
-  {
-    title: "Continuación de proyectos",
-    body: "Retomamos y escalamos desarrollos pausados o incompletos con una arquitectura sólida y visión de futuro.",
-    icon: "consulting"
-  },
-  {
-    title: "Mantenimiento",
-    body: "Acompañamiento preventivo y evolutivo para que tu software nunca deje de funcionar y se mantenga actualizado.",
-    icon: "support"
-  },
-  {
-    title: "Servicio personalizado",
-    body: "Soluciones a medida para necesidades específicas que requieren un enfoque único fuera de los planes estándar.",
-    icon: "spark"
-  }
-];
-
-export const pricingPlans: PlanItem[] = [
-  {
-    title: "Plan básico",
-    price: "Pago inicial de $2,000 MXN",
-    subtitle: "Mensualidad de $500 MXN",
-    items: ["Landing page una sola vista", "Hosting incluido", "SEO básico onsite", "Cambios básicos ilimitados"]
-  },
-  {
-    title: "Plan PYMES",
-    price: "Pago inicial de $5,000 MXN",
-    subtitle: "Mensualidad de $1,500 MXN",
-    note: "Incluye todo lo del plan básico, más:",
-    items: ["Dos a tres vistas internas", "SEO avanzado onsite", "Control de clientes", "Cambios avanzados con límite mensual"]
-  },
-  {
-    title: "Plan E-commerce",
-    price: "Pago inicial de $10,000 MXN",
-    subtitle: "Mensualidad de $2,500 MXN",
-    note: "Incluye todo lo del plan PYMES, más:",
-    items: ["Sitio web con tienda", "Control de clientes", "Administración de productos", "Integración de pasarelas de pago"]
-  }
-];
-
+export const pricingPlans: PlanCatalog = {
+  personal: [
+    {
+      title: "Plan basico",
+      price: "Pago inicial de $2,000 MXN",
+      subtitle: "Mensualidad de $500 MXN",
+      items: ["Landing page una sola vista", "Hosting incluido", "SEO basico onsite", "Cambios basicos ilimitados"]
+    },
+    {
+      title: "Plan PYMES",
+      price: "Pago inicial de $5,000 MXN",
+      subtitle: "Mensualidad de $1,500 MXN",
+      note: "Incluye todo lo del plan basico, mas:",
+      items: ["Dos a tres vistas internas", "SEO avanzado onsite", "Control de clientes", "Cambios avanzados con limite mensual"]
+    },
+    {
+      title: "Plan E-commerce",
+      price: "Pago inicial de $10,000 MXN",
+      subtitle: "Mensualidad de $2,500 MXN",
+      note: "Incluye todo lo del plan PYMES, mas:",
+      items: ["Sitio web con tienda", "Control de clientes", "Administracion de productos", "Integracion de pasarelas de pago"]
+    },
+    {
+      title: "Plan personalizado",
+      price: "Contactanos para discutir un presupuesto.",
+      items: ["Consultoria personalizada"]
+    }
+  ],
+  business: [
+    {
+      title: "Starter corporativo",
+      price: "Pago inicial de $18,000 MXN",
+      subtitle: "Mensualidad de $4,500 MXN",
+      items: ["Sitio institucional multi-area", "Panel comercial base", "Gobierno de contenidos", "Acompanamiento operativo inicial"]
+    },
+    {
+      title: "Operations board",
+      price: "Pago inicial de $38,000 MXN",
+      subtitle: "Mensualidad de $8,500 MXN",
+      note: "Incluye tablero ejecutivo y lectura operativa:",
+      items: ["Dashboards por rol", "Reportes exportables", "Integraciones clave", "Soporte de continuidad comercial"]
+    },
+    {
+      title: "Suite commerce enterprise",
+      price: "Pago inicial de $65,000 MXN",
+      subtitle: "Mensualidad de $14,000 MXN",
+      note: "Pensado para operaciones con varios equipos:",
+      items: ["Checkout y catalogo avanzado", "Inventario y perfiles internos", "Automatizaciones comerciales", "Acompañamiento premium de implementacion"]
+    },
+    {
+      title: "Plataforma corporativa a medida",
+      price: "Cotizacion ejecutiva personalizada.",
+      items: ["Discovery de arquitectura", "Roadmap por fases", "PM dedicado", "Entregables y soporte premium"]
+    }
+  ]
+};

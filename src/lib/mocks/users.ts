@@ -12,7 +12,8 @@ export const mockUsers: UserRecord[] = [
     company: "Valeria Capital",
     role: "client",
     title: "Dirección de producto",
-    activeProjects: 1
+    activeProjects: 1,
+    state: "active"
   },
   {
     id: "user-client-2",
@@ -24,7 +25,8 @@ export const mockUsers: UserRecord[] = [
     company: "Nutrition Lab",
     role: "client",
     title: "Coordinación comercial",
-    activeProjects: 1
+    activeProjects: 1,
+    state: "active"
   },
   {
     id: "user-client-3",
@@ -36,7 +38,8 @@ export const mockUsers: UserRecord[] = [
     company: "Aurumtage",
     role: "client",
     title: "Dirección operativa",
-    activeProjects: 0
+    activeProjects: 0,
+    state: "inactive"
   },
   {
     id: "user-pm-1",
@@ -47,7 +50,8 @@ export const mockUsers: UserRecord[] = [
     phone: "+52 55 3344 1188",
     role: "pm",
     title: "Project Manager",
-    activeProjects: 2
+    activeProjects: 2,
+    state: "active"
   },
   {
     id: "user-pm-2",
@@ -58,7 +62,8 @@ export const mockUsers: UserRecord[] = [
     phone: "+52 55 1199 7744",
     role: "pm",
     title: "Project Manager",
-    activeProjects: 1
+    activeProjects: 1,
+    state: "inactive"
   },
   {
     id: "user-admin-1",
@@ -69,6 +74,7 @@ export const mockUsers: UserRecord[] = [
     phone: "+52 55 1111 0000",
     role: "admin",
     title: "Administración general",
-    activeProjects: 3
+    activeProjects: 3,
+    state: "active"
   }
 ];

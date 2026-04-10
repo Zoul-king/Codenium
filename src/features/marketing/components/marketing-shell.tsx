@@ -16,7 +16,7 @@ export function MarketingShell({ children, headerVariant }: MarketingShellProps)
     <div className="page-shell">
       <Header variant={headerVariant} />
       <PageShell>
-        <main className="relative min-h-screen overflow-hidden">{children}</main>
+        <main className="relative min-h-screen overflow-x-hidden">{children}</main>
       </PageShell>
       <Footer />
       <WhatsAppButton />

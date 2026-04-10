@@ -148,6 +148,30 @@
     @apply inline-flex items-center justify-center rounded-[5px] border-2 border-secondary-500 bg-transparent px-6 py-2 text-sm font-extrabold text-secondary-500 transition-all duration-500 ease-in-out hover:scale-105 hover:bg-secondary-500 hover:text-white lg:text-base;
   }
 
+  .nav-underline {
+    @apply relative inline-flex items-center;
+  }
+
+  .nav-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.3s ease;
+    opacity: 0.9;
+  }
+
+  .nav-underline:hover::after,
+  .nav-underline:focus-visible::after {
+    transform: scaleX(1);
+  }
+
   .service-card {
     @apply flex flex-col items-center gap-6 rounded-lg bg-white p-8 text-center shadow-md transition-all duration-500 hover:-translate-y-1;
     backdrop-filter: blur(2px);
@@ -167,6 +191,37 @@
 
   .slider:hover .track {
     animation-play-state: paused;
+  }
+
+  .logo-marquee-shell {
+    position: relative;
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .logo-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: scrollLogos 26s linear infinite;
+  }
+
+  .logo-marquee-shell:hover .logo-marquee-track {
+    animation-play-state: paused;
+  }
+
+  .logo-marquee-card {
+    @apply mx-3 flex h-[124px] w-[220px] shrink-0 items-center justify-center rounded-[26px] border border-slate-200 bg-white/92 px-8 shadow-[0_16px_36px_rgba(15,23,42,0.06)] backdrop-blur-sm;
+  }
+
+  .logo-marquee-image {
+    @apply h-11 w-auto object-contain opacity-90 transition duration-300;
+    filter: grayscale(1);
+  }
+
+  .logo-marquee-card:hover .logo-marquee-image {
+    filter: grayscale(0);
+    opacity: 1;
   }
 
   .item {
@@ -385,6 +440,22 @@
 
   .contact-hub-link {
     @apply flex items-center gap-3 rounded-[14px] px-3 py-3 text-sm font-medium text-slate-700 transition duration-200 hover:bg-slate-100 hover:text-slate-950;
+  }
+
+  .quote-sticky {
+    @apply lg:sticky lg:top-8 lg:self-start;
+  }
+
+  .quote-form-grid {
+    @apply grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-start;
+  }
+
+  .solutions-grid {
+    @apply grid gap-5 md:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .solutions-card {
+    @apply relative overflow-hidden rounded-[30px] border border-slate-200 bg-white p-7 shadow-[0_18px_40px_rgba(15,23,42,0.06)];
   }
 }
 
@@ -685,6 +756,16 @@
 
   100% {
     transform: translate(calc(-1 * var(--item-width) * 9));
+  }
+}
+
+@keyframes scrollLogos {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
   }
 }
 

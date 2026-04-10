@@ -6,12 +6,15 @@ export const mockProjects: ProjectRecord[] = [
     name: "Portal Valeria Capital",
     clientId: "user-client-1",
     clientName: "Valeria Rios",
+    clientCompany: "Valeria Capital",
     status: "build",
     progress: 60,
     dueDate: "2026-05-08",
     pmId: "user-pm-1",
     quoteCode: "CD-24001",
     quoteId: "quote-1",
+    planProfile: "personal",
+    planTitle: "Plan PYMES",
     summary: "Portal corporativo con flujo comercial, panel interno y una base documental activa."
   },
   {
@@ -19,12 +22,15 @@ export const mockProjects: ProjectRecord[] = [
     name: "Nutrition Lab Commerce",
     clientId: "user-client-2",
     clientName: "Daniel Ortega",
+    clientCompany: "Nutrition Lab",
     status: "design",
     progress: 40,
     dueDate: "2026-05-28",
     pmId: "user-pm-1",
     quoteCode: "CD-24002",
     quoteId: "quote-2",
+    planProfile: "business",
+    planTitle: "Suite Commerce Enterprise",
     summary: "Ecommerce con catalogo, checkout y operacion comercial conectada a pagos."
   },
   {
@@ -32,12 +38,15 @@ export const mockProjects: ProjectRecord[] = [
     name: "Ops Control Suite",
     clientId: "user-client-2",
     clientName: "Daniel Ortega",
+    clientCompany: "Nutrition Lab",
     status: "done",
     progress: 100,
     dueDate: "2026-03-22",
     pmId: "user-pm-2",
     quoteCode: "CD-24003",
     quoteId: "quote-3",
+    planProfile: "business",
+    planTitle: "Plataforma Operativa Corporativa",
     summary: "Plataforma operativa con trazabilidad, reportes y visibilidad para el equipo interno."
   }
 ];

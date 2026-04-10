@@ -50,6 +50,11 @@ export interface PlanItem {
   items: string[];
 }
 
+export interface PlanCatalog {
+  personal: PlanItem[];
+  business: PlanItem[];
+}
+
 export interface PortfolioCard {
   name: string;
   year: string;

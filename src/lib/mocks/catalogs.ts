@@ -1,4 +1,11 @@
-import type { DashboardNavItem, PermissionKey, QuoteModuleOption, QuoteProjectTypeOption, Role } from "@/lib/types/domain";
+import type {
+  DashboardNavItem,
+  InfrastructureOption,
+  PermissionKey,
+  QuoteModuleOption,
+  QuoteProjectTypeOption,
+  Role
+} from "@/lib/types/domain";
 
 export const quoteProjectTypes: QuoteProjectTypeOption[] = [
   {
@@ -68,28 +75,55 @@ export const quoteModules: QuoteModuleOption[] = [
   { key: "maintenance", group: "service", label: "Mantenimiento mensual", description: "Acompanamiento continuo para soporte, ajustes y mejoras menores.", price: { min: 0, max: 0 }, monthly: { min: 3000, max: 10000 } }
 ];
 
+export const quoteInfrastructureOptions: Array<{
+  key: InfrastructureOption;
+  label: string;
+  description: string;
+}> = [
+  {
+    key: "new",
+    label: "Nueva infraestructura",
+    description: "Partimos desde cero para definir base tecnica, ambientes y despliegue."
+  },
+  {
+    key: "existing",
+    label: "Infraestructura existente",
+    description: "Trabajamos sobre servidores, dominios o flujos ya operando en tu negocio."
+  },
+  {
+    key: "cloud",
+    label: "Arquitectura en nube",
+    description: "El proyecto se prepara para operar con servicios cloud y escalabilidad controlada."
+  },
+  {
+    key: "hybrid",
+    label: "Infraestructura hibrida",
+    description: "Combinamos sistemas existentes con nuevas piezas en nube o integraciones dedicadas."
+  }
+];
+
 export const dashboardNav: Record<Role, DashboardNavItem[]> = {
   client: [
-    { key: "overview", label: "Inicio", href: "/dashboard/client" },
-    { key: "milestones", label: "Hitos", href: "/dashboard/client/milestones" },
-    { key: "docs", label: "Documentos", href: "/dashboard/client/docs" },
-    { key: "changes", label: "Cambios", href: "/dashboard/client/changes" },
-    { key: "chat", label: "Chat", href: "/dashboard/client/chat" },
+    { key: "projects", label: "Proyectos", href: "/dashboard/client" },
+    { key: "milestones", label: "Hitos y cambios", href: "/dashboard/client/milestones" },
+    { key: "chat", label: "Chat con PM", href: "/dashboard/client/chat" },
     { key: "payments", label: "Pagos", href: "/dashboard/client/payments" },
+    { key: "deliverables", label: "Entregables", href: "/dashboard/client/deliverables" },
     { key: "profile", label: "Perfil", href: "/dashboard/client/profile" }
   ],
   pm: [
-    { key: "overview", label: "Inicio", href: "/dashboard/pm" },
-    { key: "projects", label: "Proyectos", href: "/dashboard/pm/projects" },
-    { key: "timeline", label: "Timeline", href: "/dashboard/pm/timeline" },
-    { key: "messages", label: "Mensajes", href: "/dashboard/pm/messages" },
-    { key: "status", label: "Estado", href: "/dashboard/pm/status" }
+    { key: "projects", label: "Proyectos", href: "/dashboard/pm" },
+    { key: "milestones", label: "Hitos", href: "/dashboard/pm/milestones" },
+    { key: "deliverables", label: "Entregables", href: "/dashboard/pm/deliverables" },
+    { key: "chat", label: "Chat con cliente", href: "/dashboard/pm/chat" },
+    { key: "profile", label: "Perfil", href: "/dashboard/pm/profile" }
   ],
   admin: [
-    { key: "overview", label: "Inicio", href: "/dashboard/admin" },
+    { key: "metrics", label: "Metricas", href: "/dashboard/admin" },
     { key: "quotes", label: "Cotizaciones", href: "/dashboard/admin/quotes" },
-    { key: "projects", label: "Proyectos", href: "/dashboard/admin/projects" },
-    { key: "team", label: "PMs", href: "/dashboard/admin/team" }
+    { key: "users", label: "Usuarios", href: "/dashboard/admin/users" },
+    { key: "payments", label: "Pagos", href: "/dashboard/admin/payments" },
+    { key: "deliverables", label: "Entregables", href: "/dashboard/admin/deliverables" }
   ]
 };
 

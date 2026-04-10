@@ -1,5 +1,6 @@
-import { mockDocuments, mockMessages, mockMilestones, mockPayments, mockProjects, mockQuotes, mockUsers } from "@/lib/mocks";
+import type { DashboardWorkspaceState } from "@/features/dashboard/lib/workspace-store";
 import type {
+  ChangeRequestRecord,
   MessageRecord,
   PaymentRecord,
   ProjectDocumentRecord,
@@ -16,72 +17,72 @@ const primaryUserByRole: Record<Role, string> = {
   admin: "user-admin-1"
 };
 
-export function getPrimaryUser(role: Role): UserRecord | undefined {
-  return mockUsers.find((user) => user.id === primaryUserByRole[role]);
+export function getPrimaryUser(state: DashboardWorkspaceState, role: Role): UserRecord | undefined {
+  return state.users.find((user) => user.id === primaryUserByRole[role]);
 }
 
-export function getUserById(userId?: string) {
-  return userId ? mockUsers.find((user) => user.id === userId) : undefined;
+export function getUserById(state: DashboardWorkspaceState, userId?: string) {
+  return userId ? state.users.find((user) => user.id === userId) : undefined;
 }
 
-export function getQuoteById(quoteId?: string) {
-  return quoteId ? mockQuotes.find((quote) => quote.id === quoteId) : undefined;
+export function getQuoteById(state: DashboardWorkspaceState, quoteId?: string) {
+  return quoteId ? state.quotes.find((quote) => quote.id === quoteId) : undefined;
 }
 
-export function getProjectById(projectId?: string) {
-  return projectId ? mockProjects.find((project) => project.id === projectId) : undefined;
+export function getProjectById(state: DashboardWorkspaceState, projectId?: string) {
+  return projectId ? state.projects.find((project) => project.id === projectId) : undefined;
 }
 
-export function getVisibleQuotes(role: Role): QuoteRecord[] {
+export function getVisibleQuotes(state: DashboardWorkspaceState, role: Role): QuoteRecord[] {
   if (role === "admin") {
-    return mockQuotes;
+    return state.quotes;
   }
 
-  const user = getPrimaryUser(role);
+  const user = getPrimaryUser(state, role);
 
   if (!user) {
     return [];
   }
 
   if (role === "client") {
-    return mockQuotes.filter((quote) => quote.clientId === user.id);
+    return state.quotes.filter((quote) => quote.clientId === user.id);
   }
 
-  return mockQuotes.filter((quote) => quote.pmId === user.id);
+  return state.quotes.filter((quote) => quote.pmId === user.id);
 }
 
-export function getVisibleProjects(role: Role): ProjectRecord[] {
+export function getVisibleProjects(state: DashboardWorkspaceState, role: Role): ProjectRecord[] {
   if (role === "admin") {
-    return mockProjects;
+    return state.projects;
   }
 
-  const user = getPrimaryUser(role);
+  const user = getPrimaryUser(state, role);
 
   if (!user) {
     return [];
   }
 
   if (role === "client") {
-    return mockProjects.filter((project) => project.clientId === user.id);
+    return state.projects.filter((project) => project.clientId === user.id);
   }
 
-  return mockProjects.filter((project) => project.pmId === user.id);
+  return state.projects.filter((project) => project.pmId === user.id);
 }
 
-export function getVisibleMessages(role: Role): MessageRecord[] {
+export function getVisibleMessages(state: DashboardWorkspaceState, role: Role): MessageRecord[] {
   if (role === "admin") {
-    return mockMessages;
+    return state.messages;
   }
 
-  const user = getPrimaryUser(role);
+  const user = getPrimaryUser(state, role);
 
   if (!user) {
     return [];
   }
 
-  const visibleProjectIds = new Set(getVisibleProjects(role).map((project) => project.id));
+  const visibleProjectIds = new Set(getVisibleProjects(state, role).map((project) => project.id));
 
-  return mockMessages.filter(
+  return state.messages.filter(
     (message) =>
       (message.projectId ? visibleProjectIds.has(message.projectId) : false) ||
       message.senderId === user.id ||
@@ -89,24 +90,24 @@ export function getVisibleMessages(role: Role): MessageRecord[] {
   );
 }
 
-export function getPrimaryProject(role: Role) {
-  return getVisibleProjects(role)[0];
+export function getPrimaryProject(state: DashboardWorkspaceState, role: Role) {
+  return getVisibleProjects(state, role)[0];
 }
 
-export function getProjectMilestones(projectId?: string): ProjectMilestoneRecord[] {
-  return projectId ? mockMilestones.filter((item) => item.projectId === projectId) : [];
+export function getProjectMilestones(state: DashboardWorkspaceState, projectId?: string): ProjectMilestoneRecord[] {
+  return projectId ? state.milestones.filter((item) => item.projectId === projectId) : [];
 }
 
-export function getLatestMilestone(projectId?: string) {
-  return getProjectMilestones(projectId)
+export function getLatestMilestone(state: DashboardWorkspaceState, projectId?: string) {
+  return getProjectMilestones(state, projectId)
     .slice()
     .sort((left, right) => new Date(right.date).getTime() - new Date(left.date).getTime())[0];
 }
 
-export function getUpcomingMilestones(role: Role) {
-  return getVisibleProjects(role)
+export function getUpcomingMilestones(state: DashboardWorkspaceState, role: Role) {
+  return getVisibleProjects(state, role)
     .flatMap((project) =>
-      getProjectMilestones(project.id).map((milestone) => ({
+      getProjectMilestones(state, project.id).map((milestone) => ({
         ...milestone,
         projectName: project.name,
         clientName: project.clientName
@@ -115,30 +116,38 @@ export function getUpcomingMilestones(role: Role) {
     .sort((left, right) => new Date(left.date).getTime() - new Date(right.date).getTime());
 }
 
-export function getProjectDocuments(projectId?: string): ProjectDocumentRecord[] {
-  return projectId ? mockDocuments.filter((item) => item.projectId === projectId) : [];
+export function getProjectDocuments(state: DashboardWorkspaceState, projectId?: string): ProjectDocumentRecord[] {
+  return projectId ? state.documents.filter((item) => item.projectId === projectId) : [];
 }
 
-export function getProjectPayments(projectId?: string): PaymentRecord[] {
-  return projectId ? mockPayments.filter((item) => item.projectId === projectId) : [];
+export function getProjectPayments(state: DashboardWorkspaceState, projectId?: string): PaymentRecord[] {
+  return projectId ? state.payments.filter((item) => item.projectId === projectId) : [];
 }
 
-export function getProjectMessages(projectId?: string): MessageRecord[] {
-  return projectId ? mockMessages.filter((item) => item.projectId === projectId) : [];
+export function getProjectMessages(state: DashboardWorkspaceState, projectId?: string): MessageRecord[] {
+  return projectId ? state.messages.filter((item) => item.projectId === projectId) : [];
 }
 
-export function getPendingMessages(role: Role) {
-  const currentUser = getPrimaryUser(role);
-
-  return getVisibleMessages(role).filter((message) => message.status === "unread" && message.recipientId === currentUser?.id);
+export function getProjectChangeRequests(state: DashboardWorkspaceState, projectId?: string): ChangeRequestRecord[] {
+  return projectId ? state.changeRequests.filter((item) => item.projectId === projectId) : [];
 }
 
-export function getPmUsers() {
-  return mockUsers.filter((user) => user.role === "pm");
+export function getPendingMessages(state: DashboardWorkspaceState, role: Role) {
+  const currentUser = getPrimaryUser(state, role);
+
+  return getVisibleMessages(state, role).filter((message) => message.status === "unread" && message.recipientId === currentUser?.id);
 }
 
-export function getPmStats(pmId: string) {
-  const projects = mockProjects.filter((project) => project.pmId === pmId);
+export function getPmUsers(state: DashboardWorkspaceState) {
+  return state.users.filter((user) => user.role === "pm");
+}
+
+export function getClientUsers(state: DashboardWorkspaceState) {
+  return state.users.filter((user) => user.role === "client");
+}
+
+export function getPmStats(state: DashboardWorkspaceState, pmId: string) {
+  const projects = state.projects.filter((project) => project.pmId === pmId);
 
   return {
     activeProjects: projects.filter((project) => project.status !== "done").length,
@@ -146,14 +155,10 @@ export function getPmStats(pmId: string) {
   };
 }
 
-export function getClientUsers() {
-  return mockUsers.filter((user) => user.role === "client");
-}
-
-export function getProjectsAtRisk() {
+export function getProjectsAtRisk(state: DashboardWorkspaceState) {
   const today = new Date("2026-04-09T12:00:00");
 
-  return mockProjects.filter((project) => {
+  return state.projects.filter((project) => {
     if (project.status === "done") {
       return false;
     }

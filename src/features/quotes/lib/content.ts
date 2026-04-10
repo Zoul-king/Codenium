@@ -1,20 +1,25 @@
-import { quoteModules } from "@/lib/mocks";
+import { quoteInfrastructureOptions, quoteModules } from "@/lib/mocks";
 
 export const quoteSections = [
   {
     key: "project",
-    title: "Categoría",
+    title: "Categoria",
     description: "Elige la base principal del proyecto."
   },
   {
     key: "objective",
     title: "Objetivo",
-    description: "¿Qué quieres lograr o qué problema necesitas resolver?"
+    description: "Que quieres lograr o que problema necesitas resolver?"
+  },
+  {
+    key: "infrastructure",
+    title: "Infraestructura",
+    description: "Define si partimos desde cero, sobre base existente o con arquitectura distribuida."
   },
   {
     key: "timeline",
     title: "Tiempo aproximado",
-    description: "Selecciona el rango de tiempo en el que te gustaría mover el proyecto."
+    description: "Selecciona el rango de tiempo en el que te gustaria mover el proyecto."
   },
   {
     key: "features",
@@ -23,14 +28,17 @@ export const quoteSections = [
   }
 ] as const;
 
-
 export function getSelectedQuoteModules(moduleKeys: string[]) {
   return quoteModules.filter((item) => moduleKeys.includes(item.key));
 }
 
+export function getInfrastructureLabel(infrastructure: string) {
+  return quoteInfrastructureOptions.find((item) => item.key === infrastructure)?.label ?? "Sin definir";
+}
+
 export function getQuoteSectionSummary(
   sectionKey: (typeof quoteSections)[number]["key"],
-  draft: { projectType: string; objective: string; timelinePreference: string; modules: string[] }
+  draft: { objective: string; infrastructure: string; timelinePreference: string; modules: string[] }
 ) {
   if (sectionKey === "project") {
     return "Selecciona una base clara para tu estimado.";
@@ -40,6 +48,10 @@ export function getQuoteSectionSummary(
     return draft.objective.trim() ? draft.objective.trim() : "Aun no escribes el objetivo del proyecto.";
   }
 
+  if (sectionKey === "infrastructure") {
+    return getInfrastructureLabel(draft.infrastructure);
+  }
+
   if (sectionKey === "timeline") {
     if (draft.timelinePreference === "1-4") return "Entre 1 y 4 meses.";
     if (draft.timelinePreference === "5-7") return "Entre 5 y 7 meses.";
@@ -47,10 +59,10 @@ export function getQuoteSectionSummary(
   }
 
   const selectedModules = getSelectedQuoteModules(draft.modules);
-  const items = selectedModules.filter((item) => item.group === (sectionKey === "features" ? "feature" : "service"));
+  const items = selectedModules.filter((item) => item.group === "feature");
 
   if (items.length === 0) {
-    return sectionKey === "features" ? "Sin funciones adicionales por ahora." : "Sin soporte posterior por ahora.";
+    return "Sin funciones adicionales por ahora.";
   }
 
   if (items.length === 1) {

@@ -65,7 +65,8 @@ export function validateRegister(input: RegisterInput) {
     company: input.company?.trim() || undefined,
     role: "client",
     title: "Cuenta cliente",
-    activeProjects: 0
+    activeProjects: 0,
+    state: "active"
   };
 
   return buildSession(mockUser, "client");

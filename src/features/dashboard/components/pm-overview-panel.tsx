@@ -1,93 +1,70 @@
-import Link from "next/link";
+"use client";
 
 import { DashboardCard, DashboardMutedCard, ProgressBar, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
-import { getPendingMessages, getProjectsAtRisk, getVisibleProjects } from "@/features/dashboard/lib/selectors";
+import { getPendingMessages, getVisibleProjects } from "@/features/dashboard/lib/selectors";
+import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { formatShortDate, getProjectStatusLabel } from "@/lib/presenters";
 
 export function PmOverviewPanel() {
-  const projects = getVisibleProjects("pm");
-  const alerts = getProjectsAtRisk().filter((project) => project.pmId === "user-pm-1");
-  const pendingMessages = getPendingMessages("pm");
+  const { state } = useDashboardWorkspace();
+  const projects = getVisibleProjects(state, "pm");
+  const activeProjects = projects.filter((project) => project.status !== "done");
+  const completedProjects = projects.filter((project) => project.status === "done");
+  const pendingMessages = getPendingMessages(state, "pm");
 
   return (
-    <div className="grid h-full gap-5 xl:grid-cols-[1.2fr_0.8fr] xl:grid-rows-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-      <DashboardCard className="xl:row-span-2">
-        <SectionHeading eyebrow="Panel de PM" title="Proyectos asignados" description="Vista compacta para revisar estado, progreso y siguiente entrega sin paneles duplicados." />
-        <div className="mt-6 overflow-hidden rounded-[24px] border border-slate-200">
-          <div className="grid grid-cols-[1.4fr_1fr_0.9fr_0.8fr_0.9fr] gap-3 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-            <span>Proyecto</span>
-            <span>Cliente</span>
-            <span>Estado</span>
-            <span>Progreso</span>
-            <span>Entrega</span>
-          </div>
-          <div className="divide-y divide-slate-200">
-            {projects.map((project) => (
-              <div key={project.id} className="grid grid-cols-[1.4fr_1fr_0.9fr_0.8fr_0.9fr] gap-3 px-5 py-4">
-                <div>
-                  <p className="font-semibold text-slate-950">{project.name}</p>
-                  <p className="mt-1 text-sm text-slate-500">{project.summary}</p>
-                </div>
-                <p className="text-sm text-slate-600">{project.clientName}</p>
-                <div className="pt-0.5">
-                  <StatusBadge tone={project.status === "done" ? "success" : project.progress < 50 ? "warning" : "accent"}>{getProjectStatusLabel(project.status)}</StatusBadge>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">{project.progress}%</p>
-                  <div className="mt-2">
-                    <ProgressBar value={project.progress} />
-                  </div>
-                </div>
-                <p className="text-sm text-slate-600">{formatShortDate(project.dueDate)}</p>
-              </div>
-            ))}
-          </div>
+    <div className="grid h-full gap-5 xl:grid-cols-[1.1fr_0.9fr]">
+      <DashboardCard>
+        <SectionHeading eyebrow="Proyectos" title="Frentes en proceso y terminados" description="El PM ve separados los proyectos activos y los ya cerrados para priorizar seguimiento real." />
+        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+          <ProjectColumn title="En proceso" items={activeProjects} />
+          <ProjectColumn title="Terminados" items={completedProjects} />
         </div>
       </DashboardCard>
 
       <DashboardMutedCard>
-        <SectionHeading eyebrow="Alertas" title="Frentes a destrabar" />
+        <SectionHeading eyebrow="Seguimiento" title={`${pendingMessages.length} mensajes pendientes`} />
         <div className="mt-6 grid gap-3">
-          {alerts.map((project) => (
-            <div key={project.id} className="rounded-[20px] border border-amber-100 bg-amber-50 px-4 py-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="font-semibold text-slate-950">{project.name}</p>
-                <StatusBadge tone="warning">{project.progress < 50 ? "Riesgo" : "Entrega cercana"}</StatusBadge>
-              </div>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Entrega {formatShortDate(project.dueDate)}. Requiere seguimiento con cliente o desbloqueo operativo.</p>
+          {pendingMessages.map((message) => (
+            <div key={message.id} className="rounded-[18px] border border-slate-200 bg-white p-4">
+              <p className="font-semibold text-slate-950">{message.senderName}</p>
+              <p className="mt-1 text-sm text-slate-500">{message.thread}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{message.preview}</p>
             </div>
           ))}
         </div>
       </DashboardMutedCard>
+    </div>
+  );
+}
 
-      <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-        <DashboardMutedCard>
-          <SectionHeading eyebrow="Mensajes pendientes" title={`${pendingMessages.length} por responder`} />
-          <div className="mt-6 grid gap-3">
-            {pendingMessages.map((message) => (
-              <div key={message.id} className="rounded-[18px] border border-slate-200 bg-white p-4">
-                <p className="font-semibold text-slate-950">{message.senderName}</p>
-                <p className="mt-1 text-sm text-slate-500">{message.thread}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{message.preview}</p>
+function ProjectColumn({ title, items }: { title: string; items: ReturnType<typeof getVisibleProjects> }) {
+  return (
+    <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-lg font-semibold text-slate-950">{title}</h3>
+        <span className="text-sm font-semibold text-slate-500">{items.length}</span>
+      </div>
+      <div className="mt-4 grid gap-3">
+        {items.map((project) => (
+          <div key={project.id} className="rounded-[18px] border border-slate-200 bg-white p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-semibold text-slate-950">{project.name}</p>
+                <p className="mt-1 text-sm text-slate-500">{project.clientName}</p>
               </div>
-            ))}
+              <StatusBadge tone={project.status === "done" ? "success" : "accent"}>{getProjectStatusLabel(project.status)}</StatusBadge>
+            </div>
+            <p className="mt-3 text-sm leading-6 text-slate-600">{project.summary}</p>
+            <div className="mt-3">
+              <div className="mb-2 flex items-center justify-between text-sm text-slate-600">
+                <span>Entrega</span>
+                <span>{formatShortDate(project.dueDate)}</span>
+              </div>
+              <ProgressBar value={project.progress} />
+            </div>
           </div>
-        </DashboardMutedCard>
-
-        <DashboardCard>
-          <SectionHeading eyebrow="Acciones rapidas" title="Atajos operativos" />
-          <div className="mt-6 grid gap-3">
-            <Link href="/dashboard/pm/status" className="dashboard-action">
-              Actualizar estado de proyecto
-            </Link>
-            <Link href="/dashboard/pm/messages" className="dashboard-action">
-              Abrir conversacion activa
-            </Link>
-            <Link href="/dashboard/pm/timeline" className="dashboard-action">
-              Revisar timeline completo
-            </Link>
-          </div>
-        </DashboardCard>
+        ))}
       </div>
     </div>
   );

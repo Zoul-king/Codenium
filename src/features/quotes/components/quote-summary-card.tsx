@@ -1,4 +1,4 @@
-import { getSelectedQuoteModules } from "@/features/quotes/lib/content";
+import { getInfrastructureLabel, getSelectedQuoteModules } from "@/features/quotes/lib/content";
 import { formatCurrency, getQuoteViability } from "@/features/quotes/lib/estimate";
 import { quoteProjectTypes } from "@/lib/mocks";
 import type { QuoteDraft, QuoteEstimate } from "@/lib/types/domain";
@@ -16,9 +16,10 @@ export function QuoteSummaryCard({ draft, estimate, compact = false }: QuoteSumm
   const serviceModules = selectedModules.filter((item) => item.group === "service");
   const viability = getQuoteViability(draft, estimate);
   const timelineLabel = draft.timelinePreference === "1-4" ? "1 a 4 meses" : draft.timelinePreference === "5-7" ? "5 a 7 meses" : "8 a 12 meses";
+  const planLabel = draft.planProfile === "business" ? "Perfil empresarial" : "Perfil personal";
 
   return (
-    <aside className={compact ? "rounded-[24px] border border-slate-200 bg-slate-50 p-5" : "rounded-[24px] border border-white bg-gradient-to-br from-transparent to-white/80 p-5 shadow-[0_16px_30px_rgba(15,23,32,0.06)] lg:self-start"}>
+    <aside className={compact ? "rounded-[24px] border border-slate-200 bg-slate-50 p-5" : "quote-sticky rounded-[24px] border border-white bg-gradient-to-br from-transparent to-white/80 p-5 shadow-[0_16px_30px_rgba(15,23,32,0.06)]"}>
       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-secondary-600">Resumen del proyecto</p>
 
       <div className="mt-4 rounded-[18px] bg-white p-4 shadow-[0_10px_18px_rgba(15,23,32,0.04)]">
@@ -31,10 +32,11 @@ export function QuoteSummaryCard({ draft, estimate, compact = false }: QuoteSumm
         </div>
 
         <div className="mt-5 space-y-4 border-t border-black/10 pt-4">
+          <DetailItem label="Perfil" value={planLabel} />
           <DetailItem label="Categoria" value={projectType?.label ?? "Sin definir"} />
           <DetailItem label="Objetivo" value={draft.objective.trim() || "Aun no escribes el objetivo del proyecto."} />
+          <DetailItem label="Infraestructura" value={getInfrastructureLabel(draft.infrastructure)} />
           <DetailItem label="Tiempo deseado" value={timelineLabel} />
-          <DetailItem label="Tiempo del sistema" value={`${estimate.timelineWeeks.min} - ${estimate.timelineWeeks.max} semanas`} />
           <DetailItem label="Capacidades" value={featureModules.length > 0 ? featureModules.map((item) => item.label).join(", ") : "Sin adicionales por ahora"} />
           <DetailItem label="Soporte posterior" value={serviceModules.length > 0 ? serviceModules.map((item) => item.label).join(", ") : "No incluido por ahora"} />
         </div>

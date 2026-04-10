@@ -30,8 +30,8 @@ export function Header({ variant }: HeaderProps) {
 
           <nav className="hidden items-center gap-7 lg:flex">
             {site.nav.map((item) => (
-              <Link key={item.href} href={item.href} className={cn("text-sm font-semibold transition-colors", navClassName)}>
-                {item.label}
+              <Link key={item.href} href={item.href} className={cn("nav-underline text-sm font-semibold transition-colors", navClassName)}>
+                <span className="relative inline-block pb-[6px]">{item.label}</span>
               </Link>
             ))}
           </nav>

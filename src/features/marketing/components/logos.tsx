@@ -9,27 +9,34 @@ export function Logos({ items }: LogosProps) {
 
   return (
     <section className="section relative bg-foreground">
-      <div className="site-shell flex min-h-[52vh] flex-col items-center justify-between gap-10 py-16 md:flex-row">
-        <article className="flex w-full flex-col gap-4" data-animate="fadeInFromTop">
+      <div className="site-shell flex min-h-[52vh] flex-col gap-10 py-16">
+        <article className="flex w-full flex-col gap-4 text-center md:text-left" data-animate="fadeInFromTop">
           <span className="type-kicker">Nuestros clientes</span>
           <h2 className="text-[28px] font-bold leading-8 tracking-[-0.03em] text-slate-950 lg:text-[40px] lg:leading-[48px]">
-            Empresas que <span className="text-primary-500">confiaron</span> en nuestro trabajo
+            Empresas que <span className="text-primary-500">inspiran</span> productos digitales de alto nivel
           </h2>
-          <p className="max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-            Hemos acompañado a diversas organizaciones en la construcción de su ecosistema digital,
-            entregando soluciones que no solo cumplen con sus objetivos técnicos, sino que también
-            fortalecen la confianza de sus usuarios finales a través de productos robustos y escalables.
+          <p className="mx-auto max-w-3xl text-sm leading-7 text-slate-600 md:mx-0 md:text-base">
+            Reimaginamos la banda de clientes como una referencia visual continua: una cinta sobria, automatica y sin cortes bruscos, alineada con el resto del sistema.
           </p>
         </article>
 
-        <article className="slider" data-animate="fadeInFromBottom">
-          <div className="track">
+        <article className="logo-marquee-shell" data-animate="fadeInFromBottom" aria-label="Empresas tecnologicas de referencia">
+          <div className="logo-marquee-track">
             {repeated.map((item, index) => (
-              <div key={`${item.alt}-${index}`} className="item">
-                <div className="flex h-full w-full items-center justify-center rounded-[22px] border border-slate-200 bg-white px-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+              <a
+                key={`${item.alt}-${index}`}
+                href={item.href ?? "#"}
+                target={item.href ? "_blank" : undefined}
+                rel={item.href ? "noreferrer" : undefined}
+                className="logo-marquee-card"
+                aria-label={item.alt}
+              >
+                {item.src ? (
+                  <img src={item.src} alt={item.alt} className="logo-marquee-image" loading="lazy" />
+                ) : (
                   <span className="text-xl font-semibold tracking-[-0.04em] text-slate-800">{item.alt}</span>
-                </div>
-              </div>
+                )}
+              </a>
             ))}
           </div>
         </article>

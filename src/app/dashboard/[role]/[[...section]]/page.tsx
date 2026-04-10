@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { DashboardShell } from "@/features/dashboard/components/dashboard-shell";
-import { isValidDashboardSection, resolveRole } from "@/features/dashboard/lib/routes";
+import { getDefaultDashboardSection, isValidDashboardSection, resolveRole } from "@/features/dashboard/lib/routes";
 import { renderDashboardSection } from "@/features/dashboard/lib/view";
 
 interface DashboardPageProps {
@@ -19,7 +19,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     notFound();
   }
 
-  const activeSection = section?.[0] ?? "overview";
+  const activeSection = section?.[0] ?? getDefaultDashboardSection(role);
 
   if (!isValidDashboardSection(role, activeSection)) {
     notFound();

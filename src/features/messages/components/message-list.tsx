@@ -1,5 +1,8 @@
+"use client";
+
 import { DashboardCard, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
 import { getVisibleMessages } from "@/features/dashboard/lib/selectors";
+import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import type { Role } from "@/lib/types/domain";
 
 interface MessageListProps {
@@ -7,7 +10,8 @@ interface MessageListProps {
 }
 
 export function MessageList({ role }: MessageListProps) {
-  const items = getVisibleMessages(role);
+  const { state } = useDashboardWorkspace();
+  const items = getVisibleMessages(state, role);
 
   return (
     <div className="grid h-full gap-5 xl:grid-cols-[0.84fr_1.16fr]">
