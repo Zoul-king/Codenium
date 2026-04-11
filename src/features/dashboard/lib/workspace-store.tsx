@@ -28,6 +28,7 @@ export interface DashboardWorkspaceState {
   payments: PaymentRecord[];
   documents: ProjectDocumentRecord[];
   changeRequests: ChangeRequestRecord[];
+  selectedProjectIds: Partial<Record<Role, string>>;
 }
 
 interface CreatePmAccountInput {
@@ -45,13 +46,24 @@ interface AddProjectDocumentInput {
   audience?: "client" | "shared";
 }
 
+interface UpsertMilestoneInput {
+  id?: string;
+  projectId: string;
+  title: string;
+  summary: string;
+  date: string;
+  status: ProjectMilestoneRecord["status"];
+}
+
 interface DashboardWorkspaceContextValue {
   state: DashboardWorkspaceState;
+  selectProject: (role: Extract<Role, "client" | "pm">, projectId: string) => void;
   acceptQuote: (quoteId: string, pmId: string) => void;
   setQuoteStatus: (quoteId: string, status: QuoteStatus) => void;
   setUserState: (userId: string, nextState: UserState) => void;
   createPmAccount: (input: CreatePmAccountInput) => void;
   completeMilestone: (milestoneId: string) => void;
+  saveMilestone: (input: UpsertMilestoneInput) => void;
   addChangeRequest: (request: Omit<ChangeRequestRecord, "id" | "requestedAt" | "status">) => void;
   addProjectMessage: (projectId: string, senderId: string, role: Role, preview: string) => void;
   markPaymentAsPaid: (paymentId: string) => void;
@@ -66,7 +78,8 @@ const initialWorkspaceState: DashboardWorkspaceState = {
   milestones: mockMilestones,
   payments: mockPayments,
   documents: mockDocuments,
-  changeRequests: mockChangeRequests
+  changeRequests: mockChangeRequests,
+  selectedProjectIds: {}
 };
 
 const DashboardWorkspaceContext = createContext<DashboardWorkspaceContextValue | null>(null);
@@ -95,6 +108,15 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
   const value = useMemo<DashboardWorkspaceContextValue>(
     () => ({
       state,
+      selectProject: (role, projectId) => {
+        setState((current) => ({
+          ...current,
+          selectedProjectIds: {
+            ...current.selectedProjectIds,
+            [role]: projectId
+          }
+        }));
+      },
       acceptQuote: (quoteId, pmId) => {
         setState((current) => {
           const quote = current.quotes.find((item) => item.id === quoteId);
@@ -148,7 +170,14 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
             ...current,
             quotes: nextQuotes,
             projects: nextProjects,
-            users: nextUsers
+            users: nextUsers,
+            selectedProjectIds: alreadyCreated
+              ? current.selectedProjectIds
+              : {
+                  ...current.selectedProjectIds,
+                  client: quote.clientId === "user-client-1" ? nextProjects.at(-1)?.id ?? current.selectedProjectIds.client : current.selectedProjectIds.client,
+                  pm: pmId === "user-pm-1" ? nextProjects.at(-1)?.id ?? current.selectedProjectIds.pm : current.selectedProjectIds.pm
+                }
           };
         });
       },
@@ -223,6 +252,46 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           };
         });
       },
+      saveMilestone: (input) => {
+        setState((current) => {
+          if (input.id) {
+            return {
+              ...current,
+              milestones: current.milestones.map((milestone) =>
+                milestone.id === input.id
+                  ? {
+                      ...milestone,
+                      projectId: input.projectId,
+                      title: input.title,
+                      summary: input.summary,
+                      date: input.date,
+                      status: input.status
+                    }
+                  : milestone
+              )
+            };
+          }
+
+          const projectPayments = current.payments.filter((payment) => payment.projectId === input.projectId);
+          const nextScheduledPayment = projectPayments.find((payment) => payment.status === "scheduled" && !current.milestones.some((milestone) => milestone.unlocksPaymentId === payment.id));
+
+          return {
+            ...current,
+            milestones: [
+              ...current.milestones,
+              {
+                id: `milestone-${current.milestones.length + 1}`,
+                projectId: input.projectId,
+                title: input.title,
+                summary: input.summary,
+                date: input.date,
+                status: input.status,
+                unlocksPaymentId: nextScheduledPayment?.id
+              }
+            ]
+          };
+        });
+      },
       addChangeRequest: (request) => {
         setState((current) => ({
           ...current,
@@ -270,7 +339,19 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
       markPaymentAsPaid: (paymentId) => {
         setState((current) => ({
           ...current,
-          payments: current.payments.map((payment) => (payment.id === paymentId ? { ...payment, status: "paid" } : payment))
+          payments: current.payments.map((payment) => {
+            if (payment.id !== paymentId) {
+              return payment;
+            }
+
+            const milestone = current.milestones.find((item) => item.id === payment.milestoneId);
+
+            if (milestone && milestone.status !== "done") {
+              return payment;
+            }
+
+            return { ...payment, status: "paid" };
+          })
         }));
       },
       addProjectDocument: ({ projectId, title, kind, href, audience = "client" }) => {

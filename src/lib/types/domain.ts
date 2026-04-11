@@ -205,6 +205,7 @@ export interface ChangeRequestRecord {
   id: string;
   projectId: string;
   clientId: string;
+  milestoneId?: string;
   title: string;
   detail: string;
   priority: "high" | "medium" | "low";

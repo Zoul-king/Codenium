@@ -1,6 +1,7 @@
 "use client";
 
-import { getPrimaryProject, getPrimaryUser, getUserById } from "@/features/dashboard/lib/selectors";
+import { DashboardCard, DashboardEmptyState, DashboardMutedCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
+import { getPrimaryUser, getSelectedProject, getUserById } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import type { Role } from "@/lib/types/domain";
 
@@ -11,61 +12,46 @@ interface ProfilePanelProps {
 export function ProfilePanel({ role }: ProfilePanelProps) {
   const { state } = useDashboardWorkspace();
   const user = getPrimaryUser(state, role);
-  const project = getPrimaryProject(state, role);
-  const pm = getUserById(state, project?.pmId);
-  const client = getUserById(state, project?.clientId);
+  const project = getSelectedProject(state, role);
+  const counterpart = getUserById(state, role === "client" ? project?.pmId : project?.clientId);
 
   return (
-    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-      <section className="rounded-[18px] border border-slate-200 bg-white px-6 py-6">
-        <div className="border-b border-slate-200 pb-5">
-          <p className="dashboard-eyebrow">Perfil</p>
-          <h2 className="mt-2 text-[28px] font-semibold tracking-[-0.04em] text-slate-950">{user?.name ?? "Sin usuario"}</h2>
-          <p className="mt-2 text-sm text-slate-600">{user?.title}</p>
-        </div>
-
-        <div className="mt-6 grid gap-4">
+    <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+      <DashboardCard>
+        <SectionHeading title={user?.name ?? "Sin usuario"} description={user?.title} />
+        <div className="mt-4 grid gap-3">
           <ProfileRow label="Correo" value={user?.email ?? "-"} />
           <ProfileRow label="Telefono" value={user?.phone ?? "-"} />
           <ProfileRow label="Empresa" value={user?.company ?? "Interno"} />
           <ProfileRow label="Estado" value={user?.state ?? "-"} />
         </div>
-      </section>
+      </DashboardCard>
 
-      <section className="rounded-[18px] border border-slate-200 bg-[linear-gradient(180deg,rgba(248,250,252,0.74)_0%,rgba(241,245,249,0.62)_100%)] px-6 py-6">
-        <div className="border-b border-slate-200 pb-5">
-          <p className="dashboard-eyebrow">{role === "client" ? "Seguimiento" : "Relacion operativa"}</p>
-          <h2 className="mt-2 text-[28px] font-semibold tracking-[-0.04em] text-slate-950">{role === "client" ? "Tu PM asignado y proyecto" : "Cliente principal y proyecto"}</h2>
-        </div>
-
-        <div className="mt-6 grid gap-4">
-          {role === "client" ? (
-            <>
-              <ProfileRow label="PM asignado" value={pm?.name ?? "Pendiente"} />
-              <ProfileRow label="Correo PM" value={pm?.email ?? "-"} />
-              <ProfileRow label="Origen" value={project?.intakeSource === "service" ? "Servicio" : "Plan"} />
-              <ProfileRow label="Seleccion contratada" value={project?.selectionLabel ?? "Sin proyecto"} />
-            </>
-          ) : (
-            <>
-              <ProfileRow label="Cliente principal" value={client?.name ?? "Pendiente"} />
-              <ProfileRow label="Correo cliente" value={client?.email ?? "-"} />
-              <ProfileRow label="Proyecto activo" value={project?.name ?? "Sin proyecto"} />
-              <ProfileRow label="Origen" value={project?.intakeSource === "service" ? "Servicio" : "Plan"} />
-              <ProfileRow label="Seleccion del proyecto" value={project?.selectionLabel ?? "Sin proyecto"} />
-            </>
-          )}
-        </div>
-      </section>
+      <DashboardMutedCard>
+        <SectionHeading title="Relacion operativa" />
+        {project ? (
+          <div className="mt-4 grid gap-3">
+            <ProfileRow label="Proyecto activo" value={project.name} />
+            <ProfileRow label={role === "client" ? "PM asignado" : "Cliente"} value={counterpart?.name ?? "Pendiente"} />
+            <ProfileRow label={role === "client" ? "Correo PM" : "Correo cliente"} value={counterpart?.email ?? "-"} />
+            <ProfileRow label="Origen" value={project.intakeSource === "service" ? "Servicio" : "Plan"} />
+            <ProfileRow label="Seleccion" value={project.selectionLabel} />
+          </div>
+        ) : (
+          <div className="mt-4">
+            <DashboardEmptyState title="Sin proyecto seleccionado" body="Cuando elijas un proyecto desde la vista de proyectos, su contexto operativo se reflejara aqui." />
+          </div>
+        )}
+      </DashboardMutedCard>
     </div>
   );
 }
 
 function ProfileRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid gap-2 border-b border-slate-200 pb-4 sm:grid-cols-[180px_minmax(0,1fr)] sm:items-center">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
-      <p className="text-sm font-semibold text-slate-900">{value}</p>
+    <div className="grid gap-1.5 rounded-[16px] border border-slate-200 bg-white px-4 py-3 sm:grid-cols-[150px_minmax(0,1fr)] sm:items-center">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+      <p className="text-sm font-medium text-slate-900">{value}</p>
     </div>
   );
 }

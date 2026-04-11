@@ -94,6 +94,17 @@ export function getPrimaryProject(state: DashboardWorkspaceState, role: Role) {
   return getVisibleProjects(state, role)[0];
 }
 
+export function getSelectedProject(state: DashboardWorkspaceState, role: Extract<Role, "client" | "pm">) {
+  const visibleProjects = getVisibleProjects(state, role);
+  const selectedId = state.selectedProjectIds[role];
+
+  return visibleProjects.find((project) => project.id === selectedId);
+}
+
+export function getSelectedOrPrimaryProject(state: DashboardWorkspaceState, role: Extract<Role, "client" | "pm">) {
+  return getSelectedProject(state, role) ?? getPrimaryProject(state, role);
+}
+
 export function getProjectMilestones(state: DashboardWorkspaceState, projectId?: string): ProjectMilestoneRecord[] {
   return projectId ? state.milestones.filter((item) => item.projectId === projectId) : [];
 }
@@ -130,6 +141,14 @@ export function getProjectMessages(state: DashboardWorkspaceState, projectId?: s
 
 export function getProjectChangeRequests(state: DashboardWorkspaceState, projectId?: string): ChangeRequestRecord[] {
   return projectId ? state.changeRequests.filter((item) => item.projectId === projectId) : [];
+}
+
+export function getMilestoneById(state: DashboardWorkspaceState, milestoneId?: string) {
+  return milestoneId ? state.milestones.find((item) => item.id === milestoneId) : undefined;
+}
+
+export function getMilestonePayment(state: DashboardWorkspaceState, milestoneId?: string) {
+  return milestoneId ? state.payments.find((payment) => payment.milestoneId === milestoneId) : undefined;
 }
 
 export function getPendingMessages(state: DashboardWorkspaceState, role: Role) {

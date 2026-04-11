@@ -82,14 +82,14 @@ export function DashboardCard({ className, children }: CardProps) {
   const chrome = useDashboardChrome();
   const tone = getRoleCardTone(chrome?.role);
 
-  return <article className={cn("rounded-[28px] border p-5 lg:p-6", tone.card, className)}>{children}</article>;
+  return <article className={cn("rounded-[24px] border p-4 lg:p-5", tone.card, className)}>{children}</article>;
 }
 
 export function DashboardMutedCard({ className, children }: CardProps) {
   const chrome = useDashboardChrome();
   const tone = getRoleCardTone(chrome?.role);
 
-  return <article className={cn("rounded-[28px] border p-5 lg:p-6", tone.muted, className)}>{children}</article>;
+  return <article className={cn("rounded-[24px] border p-4 lg:p-5", tone.muted, className)}>{children}</article>;
 }
 
 export function SectionHeading({ eyebrow, title, description, action }: SectionHeadingProps) {
@@ -99,9 +99,9 @@ export function SectionHeading({ eyebrow, title, description, action }: SectionH
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div>
-        {eyebrow ? <p className={cn("text-[11px] font-semibold uppercase tracking-[0.18em]", tone.eyebrow)}>{eyebrow}</p> : null}
-        <h1 className={cn("mt-2 text-[24px] font-semibold leading-[1.02] tracking-[-0.045em] lg:text-[32px]", tone.title)}>{title}</h1>
-        {description ? <p className={cn("mt-3 max-w-2xl text-sm leading-7", tone.copy)}>{description}</p> : null}
+        {eyebrow ? <p className={cn("text-[10px] font-semibold uppercase tracking-[0.18em]", tone.eyebrow)}>{eyebrow}</p> : null}
+        <h1 className={cn("mt-1.5 text-[20px] font-semibold leading-[1.08] tracking-[-0.04em] lg:text-[26px]", tone.title)}>{title}</h1>
+        {description ? <p className={cn("mt-2 max-w-2xl text-sm leading-6", tone.copy)}>{description}</p> : null}
       </div>
       {action}
     </div>
@@ -151,9 +151,27 @@ export function ProgressBar({ value }: { value: number }) {
 
 export function MetricPill({ label, value, tone = "default" }: MetricPillProps) {
   return (
-    <div className={cn("rounded-[20px] border px-4 py-4", tone === "accent" ? "border-primary-100 bg-primary-50" : "border-slate-200 bg-white")}>
+    <div className={cn("rounded-[18px] border px-4 py-3", tone === "accent" ? "border-primary-100 bg-primary-50" : "border-slate-200 bg-white")}>
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
       <p className="mt-2 text-lg font-semibold text-slate-900">{value}</p>
+    </div>
+  );
+}
+
+export function DashboardEmptyState({
+  title,
+  body,
+  action
+}: {
+  title: string;
+  body: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="rounded-[20px] border border-dashed border-slate-300 bg-white px-4 py-5 text-center">
+      <p className="text-base font-semibold text-slate-900">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
+      {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
     </div>
   );
 }

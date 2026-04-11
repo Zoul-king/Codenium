@@ -417,11 +417,11 @@
   }
 
   .dashboard-button-primary {
-    @apply inline-flex items-center justify-center rounded-[14px] bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition duration-200 hover:bg-primary-500 disabled:cursor-not-allowed disabled:bg-slate-300;
+    @apply inline-flex items-center justify-center rounded-[12px] bg-[#4f2f96] px-4 py-2.5 text-sm font-semibold text-white transition duration-200 hover:bg-[#3f237a] disabled:cursor-not-allowed disabled:bg-slate-300;
   }
 
   .dashboard-button-secondary {
-    @apply inline-flex items-center justify-center rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition duration-200 hover:border-slate-300 hover:bg-slate-50;
+    @apply inline-flex items-center justify-center rounded-[12px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition duration-200 hover:border-slate-300 hover:bg-slate-50;
   }
 
   .dashboard-link {
@@ -433,7 +433,7 @@
   }
 
   .dashboard-select {
-    @apply w-full rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary-300;
+    @apply w-full rounded-[12px] border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary-300;
   }
 
   .portfolio-nav-btn {
