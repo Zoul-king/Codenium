@@ -19,3 +19,5 @@ pnpm-debug.log*
 .env*.local
 .DS_Store
 Thumbs.db
+.env
+seed.sql

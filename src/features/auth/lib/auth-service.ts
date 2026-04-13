@@ -16,7 +16,9 @@ export function validateLogin(input: LoginInput) {
     return "Completa tu correo y contraseña.";
   }
 
-  const account = mockAuthAccounts.find((item) => item.email.toLowerCase() === input.email.trim().toLowerCase());
+  const account = mockAuthAccounts.find(
+    (item) => item.email.toLowerCase() === input.email.trim().toLowerCase()
+  );
 
   if (!account || account.password !== input.password) {
     return "No pudimos validar esos datos. Revisa tu correo y contraseña.";

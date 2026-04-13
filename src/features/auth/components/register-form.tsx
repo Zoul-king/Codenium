@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { AuthField, AuthMessage } from "@/features/auth/components/auth-fields";
-import { getDashboardRoute, validateRegister } from "@/features/auth/lib/auth-service";
+import { getDashboardRoute } from "@/features/auth/lib/auth-service";
 import { writeSession } from "@/features/auth/lib/session-store";
 import { cn } from "@/lib/utils";
 
@@ -34,23 +34,42 @@ export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) 
     }));
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    const result = validateRegister(form);
-
-    if (typeof result === "string") {
-      setMessage(result);
-      return;
-    }
-
-    writeSession(result);
     setMessage(null);
-    onSuccess?.();
 
-    startTransition(() => {
-      router.push(getDashboardRoute(result.role));
-    });
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(form)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setMessage(result.error || "No se pudo crear la cuenta.");
+        return;
+      }
+
+      writeSession({
+        userId: result.userId,
+        role: result.role,
+        name: result.name,
+        email: result.email,
+        permissions: []
+      });
+
+      onSuccess?.();
+
+      startTransition(() => {
+        router.push(getDashboardRoute(result.role));
+      });
+    } catch {
+      setMessage("Ocurrió un error al crear la cuenta.");
+    }
   }
 
   return (

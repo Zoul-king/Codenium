@@ -1,3 +1,4 @@
+// Configuración de Generador y Fuente de Datos
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,12 +8,375 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model ContactLead {
+// --------------------------------------
+// Modelos de Usuario y Autenticación
+// --------------------------------------
+
+model User {
+  id             String          @id @default(cuid())
+  firstName      String
+  lastName       String
+  email          String          @unique
+  phone          String?
+  company        String?
+  passwordHash   String
+  role           UserRole        @default(CLIENT)
+  status         UserStatus      @default(ACTIVE)
+  avatarUrl      String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  // Relaciones
+  leads          ContactLead[]
+  quotes         Quote[]         @relation("ClientQuotes")
+  managedProjects Project[]      @relation("ProjectManagerProjects")
+  messagesSent   Message[]       @relation("MessageSender")
+  documents      Document[]
+  payments       Payment[]       @relation("PaymentCreatedBy")
+  changeRequests ChangeRequest[] @relation("ChangeRequestedBy")
+  sessions       Session[]
+  resetTokens    PasswordResetToken[]
+  projectsAsClient Project[]     @relation("ClientProjects")
+}
+
+model Session {
   id        String   @id @default(cuid())
-  name      String
-  email     String
-  phone     String?
-  message   String
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --------------------------------------
+// Marketing y Captación
+// --------------------------------------
+
+model ContactLead {
+  id          String      @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  company     String?
+  message     String?
+  source      LeadSource  @default(CONTACT_FORM)
+  status      LeadStatus  @default(NEW)
+  userId      String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user        User?       @relation(fields: [userId], references: [id])
+}
+
+// --------------------------------------
+// Ventas y Cotizaciones
+// --------------------------------------
+
+model Quote {
+  id                String        @id @default(cuid())
+  folio             String        @unique
+  clientId          String
+  title             String
+  description       String?
+  projectType       ProjectType
+  planCategory      PlanCategory
+  planTier          PlanTier
+  billingModel      BillingModel
+  estimatedPrice    Float?
+  estimatedTimeline String?
+  priority          QuotePriority @default(NORMAL)
+  status            QuoteStatus   @default(DRAFT)
+  notes             String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  client            User          @relation("ClientQuotes", fields: [clientId], references: [id])
+  items             QuoteItem[]
+  project           Project?
+}
+
+model QuoteItem {
+  id          String            @id @default(cuid())
+  quoteId     String
+  category    QuoteItemCategory
+  code        String
+  label       String
+  description String?
+  quantity    Int               @default(1)
+  unitPrice   Float?
+  subtotal    Float?
+  createdAt   DateTime          @default(now())
+
+  quote       Quote             @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+}
+
+// --------------------------------------
+// Gestión de Proyectos
+// --------------------------------------
+
+model Project {
+  id              String          @id @default(cuid())
+  quoteId         String          @unique
+  clientId        String
+  pmId            String?
+  name            String
+  description     String?
+  status          ProjectStatus   @default(PENDING)
+  startDate       DateTime?
+  dueDate         DateTime?
+  deliveryDate    DateTime?
+  budget          Float?
+  progress        Int             @default(0)
+  repositoryUrl   String?
+  stagingUrl      String?
+  productionUrl   String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  quote           Quote           @relation(fields: [quoteId], references: [id])
+  client          User            @relation("ClientProjects", fields: [clientId], references: [id])
+  pm              User?           @relation("ProjectManagerProjects", fields: [pmId], references: [id])
+  milestones      Milestone[]
+  messages        Message[]
+  documents       Document[]
+  payments        Payment[]
+  changeRequests  ChangeRequest[]
+}
+
+model Milestone {
+  id            String           @id @default(cuid())
+  projectId     String
+  title         String
+  description   String?
+  dueDate       DateTime?
+  completedAt   DateTime?
+  status        MilestoneStatus  @default(PENDING)
+  order         Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// --------------------------------------
+// Comunicación y Documentación
+// --------------------------------------
+
+model Message {
+  id          String        @id @default(cuid())
+  projectId   String
+  senderId    String
+  content     String
+  type        MessageType   @default(TEXT)
+  isRead      Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sender      User          @relation("MessageSender", fields: [senderId], references: [id])
+}
+
+model Document {
+  id           String         @id @default(cuid())
+  projectId     String?
+  uploadedById  String
+  name          String
+  fileUrl       String
+  fileType      String?
+  category      DocumentType   @default(OTHER)
+  createdAt     DateTime       @default(now())
+
+  project       Project?       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  uploadedBy    User           @relation(fields: [uploadedById], references: [id])
+}
+
+// --------------------------------------
+// Finanzas y Control de Cambios
+// --------------------------------------
+
+model Payment {
+  id            String         @id @default(cuid())
+  projectId      String
+  createdById    String?
+  concept        String
+  amount         Float
+  currency       String         @default("MXN")
+  status         PaymentStatus  @default(PENDING)
+  paymentMethod  PaymentMethod?
+  paidAt         DateTime?
+  dueDate        DateTime?
+  reference      String?
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  project        Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy      User?          @relation("PaymentCreatedBy", fields: [createdById], references: [id])
+}
+
+model ChangeRequest {
+  id            String               @id @default(cuid())
+  projectId      String
+  requestedById  String?
+  title          String
+  description    String
+  impact         ChangeImpact        @default(MEDIUM)
+  status         ChangeRequestStatus @default(PENDING)
+  estimatedCost  Float?
+  estimatedDays  Int?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  project        Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestedBy    User?               @relation("ChangeRequestedBy", fields: [requestedById], references: [id])
+}
+
+// --------------------------------------
+// Enums
+// --------------------------------------
+
+enum UserRole {
+  CLIENT
+  PM
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+}
+
+enum LeadSource {
+  CONTACT_FORM
+  QUOTE_FORM
+  CHATBOT
+  MANUAL
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CLOSED
+  LOST
+}
+
+enum ProjectType {
+  WEB
+  MOBILE
+  DESKTOP
+  AUTOMATION
+  OTHER
+}
+
+enum PlanCategory {
+  PERSONAL
+  BUSINESS
+}
+
+enum PlanTier {
+  ONE_TIME
+  BASIC
+  INTERMEDIATE
+  PREMIUM
+}
+
+enum BillingModel {
+  ONE_TIME
+  SUBSCRIPTION
+}
+
+enum QuotePriority {
+  NORMAL
+  PRIORITY
+}
+
+enum QuoteStatus {
+  DRAFT
+  SUBMITTED
+  REVIEWING
+  APPROVED
+  REJECTED
+  CONVERTED
+}
+
+enum QuoteItemCategory {
+  MODULE
+  FEATURE
+  INFRASTRUCTURE
+  INTEGRATION
+  SUPPORT
+  OTHER
+}
+
+enum ProjectStatus {
+  PENDING
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  BLOCKED
+}
+
+enum MessageType {
+  TEXT
+  SYSTEM
+  FILE
+}
+
+enum DocumentType {
+  PROPOSAL
+  CONTRACT
+  BRIEF
+  DELIVERABLE
+  INVOICE
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentMethod {
+  TRANSFER
+  CARD
+  CASH
+  PAYPAL
+  OTHER
+}
+
+enum ChangeImpact {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ChangeRequestStatus {
+  PENDING
+  REVIEWING
+  APPROVED
+  REJECTED
+  IMPLEMENTED
 }

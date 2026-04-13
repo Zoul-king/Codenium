@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { mockChangeRequests, mockDocuments, mockMessages, mockMilestones, mockPayments, mockProjects, mockQuotes, mockUsers } from "@/lib/mocks";
 import type {
   ChangeRequestRecord,
   MessageRecord,
@@ -71,14 +70,14 @@ interface DashboardWorkspaceContextValue {
 }
 
 const initialWorkspaceState: DashboardWorkspaceState = {
-  users: mockUsers,
-  quotes: mockQuotes,
-  projects: mockProjects,
-  messages: mockMessages,
-  milestones: mockMilestones,
-  payments: mockPayments,
-  documents: mockDocuments,
-  changeRequests: mockChangeRequests,
+  users: [],
+  quotes: [],
+  projects: [],
+  messages: [],
+  milestones: [],
+  payments: [],
+  documents: [],
+  changeRequests: [],
   selectedProjectIds: {}
 };
 
@@ -88,17 +87,40 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
   const [state, setState] = useState<DashboardWorkspaceState>(initialWorkspaceState);
 
   useEffect(() => {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY);
+    async function loadData() {
+      try {
+        const raw = window.sessionStorage.getItem(STORAGE_KEY);
 
-    if (!raw) {
-      return;
+        if (raw) {
+          setState(JSON.parse(raw));
+        }
+
+        const res = await fetch("/api/users");
+        const users = await res.json();
+
+        setState((current) => ({
+          ...current,
+          users: users.map((user: any) => ({
+            id: user.id,
+            createdAt: user.createdAt.split("T")[0],
+            firstName: user.firstName,
+            lastName: user.lastName,
+            name: `${user.firstName} ${user.lastName}`,
+            email: user.email,
+            phone: user.phone ?? "",
+            company: user.company ?? undefined,
+            role: user.role.toLowerCase(), // Normalización crítica para consistencia de rutas
+            title: "Usuario",
+            activeProjects: 0,
+            state: "active"
+          }))
+        }));
+      } catch {
+        window.sessionStorage.removeItem(STORAGE_KEY);
+      }
     }
 
-    try {
-      setState(JSON.parse(raw) as DashboardWorkspaceState);
-    } catch {
-      window.sessionStorage.removeItem(STORAGE_KEY);
-    }
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -198,10 +220,10 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           ...current,
           users: [
             ...current.users,
-              {
-                  id: `user-pm-${current.users.filter((user) => user.role === "pm").length + 1}`,
-                  createdAt: "2026-04-10",
-                  firstName: input.firstName,
+            {
+              id: `user-pm-${current.users.filter((user) => user.role === "pm").length + 1}`,
+              createdAt: "2026-04-10",
+              firstName: input.firstName,
               lastName: input.lastName,
               name: `${input.firstName} ${input.lastName}`,
               email: input.email,

@@ -63,7 +63,7 @@ export function ContactForm({
   reverseColumns = false,
   hideContactInfo = false,
   formCard = true,
-  hiddenFields,
+  hiddenFields = {},
   contactEmail = site.contact.email,
   embedded = false
 }: ContactFormProps) {
@@ -97,6 +97,7 @@ export function ContactForm({
       setSubmitting(true);
       setErrorMessage("");
 
+      // 1. Notificación vía Email/Lead (lo que ya funcionaba)
       await submitPublicLead({
         source,
         firstName: values.firstName.trim(),
@@ -108,9 +109,30 @@ export function ContactForm({
         hiddenFields
       });
 
+      // 2. Persistencia en DB (Guardado de cotización)
+      // Usamos "user-client" temporal para evitar errores de validación de clientId
+      await fetch("/api/quotes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title: hiddenFields.project_category || "Proyecto sin título",
+          description: values.message || "",
+          projectType: hiddenFields.project_category || "OTHER",
+          planCategory: hiddenFields.selected_plan?.includes("Business") ? "BUSINESS" : "PERSONAL",
+          planTier: "BASIC",
+          billingModel: "ONE_TIME",
+          estimatedPrice: 0,
+          estimatedTimeline: hiddenFields.timeline || "",
+          clientId: "user-client" 
+        })
+      });
+
       setSubmitted(true);
       setValues({ ...defaultValues });
     } catch (error) {
+      console.error("Error submitting form:", error);
       setErrorMessage(error instanceof Error ? error.message : "No pudimos enviar tu solicitud. Intenta de nuevo.");
     } finally {
       setSubmitting(false);
@@ -137,7 +159,7 @@ export function ContactForm({
         {submitted ? (
           <div className="rounded-[24px] bg-white p-8 shadow-[0_16px_40px_rgba(14,20,36,0.08)]" data-animate="fadeIn">
             <span className="type-kicker">Solicitud enviada</span>
-            <h3 className="mt-4 text-2xl font-bold text-body-color">Gracias por compartir tu informacion</h3>
+            <h3 className="mt-4 text-2xl font-bold text-body-color">Gracias por compartir tu información</h3>
             <p className="type-body mt-4">{successMessage}</p>
           </div>
         ) : (
@@ -147,9 +169,9 @@ export function ContactForm({
                 {hasSummary ? <div>{summary}</div> : null}
                 {!hasSummary ? (
                   <>
-                    <ContactInfoColumn label="Correo electronico" value={contactEmail} icon="mail" boxed={false} />
-                    <ContactInfoColumn label="Telefono" value={site.contact.phone} icon="phone" boxed={false} />
-                    <ContactInfoColumn label="Ubicacion" value={`${site.contact.location}, ${site.contact.city}`} icon="location" boxed={false} />
+                    <ContactInfoColumn label="Correo electrónico" value={contactEmail} icon="mail" boxed={false} />
+                    <ContactInfoColumn label="Teléfono" value={site.contact.phone} icon="phone" boxed={false} />
+                    <ContactInfoColumn label="Ubicación" value={`${site.contact.location}, ${site.contact.city}`} icon="location" boxed={false} />
                   </>
                 ) : null}
               </div>
@@ -169,10 +191,11 @@ export function ContactForm({
                   <TextField label="Apellidos *" placeholder="Apellidos" value={values.lastName} onChange={(value) => updateValue("lastName", value)} />
                 </div>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <TextField label="Correo electronico *" placeholder="Correo electronico" type="email" value={values.email} onChange={(value) => updateValue("email", value)} />
-                  <TextField label="Numero de telefono *" placeholder="Numero de telefono" value={values.phone} onChange={(value) => updateValue("phone", value)} />
+                  <TextField label="Correo electrónico *" placeholder="Correo electrónico" type="email" value={values.email} onChange={(value) => updateValue("email", value)} />
+                  <TextField label="Número de teléfono *" placeholder="Número de teléfono" value={values.phone} onChange={(value) => updateValue("phone", value)} />
                 </div>
-                <TextAreaField label="Mensaje *" placeholder="Cuentanos brevemente que necesitas" value={values.message} onChange={(value) => updateValue("message", value)} />
+                <TextAreaField label="Mensaje *" placeholder="Cuéntanos brevemente que necesitas" value={values.message} onChange={(value) => updateValue("message", value)} />
+                
                 {hiddenFields
                   ? Object.entries(hiddenFields).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} />)
                   : null}
