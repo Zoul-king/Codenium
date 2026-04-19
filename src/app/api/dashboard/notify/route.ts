@@ -6,7 +6,8 @@ import {
   sendDashboardMessageEmail,
   sendDeliverableNotificationEmail,
   sendPmAccountCreatedEmail,
-  sendProjectAssignmentEmail
+  sendProjectAssignmentEmail,
+  sendQuoteStatusEmail
 } from "@/server/email";
 
 export async function POST(request: Request) {
@@ -47,6 +48,9 @@ export async function POST(request: Request) {
         break;
       case "pm_account_created":
         await sendPmAccountCreatedEmail({ pmEmail: payload.pmEmail, pmName: payload.pmName });
+        break;
+      case "quote_status_update":
+        await sendQuoteStatusEmail(payload);
         break;
       default:
         throw new Error("Tipo de notificacion no soportado.");
@@ -117,6 +121,18 @@ function validateDashboardNotificationPayload(payload: Partial<DashboardNotifica
         type: "pm_account_created",
         pmEmail: requireEmail(payload.pmEmail, "pmEmail"),
         pmName: requireText(payload.pmName, "pmName")
+      };
+    case "quote_status_update":
+      return {
+        type: "quote_status_update",
+        recipientEmail: requireEmail(payload.recipientEmail, "recipientEmail"),
+        recipientName: requireText(payload.recipientName, "recipientName"),
+        quoteCode: requireText(payload.quoteCode, "quoteCode"),
+        quoteTitle: requireText(payload.quoteTitle, "quoteTitle"),
+        status:
+          payload.status === "pending" || payload.status === "reviewed" || payload.status === "accepted" || payload.status === "rejected"
+            ? payload.status
+            : invalidField("status")
       };
     default:
       throw new Error("Tipo de notificacion no soportado.");

@@ -1,3 +1,5 @@
+import type { QuoteStatus } from "@/lib/types/domain";
+
 export type PublicLeadSource = "contact" | "quote";
 
 export interface PublicLeadPayload {
@@ -65,9 +67,19 @@ export interface DashboardPmAccountCreatedPayload {
   pmName: string;
 }
 
+export interface DashboardQuoteStatusPayload {
+  type: "quote_status_update";
+  recipientEmail: string;
+  recipientName: string;
+  quoteCode: string;
+  quoteTitle: string;
+  status: QuoteStatus;
+}
+
 export type DashboardNotificationPayload =
   | DashboardProjectMessagePayload
   | DashboardChangeRequestPayload
   | DashboardDeliverablePayload
   | DashboardQuoteAssignmentPayload
-  | DashboardPmAccountCreatedPayload;
+  | DashboardPmAccountCreatedPayload
+  | DashboardQuoteStatusPayload;

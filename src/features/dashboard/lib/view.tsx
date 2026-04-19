@@ -1,5 +1,6 @@
 import { AdminDeliverablesPanel } from "@/features/dashboard/components/admin-deliverables-panel";
 import { AdminOverviewPanel } from "@/features/dashboard/components/admin-overview-panel";
+import { AdminPlanPanel } from "@/features/dashboard/components/admin-plan-panel";
 import { AdminPaymentsPanel } from "@/features/dashboard/components/admin-payments-panel";
 import { AdminQuotePanel } from "@/features/dashboard/components/admin-quote-panel";
 import { AdminTeamPanel } from "@/features/dashboard/components/admin-team-panel";
@@ -33,6 +34,7 @@ export function renderDashboardSection(role: Role, section: string) {
 
   if (role === "admin") {
     if (section === "metrics") return <AdminOverviewPanel />;
+    if (section === "plans") return <AdminPlanPanel />;
     if (section === "quotes") return <AdminQuotePanel />;
     if (section === "users") return <AdminTeamPanel />;
     if (section === "payments") return <AdminPaymentsPanel />;

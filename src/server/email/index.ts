@@ -8,8 +8,10 @@ import {
   buildDashboardMessageEmail,
   buildDeliverableNotificationEmail,
   buildPmAccountCreatedEmail,
-  buildProjectAssignmentEmail
+  buildProjectAssignmentEmail,
+  buildQuoteStatusEmail
 } from "@/server/email/templates/dashboard-events";
+import type { QuoteStatus } from "@/lib/types/domain";
 import { buildCompanyLeadEmail, buildLeadConfirmationEmail } from "@/server/email/templates/public-leads";
 
 function formatReceivedAt() {
@@ -130,6 +132,23 @@ export async function sendDeliverableNotificationEmail(input: {
   registeredBy: string;
 }) {
   const template = buildDeliverableNotificationEmail(input);
+
+  return sendEmail({
+    to: input.recipientEmail,
+    subject: template.subject,
+    text: template.text,
+    html: template.html
+  });
+}
+
+export async function sendQuoteStatusEmail(input: {
+  recipientEmail: string;
+  recipientName: string;
+  quoteCode: string;
+  quoteTitle: string;
+  status: QuoteStatus;
+}) {
+  const template = buildQuoteStatusEmail(input);
 
   return sendEmail({
     to: input.recipientEmail,

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import type { PlanCatalog } from "@/features/marketing/types";
+import { buildManagedPlanCatalog, fetchManagedPlanCatalog } from "@/lib/plan-catalog";
 import { readPlanProfilePreference, writePlanProfilePreference } from "@/lib/plan-profile";
 import { buildQuoteSelectionHref, writeQuoteSelection } from "@/lib/quote-selection";
 import type { PlanProfile } from "@/lib/types/domain";
@@ -36,15 +37,21 @@ export function Pricing({
   layout = "default"
 }: PricingProps) {
   const [activeProfile, setActiveProfile] = useState<PlanProfile>(defaultProfile);
+  const [resolvedPlans, setResolvedPlans] = useState<PlanCatalog>(plans);
 
   useEffect(() => {
     if (!persistPreference) {
       setActiveProfile(defaultProfile);
-      return;
+    } else {
+      setActiveProfile(readPlanProfilePreference());
     }
-
-    setActiveProfile(readPlanProfilePreference());
   }, [defaultProfile, persistPreference]);
+
+  useEffect(() => {
+    fetchManagedPlanCatalog()
+      .then((catalog) => setResolvedPlans(buildManagedPlanCatalog(catalog)))
+      .catch(() => setResolvedPlans(plans));
+  }, [plans]);
 
   function handleProfileChange(profile: PlanProfile) {
     setActiveProfile(profile);
@@ -54,7 +61,7 @@ export function Pricing({
     }
   }
 
-  const activePlans = plans[activeProfile];
+  const activePlans = resolvedPlans[activeProfile];
 
   return (
     <section className="soft-section relative">

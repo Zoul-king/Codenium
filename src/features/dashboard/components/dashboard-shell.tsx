@@ -147,6 +147,7 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
 
 function getNavIcon(key: string) {
   if (key === "projects" || key === "metrics") return LayoutDashboard;
+  if (key === "plans") return PackageCheck;
   if (key === "milestones") return FolderKanban;
   if (key === "chat") return MessageSquare;
   if (key === "payments") return CreditCard;

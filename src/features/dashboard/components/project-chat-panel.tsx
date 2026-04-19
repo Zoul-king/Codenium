@@ -3,9 +3,9 @@
 import { useMemo, useState } from "react";
 
 import { TextAreaField } from "@/components/ui/form-controls";
-import { DashboardCard, DashboardEmptyState, DashboardMutedCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
-import { getProjectPmEmail, getProjectClientEmail } from "@/features/dashboard/lib/recipients";
-import { getPrimaryUser, getProjectMessages, getSelectedProject, getUserById } from "@/features/dashboard/lib/selectors";
+import { DashboardCard, DashboardEmptyState, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
+import { getProjectClientEmail, getProjectPmEmail } from "@/features/dashboard/lib/recipients";
+import { getPrimaryUser, getProjectMessages, getSelectedOrPrimaryProject, getUserById, getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { sendDashboardNotification } from "@/lib/client-api";
 import type { Role } from "@/lib/types/domain";
@@ -15,9 +15,10 @@ interface ProjectChatPanelProps {
 }
 
 export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
-  const { state, addProjectMessage } = useDashboardWorkspace();
+  const { state, addProjectMessage, selectProject } = useDashboardWorkspace();
   const currentUser = getPrimaryUser(state, role);
-  const project = getSelectedProject(state, role);
+  const visibleProjects = getVisibleProjects(state, role);
+  const project = getSelectedOrPrimaryProject(state, role);
   const [draft, setDraft] = useState("");
   const [notice, setNotice] = useState("");
   const orderedMessages = useMemo(() => getProjectMessages(state, project?.id), [project?.id, state]);
@@ -31,8 +32,6 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
     );
   }
 
-  const activeProject = project;
-
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -41,11 +40,11 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
     }
 
     const nextMessage = draft.trim();
-    addProjectMessage(activeProject.id, currentUser.id, role, nextMessage);
-    setDraft("");
-
     try {
-      const recipientEmail = role === "client" ? getProjectPmEmail(state, activeProject.id) : getProjectClientEmail(state, activeProject.id);
+      await addProjectMessage(project.id, currentUser.id, role, nextMessage);
+      setDraft("");
+
+      const recipientEmail = role === "client" ? getProjectPmEmail(state, project.id) : getProjectClientEmail(state, project.id);
 
       if (!recipientEmail || !counterpart) {
         throw new Error("No encontramos el correo de la contraparte para notificar.");
@@ -55,7 +54,7 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
         type: "project_message",
         recipientEmail,
         recipientName: counterpart.name,
-        projectName: activeProject.name,
+        projectName: project.name,
         senderName: currentUser.name,
         senderRole: role,
         message: nextMessage
@@ -68,22 +67,43 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
   }
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)]">
+    <div className="grid gap-5 xl:grid-cols-[300px_minmax(0,1fr)]">
       <DashboardMutedCard className="h-fit xl:sticky xl:top-4">
-        <SectionHeading title="Hilo activo" />
-        <div className="mt-4 grid gap-3 text-sm text-slate-600">
-          <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
-            <p className="font-semibold text-slate-950">{activeProject.name}</p>
-            <p className="mt-1">{role === "client" ? counterpart?.name ?? "PM sin asignar" : activeProject.clientName}</p>
-          </div>
-          <p className="leading-6">Este hilo es compartido por cliente y PM para el proyecto seleccionado.</p>
+        <SectionHeading title="Proyectos con chat" />
+        <div className="mt-4 grid gap-3">
+          {visibleProjects.map((item) => {
+            const selected = item.id === project.id;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => selectProject(role, item.id)}
+                className={`rounded-[18px] border px-4 py-4 text-left transition ${selected ? "border-[#4f2f96] bg-white shadow-[0_14px_24px_rgba(79,47,150,0.08)]" : "border-slate-200 bg-white hover:border-slate-300"}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-slate-950">{item.name}</p>
+                    <p className="mt-1 text-sm text-slate-600">{item.clientName}</p>
+                  </div>
+                  <StatusBadge tone={selected ? "accent" : "neutral"}>{selected ? "Activo" : "Disponible"}</StatusBadge>
+                </div>
+                <p className="mt-3 text-xs uppercase tracking-[0.14em] text-slate-500">{item.quoteCode}</p>
+              </button>
+            );
+          })}
         </div>
       </DashboardMutedCard>
 
       <DashboardCard className="flex min-h-[65vh] flex-col">
-        <SectionHeading title="Conversacion" description={counterpart ? `Hablando con ${counterpart.name}` : undefined} />
+        <SectionHeading title="Conversacion" description={counterpart ? `Proyecto: ${project.name} · Hablando con ${counterpart.name}` : `Proyecto: ${project.name}`} />
 
-        <div className="custom-scrollbar mt-4 flex-1 overflow-y-auto rounded-[18px] border border-slate-200 bg-slate-50 px-3 py-3">
+        <div className="mb-4 mt-4 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+          <p className="font-semibold text-slate-950">{project.name}</p>
+          <p className="mt-1">Este hilo esta vinculado al proyecto {project.quoteCode} y todas las respuestas se guardan sobre ese proyecto.</p>
+        </div>
+
+        <div className="custom-scrollbar flex-1 overflow-y-auto rounded-[18px] border border-slate-200 bg-slate-50 px-3 py-3">
           <div className="space-y-2.5">
             {orderedMessages.length > 0 ? (
               orderedMessages.map((message) => {
@@ -100,13 +120,13 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
                 );
               })
             ) : (
-              <DashboardEmptyState title="Sin mensajes todavía" body="Cuando escribas el primer mensaje, ambos dashboards veran este mismo hilo." />
+              <DashboardEmptyState title="Sin mensajes todavia" body="Cuando escribas el primer mensaje, ambos dashboards veran este mismo hilo ligado al proyecto actual." />
             )}
           </div>
         </div>
 
         <form className="mt-4 grid gap-3" onSubmit={handleSubmit}>
-          <TextAreaField label="Mensaje" placeholder="Escribe un mensaje claro." rows={3} value={draft} onChange={setDraft} />
+          <TextAreaField label="Mensaje" placeholder={`Escribe un mensaje para ${project.name}.`} rows={3} value={draft} onChange={setDraft} />
           {notice ? <p className="text-sm font-medium text-rose-600">{notice}</p> : null}
           <button type="submit" className="dashboard-button-primary w-fit">
             Enviar

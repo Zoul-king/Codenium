@@ -1,10 +1,18 @@
 import { formatKeyValueHtml, formatKeyValueText, wrapEmailHtml } from "@/server/email/templates/shared";
+import type { QuoteStatus } from "@/lib/types/domain";
 
 interface TemplateResult {
   subject: string;
   text: string;
   html: string;
 }
+
+const quoteStatusText: Record<QuoteStatus, string> = {
+  pending: "Pendiente",
+  reviewed: "Revisada",
+  accepted: "Aceptada",
+  rejected: "Rechazada"
+};
 
 export function buildDashboardMessageEmail(input: {
   recipientName: string;
@@ -106,5 +114,24 @@ export function buildDeliverableNotificationEmail(input: {
     subject: `Nuevo entregable en ${input.projectName}`,
     text: `Hola ${input.recipientName},\n\nSe registro un nuevo entregable en tu proyecto.\n\n${formatKeyValueText(fields)}`,
     html: wrapEmailHtml(`Nuevo entregable en ${input.projectName}`, `<table style="width:100%;border-collapse:collapse;">${formatKeyValueHtml(fields)}</table>`)
+  };
+}
+
+export function buildQuoteStatusEmail(input: {
+  recipientName: string;
+  quoteCode: string;
+  quoteTitle: string;
+  status: QuoteStatus;
+}): TemplateResult {
+  const fields = {
+    Cotizacion: input.quoteCode,
+    Alcance: input.quoteTitle,
+    Estado: quoteStatusText[input.status]
+  };
+
+  return {
+    subject: `Actualizacion de cotizacion ${input.quoteCode}`,
+    text: `Hola ${input.recipientName},\n\nTu cotizacion fue actualizada.\n\n${formatKeyValueText(fields)}`,
+    html: wrapEmailHtml(`Actualizacion de cotizacion ${input.quoteCode}`, `<table style="width:100%;border-collapse:collapse;">${formatKeyValueHtml(fields)}</table>`)
   };
 }

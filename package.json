@@ -2,35 +2,40 @@
   "name": "codenium-next-landing",
   "private": true,
   "version": "0.0.1",
+  "engines": {
+    "node": ">=20.11.0"
+  },
   "scripts": {
-    "predev": "tsx scripts/free-port-3000.ts",
+    "predev": "npx tsx scripts/free-port-3000.ts",
     "dev": "next dev --port 3000",
     "dev:turbopack": "next dev --turbopack --port 3000",
     "dev:webpack": "next dev --port 3000",
-    "prebuild": "tsx scripts/clear-build-cache.ts",
-    "build": "tsx scripts/build-next.ts",
-    "start": "tsx scripts/start-next.ts",
+    "prebuild": "npx tsx scripts/clear-build-cache.ts",
+    "build": "next build",
+    "start": "next start -p 3000",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy"
   },
   "dependencies": {
-    "@prisma/client": "^6.6.0",
-    "gsap": "^3.14.2",
-    "lucide-react": "^1.7.0",
-    "next": "^15.3.2",
-    "prisma": "^6.6.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "resend": "^6.10.0"
+    "@prisma/client": "6.6.0",
+    "gsap": "3.14.2",
+    "lucide-react": "1.7.0",
+    "next": "15.5.14",
+    "prisma": "6.6.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "resend": "6.10.0",
+    "svix": "^1.90.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.18",
-    "@types/node": "^24.6.0",
-    "@types/react": "^19.1.13",
-    "@types/react-dom": "^19.1.9",
-    "tailwindcss": "^4.1.18",
-    "tsx": "^4.20.5",
+    "@tailwindcss/postcss": "4.1.18",
+    "@types/node": "24.6.0",
+    "@types/react": "19.1.13",
+    "@types/react-dom": "19.1.9",
+    "tailwindcss": "4.1.18",
+    "tsx": "4.20.5",
     "typescript": "5.9.3"
   }
 }

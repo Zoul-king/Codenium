@@ -1,28 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import { DashboardCard, SectionHeading } from "@/features/dashboard/components/dashboard-ui";
+import { DashboardCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
 import { getPmStats, getPmUsers, getVisibleQuotes, getUserById } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
-import { sendDashboardNotification } from "@/lib/client-api";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
+import { sendDashboardNotification } from "@/lib/client-api";
 import { formatLongDate, getQuoteStatusLabel } from "@/lib/presenters";
+import type { QuoteStatus } from "@/lib/types/domain";
 
 export function AdminQuotePanel() {
   const { state, acceptQuote, setQuoteStatus } = useDashboardWorkspace();
   const pmUsers = getPmUsers(state);
   const quotes = getVisibleQuotes(state, "admin");
-  const [assignment, setAssignment] = useState<Record<string, string>>(Object.fromEntries(quotes.map((quote) => [quote.id, quote.pmId ?? ""])));
+  const [assignment, setAssignment] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
+
+  const assignmentState = useMemo(
+    () => ({
+      ...Object.fromEntries(quotes.map((quote) => [quote.id, quote.pmId ?? ""])),
+      ...assignment
+    }),
+    [assignment, quotes]
+  );
+
+  async function notifyQuoteStatus(quoteId: string, status: Exclude<QuoteStatus, "accepted">) {
+    const quote = quotes.find((item) => item.id === quoteId);
+    const client = quote ? getUserById(state, quote.clientId) : undefined;
+
+    if (!quote || !client?.email) {
+      throw new Error("No encontramos el correo del cliente para avisar el cambio de estado.");
+    }
+
+    await setQuoteStatus(quoteId, status);
+
+    await sendDashboardNotification({
+      type: "quote_status_update",
+      recipientEmail: client.email,
+      recipientName: client.name,
+      quoteCode: quote.code,
+      quoteTitle: quote.title,
+      status
+    });
+  }
 
   return (
     <div className="grid h-full gap-6 xl:grid-cols-[minmax(0,1.15fr)_340px]">
       <DashboardCard>
-        <SectionHeading eyebrow="Cotizaciones" title="Entrada comercial" />
+        <SectionHeading eyebrow="Cotizaciones" title="Entrada comercial" description="Administra el estado comercial y convierte cotizaciones aceptadas en proyectos activos." />
         <div className="mt-8 grid gap-6">
           {quotes.map((quote) => {
-            const selectedPm = pmUsers.find((pm) => pm.id === assignment[quote.id]);
+            const selectedPm = pmUsers.find((pm) => pm.id === assignmentState[quote.id]);
             const pmStats = selectedPm ? getPmStats(state, selectedPm.id) : null;
 
             return (
@@ -35,9 +64,11 @@ export function AdminQuotePanel() {
                       {quote.clientName} · {formatLongDate(quote.createdAt)}
                     </p>
                   </div>
-                  <div className="text-right text-sm text-slate-500">
-                    <p>{quote.quoteKind === "prequote" ? "Precotizacion" : "Cotizacion formal"}</p>
-                    <p className="mt-1 font-semibold text-slate-950">{getQuoteStatusLabel(quote.status)}</p>
+                  <div className="text-right">
+                    <p className="text-sm text-slate-500">{quote.quoteKind === "prequote" ? "Precotizacion" : "Cotizacion formal"}</p>
+                    <div className="mt-2">
+                      <StatusBadge tone={getStatusTone(quote.status)}>{getQuoteStatusLabel(quote.status)}</StatusBadge>
+                    </div>
                   </div>
                 </div>
 
@@ -52,7 +83,7 @@ export function AdminQuotePanel() {
                   <label className="grid gap-2 text-sm font-medium text-slate-700">
                     Asignar PM
                     <select
-                      value={assignment[quote.id]}
+                      value={assignmentState[quote.id]}
                       onChange={(event) => setAssignment((current) => ({ ...current, [quote.id]: event.target.value }))}
                       className="dashboard-select"
                     >
@@ -73,17 +104,17 @@ export function AdminQuotePanel() {
                     <button
                       type="button"
                       className="dashboard-button-primary"
-                      disabled={!assignment[quote.id]}
+                      disabled={!assignmentState[quote.id]}
                       onClick={async () => {
-                        const pmId = assignment[quote.id];
-
-                        if (!pmId) {
-                          return;
-                        }
-
-                        acceptQuote(quote.id, pmId);
-
                         try {
+                          const pmId = assignmentState[quote.id];
+
+                          if (!pmId) {
+                            return;
+                          }
+
+                          await acceptQuote(quote.id, pmId);
+
                           const assignedPm = getUserById(state, pmId);
                           const client = getUserById(state, quote.clientId);
 
@@ -104,14 +135,53 @@ export function AdminQuotePanel() {
 
                           setNotice("");
                         } catch (error) {
-                          setNotice(error instanceof Error ? error.message : "No pudimos enviar los correos de asignacion.");
+                          setNotice(error instanceof Error ? error.message : "No pudimos completar la conversion.");
                         }
                       }}
                     >
                       Convertir y aceptar
                     </button>
-                    <button type="button" className="dashboard-button-secondary" onClick={() => setQuoteStatus(quote.id, "review")}>
-                      En revision
+                    <button
+                      type="button"
+                      className="dashboard-button-secondary"
+                      onClick={async () => {
+                        try {
+                          await notifyQuoteStatus(quote.id, "reviewed");
+                          setNotice("");
+                        } catch (error) {
+                          setNotice(error instanceof Error ? error.message : "No pudimos notificar la revision.");
+                        }
+                      }}
+                    >
+                      Marcar revisada
+                    </button>
+                    <button
+                      type="button"
+                      className="dashboard-button-secondary"
+                      onClick={async () => {
+                        try {
+                          await notifyQuoteStatus(quote.id, "rejected");
+                          setNotice("");
+                        } catch (error) {
+                          setNotice(error instanceof Error ? error.message : "No pudimos notificar el rechazo.");
+                        }
+                      }}
+                    >
+                      Rechazar
+                    </button>
+                    <button
+                      type="button"
+                      className="dashboard-button-secondary"
+                      onClick={async () => {
+                        try {
+                          await notifyQuoteStatus(quote.id, "pending");
+                          setNotice("");
+                        } catch (error) {
+                          setNotice(error instanceof Error ? error.message : "No pudimos regresar la cotizacion a pendiente.");
+                        }
+                      }}
+                    >
+                      Volver a pendiente
                     </button>
                   </div>
                 </div>
@@ -150,4 +220,11 @@ function InfoCell({ label, value }: { label: string; value: string }) {
       <p className="mt-2 text-sm font-semibold leading-6 text-slate-950">{value}</p>
     </div>
   );
+}
+
+function getStatusTone(status: QuoteStatus) {
+  if (status === "accepted") return "success";
+  if (status === "reviewed") return "accent";
+  if (status === "rejected") return "danger";
+  return "warning";
 }

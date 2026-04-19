@@ -13,22 +13,22 @@ const shortDateFormatter = new Intl.DateTimeFormat("es-MX", {
 });
 
 const quoteStatusLabels: Record<QuoteStatus, string> = {
-  draft: "Borrador",
-  sent: "Recibida",
-  review: "En revisión",
-  approved: "Aprobada"
+  pending: "Pendiente",
+  reviewed: "Revisada",
+  accepted: "Aceptada",
+  rejected: "Rechazada"
 };
 
 const projectStatusLabels: Record<ProjectStatus, string> = {
-  discovery: "Definición",
-  design: "Diseño",
+  discovery: "Definicion",
+  design: "Diseno",
   build: "En desarrollo",
   qa: "Pruebas",
   done: "Entregado"
 };
 
 const messageStatusLabels: Record<MessageStatus, string> = {
-  unread: "No leído",
+  unread: "No leido",
   read: "Respondido"
 };
 

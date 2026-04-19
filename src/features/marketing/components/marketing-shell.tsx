@@ -22,7 +22,7 @@ export function MarketingShell({ children, headerVariant }: MarketingShellProps)
         <main className="relative min-h-screen overflow-x-hidden">{children}</main>
       </PageShell>
       <Footer contactEmail={contactEmail} />
-      <WhatsAppButton contactEmail={contactEmail} />
+      <WhatsAppButton />
     </div>
   );
 }

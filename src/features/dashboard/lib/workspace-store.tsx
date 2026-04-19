@@ -2,6 +2,13 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
+import {
+  mockChangeRequests,
+  mockDocuments,
+  mockMilestones,
+  mockPayments,
+  mockUsers
+} from "@/lib/mocks";
 import type {
   ChangeRequestRecord,
   MessageRecord,
@@ -16,7 +23,7 @@ import type {
   UserState
 } from "@/lib/types/domain";
 
-const STORAGE_KEY = "codenium.dashboard-workspace";
+const TODAY = "2026-04-10";
 
 export interface DashboardWorkspaceState {
   users: UserRecord[];
@@ -57,29 +64,19 @@ interface UpsertMilestoneInput {
 interface DashboardWorkspaceContextValue {
   state: DashboardWorkspaceState;
   selectProject: (role: Extract<Role, "client" | "pm">, projectId: string) => void;
-  acceptQuote: (quoteId: string, pmId: string) => void;
-  setQuoteStatus: (quoteId: string, status: QuoteStatus) => void;
+  acceptQuote: (quoteId: string, pmId: string) => Promise<void>;
+  setQuoteStatus: (quoteId: string, status: QuoteStatus) => Promise<void>;
   setUserState: (userId: string, nextState: UserState) => void;
   createPmAccount: (input: CreatePmAccountInput) => void;
   completeMilestone: (milestoneId: string) => void;
   saveMilestone: (input: UpsertMilestoneInput) => void;
   addChangeRequest: (request: Omit<ChangeRequestRecord, "id" | "requestedAt" | "status">) => void;
-  addProjectMessage: (projectId: string, senderId: string, role: Role, preview: string) => void;
+  addProjectMessage: (projectId: string, senderId: string, role: Role, preview: string) => Promise<void>;
   markPaymentAsPaid: (paymentId: string) => void;
   addProjectDocument: (input: AddProjectDocumentInput) => void;
 }
 
-const initialWorkspaceState: DashboardWorkspaceState = {
-  users: [],
-  quotes: [],
-  projects: [],
-  messages: [],
-  milestones: [],
-  payments: [],
-  documents: [],
-  changeRequests: [],
-  selectedProjectIds: {}
-};
+const initialWorkspaceState: DashboardWorkspaceState = createFallbackWorkspaceState();
 
 const DashboardWorkspaceContext = createContext<DashboardWorkspaceContextValue | null>(null);
 
@@ -88,44 +85,66 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
 
   useEffect(() => {
     async function loadData() {
+      const fallback = createFallbackWorkspaceState();
+
+      let nextUsers = fallback.users;
+      let nextQuotes = [] as QuoteRecord[];
+      let nextProjects = [] as ProjectRecord[];
+      let nextMessages = [] as MessageRecord[];
+
       try {
-        const raw = window.sessionStorage.getItem(STORAGE_KEY);
+        const resUsers = await fetch("/api/users");
 
-        if (raw) {
-          setState(JSON.parse(raw));
+        if (resUsers.ok) {
+          const users = await resUsers.json();
+          nextUsers = mergeById(fallback.users, users.map(mapApiUser));
         }
-
-        const res = await fetch("/api/users");
-        const users = await res.json();
-
-        setState((current) => ({
-          ...current,
-          users: users.map((user: any) => ({
-            id: user.id,
-            createdAt: user.createdAt.split("T")[0],
-            firstName: user.firstName,
-            lastName: user.lastName,
-            name: `${user.firstName} ${user.lastName}`,
-            email: user.email,
-            phone: user.phone ?? "",
-            company: user.company ?? undefined,
-            role: user.role.toLowerCase(), // Normalización crítica para consistencia de rutas
-            title: "Usuario",
-            activeProjects: 0,
-            state: "active"
-          }))
-        }));
       } catch {
-        window.sessionStorage.removeItem(STORAGE_KEY);
+        nextUsers = fallback.users;
       }
+
+      try {
+        const resQuotes = await fetch("/api/quotes");
+
+        if (resQuotes.ok) {
+          const quotes = await resQuotes.json();
+          nextQuotes = quotes.map((quote: any) => mapApiQuote(quote, nextUsers));
+          nextProjects = quotes.flatMap((quote: any) => (quote.project ? [mapApiProject(quote.project, quote)] : []));
+        }
+      } catch {
+        nextQuotes = [];
+        nextProjects = [];
+      }
+
+      try {
+        const resMessages = await fetch("/api/chat?scope=dashboard", { cache: "no-store" });
+
+        if (resMessages.ok) {
+          nextMessages = await resMessages.json();
+        }
+      } catch {
+        nextMessages = [];
+      }
+
+      setState((current) => ({
+        ...current,
+        users: nextUsers,
+        quotes: nextQuotes,
+        projects: nextProjects,
+        messages: nextMessages,
+        milestones: fallback.milestones,
+        payments: fallback.payments,
+        documents: fallback.documents,
+        changeRequests: fallback.changeRequests,
+        selectedProjectIds: {
+          client: nextProjects.find((project) => project.clientId === "user-client-1")?.id,
+          pm: nextProjects.find((project) => project.pmId === "user-pm-1")?.id
+        }
+      }));
     }
 
     loadData();
   }, []);
-
-  useEffect(() => {
-    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
 
   const value = useMemo<DashboardWorkspaceContextValue>(
     () => ({
@@ -139,74 +158,46 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           }
         }));
       },
-      acceptQuote: (quoteId, pmId) => {
-        setState((current) => {
-          const quote = current.quotes.find((item) => item.id === quoteId);
-
-          if (!quote) {
-            return current;
-          }
-
-          const nextQuotes = current.quotes.map((item) =>
-            item.id === quoteId ? { ...item, pmId, quoteKind: "formal" as const, status: "approved" as const, acceptedAt: "2026-04-10" } : item
-          );
-          const alreadyCreated = current.projects.some((project) => project.quoteId === quoteId);
-          const client = current.users.find((user) => user.id === quote.clientId);
-          const pm = current.users.find((user) => user.id === pmId);
-          const nextProjects: ProjectRecord[] = alreadyCreated
-            ? current.projects
-            : [
-                ...current.projects,
-                {
-                  id: `project-${current.projects.length + 1}`,
-                  name: quote.title,
-                  clientId: quote.clientId,
-                  clientName: quote.clientName,
-                  clientCompany: client?.company,
-                  status: "discovery",
-                  progress: 12,
-                  dueDate: getProjectedDate(quote.createdAt, 42),
-                  pmId,
-                  quoteCode: quote.code,
-                  quoteId: quote.id,
-                  intakeSource: quote.intakeSource,
-                  selectionLabel: quote.selectionLabel,
-                  planProfile: quote.planProfile,
-                  planTitle: quote.planTitle,
-                  summary:
-                    quote.intakeSource === "service"
-                      ? `Servicio ${quote.selectionLabel.toLowerCase()} convertido en proyecto operativo para ${quote.clientName}, con ${pm?.name ?? "PM por confirmar"} como responsable.`
-                      : `Proyecto convertido desde ${quote.selectionLabel.toLowerCase()} para ${quote.clientName}, con ${pm?.name ?? "PM por confirmar"} como responsable operativo.`
-                }
-              ];
-
-          const nextUsers: UserRecord[] = current.users.map((user) => {
-            if (user.id === quote.clientId || user.id === pmId) {
-              return { ...user, activeProjects: user.activeProjects + (alreadyCreated ? 0 : 1), state: "active" as const };
-            }
-
-            return user;
-          });
-
-          return {
-            ...current,
-            quotes: nextQuotes,
-            projects: nextProjects,
-            users: nextUsers,
-            selectedProjectIds: alreadyCreated
-              ? current.selectedProjectIds
-              : {
-                  ...current.selectedProjectIds,
-                  client: quote.clientId === "user-client-1" ? nextProjects.at(-1)?.id ?? current.selectedProjectIds.client : current.selectedProjectIds.client,
-                  pm: pmId === "user-pm-1" ? nextProjects.at(-1)?.id ?? current.selectedProjectIds.pm : current.selectedProjectIds.pm
-                }
-          };
+      acceptQuote: async (quoteId, pmId) => {
+        const response = await fetch("/api/quotes", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ quoteId, pmId, status: "accepted" })
         });
-      },
-      setQuoteStatus: (quoteId, status) => {
+
+        if (!response.ok) {
+          throw new Error("No se pudo aceptar la cotización.");
+        }
+
+        const quote = await response.json();
+
         setState((current) => ({
           ...current,
-          quotes: current.quotes.map((quote) => (quote.id === quoteId ? { ...quote, status } : quote))
+          quotes: upsertById(current.quotes, mapApiQuote(quote, current.users)),
+          projects: quote.project ? upsertById(current.projects, mapApiProject(quote.project, quote)) : current.projects
+        }));
+      },
+      setQuoteStatus: async (quoteId, status) => {
+        const response = await fetch("/api/quotes", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ quoteId, status })
+        });
+
+        if (!response.ok) {
+          throw new Error("No se pudo actualizar la cotización.");
+        }
+
+        const quote = await response.json();
+
+        setState((current) => ({
+          ...current,
+          quotes: upsertById(current.quotes, mapApiQuote(quote, current.users)),
+          projects: quote.project ? upsertById(current.projects, mapApiProject(quote.project, quote)) : current.projects
         }));
       },
       setUserState: (userId, nextState) => {
@@ -222,7 +213,7 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
             ...current.users,
             {
               id: `user-pm-${current.users.filter((user) => user.role === "pm").length + 1}`,
-              createdAt: "2026-04-10",
+              createdAt: TODAY,
               firstName: input.firstName,
               lastName: input.lastName,
               name: `${input.firstName} ${input.lastName}`,
@@ -244,33 +235,25 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
             return current;
           }
 
-          const nextMilestones = current.milestones.map((item) => {
-            if (item.id === milestoneId) {
-              return { ...item, status: "done" as const };
-            }
-
-            if (item.projectId === milestone.projectId && item.status === "next") {
-              return { ...item, status: "current" as const };
-            }
-
-            return item;
-          });
-
-          const nextPayments = current.payments.map((payment) =>
-            payment.id === milestone.unlocksPaymentId && payment.status === "scheduled"
-              ? { ...payment, status: "pending" as const }
-              : payment
-          );
-
-          const nextProjects = current.projects.map((project) =>
-            project.id === milestone.projectId ? { ...project, progress: Math.min(project.progress + 18, 100) } : project
-          );
-
           return {
             ...current,
-            milestones: nextMilestones,
-            payments: nextPayments,
-            projects: nextProjects
+            milestones: current.milestones.map((item) => {
+              if (item.id === milestoneId) {
+                return { ...item, status: "done" };
+              }
+
+              if (item.projectId === milestone.projectId && item.status === "next") {
+                return { ...item, status: "current" };
+              }
+
+              return item;
+            }),
+            payments: current.payments.map((payment) =>
+              payment.id === milestone.unlocksPaymentId && payment.status === "scheduled" ? { ...payment, status: "pending" } : payment
+            ),
+            projects: current.projects.map((project) =>
+              project.id === milestone.projectId ? { ...project, progress: Math.min(project.progress + 18, 100) } : project
+            )
           };
         });
       },
@@ -295,7 +278,9 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           }
 
           const projectPayments = current.payments.filter((payment) => payment.projectId === input.projectId);
-          const nextScheduledPayment = projectPayments.find((payment) => payment.status === "scheduled" && !current.milestones.some((milestone) => milestone.unlocksPaymentId === payment.id));
+          const nextScheduledPayment = projectPayments.find(
+            (payment) => payment.status === "scheduled" && !current.milestones.some((milestone) => milestone.unlocksPaymentId === payment.id)
+          );
 
           return {
             ...current,
@@ -328,35 +313,30 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           ]
         }));
       },
-      addProjectMessage: (projectId, senderId, role, preview) => {
-        setState((current) => {
-          const project = current.projects.find((item) => item.id === projectId);
-          const sender = current.users.find((item) => item.id === senderId);
-
-          if (!project || !sender) {
-            return current;
-          }
-
-          return {
-            ...current,
-            messages: [
-              ...current.messages,
-              {
-                id: `msg-${current.messages.length + 1}`,
-                thread: project.name,
-                senderId,
-                recipientId: role === "client" ? project.pmId : project.clientId,
-                projectId,
-                quoteId: project.quoteId,
-                senderName: sender.name,
-                role,
-                preview,
-                sentAt: "Ahora",
-                status: "read"
-              }
-            ]
-          };
+      addProjectMessage: async (projectId, senderId, role, preview) => {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            projectId,
+            senderId,
+            role,
+            message: preview
+          })
         });
+
+        if (!response.ok) {
+          throw new Error("No se pudo guardar el mensaje.");
+        }
+
+        const message = await response.json();
+
+        setState((current) => ({
+          ...current,
+          messages: upsertById(current.messages, message)
+        }));
       },
       markPaymentAsPaid: (paymentId) => {
         setState((current) => ({
@@ -385,7 +365,7 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
               projectId,
               title,
               kind,
-              updatedAt: "2026-04-10",
+              updatedAt: TODAY,
               href: href?.trim() || `#document-${current.documents.length + 1}`,
               audience
             },
@@ -410,10 +390,129 @@ export function useDashboardWorkspace() {
   return context;
 }
 
+function createFallbackWorkspaceState(): DashboardWorkspaceState {
+  return {
+    users: [...mockUsers],
+    quotes: [],
+    projects: [],
+    messages: [],
+    milestones: [...mockMilestones],
+    payments: [...mockPayments],
+    documents: [...mockDocuments],
+    changeRequests: [...mockChangeRequests],
+    selectedProjectIds: {}
+  };
+}
+
+function mergeById<T extends { id: string }>(fallback: T[], incoming: T[]) {
+  const merged = new Map<string, T>();
+
+  fallback.forEach((item) => merged.set(item.id, item));
+  incoming.forEach((item) => merged.set(item.id, item));
+
+  return Array.from(merged.values());
+}
+
+function mapApiUser(user: any): UserRecord {
+  return {
+    id: user.id,
+    createdAt: String(user.createdAt).split("T")[0],
+    firstName: user.firstName,
+    lastName: user.lastName,
+    name: `${user.firstName} ${user.lastName}`,
+    email: user.email,
+    phone: user.phone ?? "",
+    company: user.company ?? undefined,
+    role: String(user.role ?? "CLIENT").toLowerCase() as Role,
+    title: user.role === "ADMIN" ? "Administracion general" : user.role === "PM" ? "Project Manager" : "Usuario",
+    activeProjects: 0,
+    state: "active"
+  };
+}
+
+function mapApiQuote(quote: any, users: UserRecord[]): QuoteRecord {
+  const client = users.find((user) => user.id === quote.clientId) ?? (quote.client ? mapApiUser(quote.client) : undefined);
+  const normalizedStatus = normalizeQuoteStatus(quote.status);
+  const createdAt = String(quote.createdAt).split("T")[0];
+
+  return {
+    id: quote.id,
+    code: quote.folio ?? `Q-${quote.id}`,
+    title: quote.title ?? "Proyecto sin titulo",
+    intakeSource: "plan",
+    selectionLabel: quote.title ?? "Proyecto sin titulo",
+    quoteKind: normalizedStatus === "accepted" ? "formal" : "prequote",
+    role: "client",
+    clientId: quote.clientId,
+    clientName: client?.name ?? "Cliente",
+    pmId: quote.project?.pmId ?? undefined,
+    status: normalizedStatus,
+    createdAt,
+    acceptedAt: normalizedStatus === "accepted" ? createdAt : undefined,
+    planProfile: quote.planCategory === "BUSINESS" ? "business" : "personal",
+    planTitle: quote.title ?? "Proyecto",
+    projectType: null,
+    infrastructure: "existing",
+    modules: [],
+    estimate: {
+      build: {
+        min: quote.estimatedPrice ?? 0,
+        max: quote.estimatedPrice ?? 0
+      },
+      monthly: {
+        min: 0,
+        max: 0
+      },
+      timelineWeeks: {
+        min: 0,
+        max: 0
+      }
+    }
+  };
+}
+
+function mapApiProject(project: any, quote: any): ProjectRecord {
+  return {
+    id: project.id,
+    name: project.name,
+    clientId: project.clientId,
+    clientName: quote.client?.firstName && quote.client?.lastName ? `${quote.client.firstName} ${quote.client.lastName}` : "Cliente",
+    clientCompany: quote.client?.company ?? undefined,
+    status: "discovery",
+    progress: project.progress ?? 0,
+    dueDate: project.dueDate ? String(project.dueDate).split("T")[0] : getProjectedDate(String(quote.createdAt).split("T")[0], 42),
+    pmId: project.pmId ?? "",
+    quoteCode: quote.folio ?? `Q-${quote.id}`,
+    quoteId: quote.id,
+    intakeSource: "plan",
+    selectionLabel: quote.title ?? "Proyecto",
+    planProfile: quote.planCategory === "BUSINESS" ? "business" : "personal",
+    planTitle: quote.title ?? "Proyecto",
+    summary: quote.description ?? "Proyecto persistido desde la cotización."
+  };
+}
+
+function normalizeQuoteStatus(status: unknown): QuoteStatus {
+  if (status === "APPROVED" || status === "CONVERTED") return "accepted";
+  if (status === "REJECTED") return "rejected";
+  if (status === "REVIEWING") return "reviewed";
+  return "pending";
+}
+
 function getProjectedDate(from: string, offsetDays: number) {
   const base = new Date(`${from}T12:00:00`);
 
   base.setDate(base.getDate() + offsetDays);
 
   return base.toISOString().slice(0, 10);
+}
+
+function upsertById<T extends { id: string }>(items: T[], nextItem: T) {
+  const exists = items.some((item) => item.id === nextItem.id);
+
+  if (!exists) {
+    return [...items, nextItem];
+  }
+
+  return items.map((item) => (item.id === nextItem.id ? nextItem : item));
 }

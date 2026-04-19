@@ -68,6 +68,17 @@ export function QuoteBuilder() {
     estimate_range: estimate.build.max > 0 ? `${formatCurrency(estimate.build.min)} - ${formatCurrency(estimate.build.max)}` : ""
   };
 
+  const quotePayload = {
+    title: projectType?.label || "Proyecto sin título",
+    description: draft.objective.trim() || "",
+    projectType: "OTHER",
+    planCategory: selection?.label?.toLowerCase().includes("business") ? "BUSINESS" : "PERSONAL",
+    planTier: "BASIC",
+    billingModel: "ONE_TIME",
+    estimatedPrice: estimate.build.max > 0 ? estimate.build.max : 0,
+    estimatedTimeline: timelineLabel || ""
+  };
+
   return (
     <section className="section soft-section bg-foreground">
       <div className="site-shell py-16 lg:py-20">
@@ -113,6 +124,7 @@ export function QuoteBuilder() {
                 formCard={false}
                 embedded
                 hiddenFields={hiddenFields}
+                quotePayload={quotePayload}
               />
             </section>
           </div>

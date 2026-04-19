@@ -1,14 +1,58 @@
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 import { chatbotContext } from "@/features/marketing/data/chatbot-context";
+
+const prisma = new PrismaClient();
 
 type IncomingMessage = {
   role: "user" | "assistant";
   content: string;
 };
 
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+
+  if (searchParams.get("scope") !== "dashboard") {
+    return NextResponse.json({ error: "Ruta no soportada." }, { status: 400 });
+  }
+
+  try {
+    const messages = await prisma.message.findMany({
+      include: {
+        sender: true,
+        project: true
+      },
+      orderBy: {
+        createdAt: "asc"
+      }
+    });
+
+    return NextResponse.json(messages.map(mapDashboardMessage));
+  } catch {
+    return NextResponse.json({ error: "No se pudieron obtener los mensajes." }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
+    if (typeof body?.projectId === "string" && typeof body?.senderId === "string" && typeof body?.message === "string") {
+      const created = await prisma.message.create({
+        data: {
+          projectId: body.projectId,
+          senderId: body.senderId,
+          content: body.message.trim()
+        },
+        include: {
+          sender: true,
+          project: true
+        }
+      });
+
+      return NextResponse.json(mapDashboardMessage(created));
+    }
+
     const message = body?.message;
     const messages = body?.messages;
 
@@ -72,4 +116,36 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
+}
+
+function mapDashboardMessage(message: {
+  id: string;
+  projectId: string;
+  senderId: string;
+  content: string;
+  isRead: boolean;
+  createdAt: Date;
+  sender: { firstName: string; lastName: string; role: string };
+  project: { name: string; clientId: string; pmId: string | null; quoteId: string };
+}) {
+  const senderName = `${message.sender.firstName} ${message.sender.lastName}`.trim();
+  const senderRole = message.sender.role.toLowerCase();
+
+  return {
+    id: message.id,
+    thread: message.project.name,
+    senderId: message.senderId,
+    recipientId: senderRole === "client" ? message.project.pmId : message.project.clientId,
+    projectId: message.projectId,
+    quoteId: message.project.quoteId,
+    senderName,
+    role: senderRole,
+    preview: message.content,
+    sentAt: new Intl.DateTimeFormat("es-MX", {
+      dateStyle: "short",
+      timeStyle: "short",
+      timeZone: "America/Mexico_City"
+    }).format(new Date(message.createdAt)),
+    status: message.isRead ? "read" : "unread"
+  };
 }

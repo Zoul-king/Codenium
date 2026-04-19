@@ -436,6 +436,10 @@
     @apply w-full rounded-[12px] border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary-300;
   }
 
+  .dashboard-input {
+    @apply w-full rounded-[12px] border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary-300;
+  }
+
   .portfolio-nav-btn {
     @apply flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-primary-600 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-primary-300 hover:bg-primary-50;
   }

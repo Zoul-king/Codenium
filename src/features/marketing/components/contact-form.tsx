@@ -1,5 +1,6 @@
 "use client";
 
+import { readSession } from "@/features/auth/lib/session-store";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
@@ -41,6 +42,16 @@ interface ContactFormProps {
   hiddenFields?: Record<string, string>;
   contactEmail?: string;
   embedded?: boolean;
+  quotePayload?: {
+    title: string;
+    description: string;
+    projectType: string;
+    planCategory: string;
+    planTier: string;
+    billingModel: string;
+    estimatedPrice: number;
+    estimatedTimeline: string;
+  };
 }
 
 const defaultValues: ContactFormValues = {
@@ -65,7 +76,8 @@ export function ContactForm({
   formCard = true,
   hiddenFields = {},
   contactEmail = site.contact.email,
-  embedded = false
+  embedded = false,
+  quotePayload,
 }: ContactFormProps) {
   const pathname = usePathname();
   const [values, setValues] = useState<ContactFormValues>({ ...defaultValues, ...initialValues });
@@ -97,7 +109,7 @@ export function ContactForm({
       setSubmitting(true);
       setErrorMessage("");
 
-      // 1. Notificación vía Email/Lead (lo que ya funcionaba)
+      // 1. Notificación vía Email/Lead
       await submitPublicLead({
         source,
         firstName: values.firstName.trim(),
@@ -109,25 +121,21 @@ export function ContactForm({
         hiddenFields
       });
 
-      // 2. Persistencia en DB (Guardado de cotización)
-      // Usamos "user-client" temporal para evitar errores de validación de clientId
-      await fetch("/api/quotes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          title: hiddenFields.project_category || "Proyecto sin título",
-          description: values.message || "",
-          projectType: hiddenFields.project_category || "OTHER",
-          planCategory: hiddenFields.selected_plan?.includes("Business") ? "BUSINESS" : "PERSONAL",
-          planTier: "BASIC",
-          billingModel: "ONE_TIME",
-          estimatedPrice: 0,
-          estimatedTimeline: hiddenFields.timeline || "",
-          clientId: "user-client" 
-        })
-      });
+      const session = readSession();
+
+      // 2. Persistencia en DB usando el quotePayload recibido
+      if (quotePayload) {
+        await fetch("/api/quotes", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            ...quotePayload,
+            clientId: "user-client"
+          })
+        });
+      }
 
       setSubmitted(true);
       setValues({ ...defaultValues });

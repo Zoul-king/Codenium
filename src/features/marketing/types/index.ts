@@ -43,11 +43,15 @@ export interface TimelineStep {
 }
 
 export interface PlanItem {
+  id?: string;
   title: string;
   price: string;
   subtitle?: string;
   note?: string;
   items: string[];
+  active?: boolean;
+  discountPercentage?: number;
+  originalPrice?: string;
 }
 
 export interface ServicePricingItem {

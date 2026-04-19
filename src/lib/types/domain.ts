@@ -40,7 +40,7 @@ export type QuoteModuleKey =
 
 export type QuoteTimelinePreference = "1-4" | "5-7" | "8-12";
 
-export type QuoteStatus = "draft" | "sent" | "review" | "approved";
+export type QuoteStatus = "pending" | "reviewed" | "accepted" | "rejected";
 export type QuoteKind = "prequote" | "formal";
 
 export type ProjectStatus = "discovery" | "design" | "build" | "qa" | "done";
