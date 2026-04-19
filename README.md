@@ -93,10 +93,3 @@ npm run dev
 npm run build
 npm run start
 ```
-
-## Próximos puntos de integración real
-
-- Sustituir `src/features/auth/lib/session-store.ts` por la estrategia real de sesión.
-- Conectar `src/features/auth/lib/auth-service.ts` a endpoints o server actions.
-- Reemplazar `src/lib/mocks/*` por repositorios conectados a Prisma.
-- Mover validaciones y envíos de formularios a backend cuando se habilite la siguiente fase.
