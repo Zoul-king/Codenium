@@ -1,177 +1,293 @@
 "use client";
 
+import { CheckCircle2, Pencil, RefreshCw, Save, X, XCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
-import { DashboardCard, DashboardEmptyState, SectionHeading, StatusBadge } from "@/features/dashboard/components/primitives";
-import { cloneManagedPlanCatalog, defaultManagedPlans, fetchManagedPlanCatalog, saveManagedPlanCatalog, type ManagedPlanCatalog } from "@/features/marketing/lib/plan-catalog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DashboardEmptyState } from "@/features/dashboard/components/primitives";
+import {
+  cloneManagedPlanCatalog,
+  defaultManagedPlans,
+  fetchManagedPlanCatalog,
+  saveManagedPlanCatalog,
+  type ManagedPlanCatalog,
+  type ManagedPlanRecord
+} from "@/features/marketing/lib/plan-catalog";
 import type { PlanProfile } from "@/lib/types/domain";
+import { cn } from "@/lib/utils";
 
 export function AdminPlanPanel() {
   const [plans, setPlans] = useState<ManagedPlanCatalog>(() => cloneManagedPlanCatalog(defaultManagedPlans));
   const [profile, setProfile] = useState<PlanProfile>("personal");
-  const [notice, setNotice] = useState("");
+  const [editingPlan, setEditingPlan] = useState<{ profile: PlanProfile; plan: ManagedPlanRecord } | null>(null);
+  const [draft, setDraft] = useState({ setupFee: 0, monthlyFee: 0, discountPercentage: 0, active: true });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchManagedPlanCatalog()
-      .then((nextPlans) => setPlans(cloneManagedPlanCatalog(nextPlans)))
-      .catch((error) => setNotice(error instanceof Error ? error.message : "No se pudieron cargar los planes."));
+      .then((next) => setPlans(cloneManagedPlanCatalog(next)))
+      .catch((error) => toast.error("No se pudieron cargar los planes", { description: error?.message }));
   }, []);
 
   const currentPlans = useMemo(() => plans[profile], [plans, profile]);
-  const activeCount = useMemo(() => [...plans.personal, ...plans.business].filter((plan) => plan.active).length, [plans]);
+  const activeCount = useMemo(
+    () => [...plans.personal, ...plans.business].filter((p) => p.active).length,
+    [plans]
+  );
 
-  function updatePlan(planId: string, field: "setupFee" | "monthlyFee" | "discountPercentage" | "active", value: string | boolean) {
+  function openEdit(plan: ManagedPlanRecord) {
+    setEditingPlan({ profile, plan });
+    setDraft({
+      setupFee: plan.setupFee ?? 0,
+      monthlyFee: plan.monthlyFee ?? 0,
+      discountPercentage: plan.discountPercentage,
+      active: plan.active
+    });
+  }
+
+  function applyDraft() {
+    if (!editingPlan) return;
+    const targetProfile = editingPlan.profile;
+    const targetId = editingPlan.plan.id;
     setPlans((current) => ({
       ...current,
-      [profile]: current[profile].map((plan) => {
-        if (plan.id !== planId) {
-          return plan;
-        }
+      [targetProfile]: current[targetProfile].map((plan) =>
+        plan.id === targetId
+          ? {
+              ...plan,
+              setupFee: draft.setupFee,
+              monthlyFee: draft.monthlyFee,
+              discountPercentage: draft.discountPercentage,
+              active: draft.active
+            }
+          : plan
+      )
+    }));
+    toast.success("Cambios listos", { description: "Recuerda guardar para publicar." });
+    setEditingPlan(null);
+  }
 
-        if (field === "active") {
-          return { ...plan, active: Boolean(value) };
-        }
-
-        const parsedValue = typeof value === "string" && value.trim() ? Number(value) : 0;
-
-        return {
-          ...plan,
-          [field]: Number.isFinite(parsedValue) ? Math.max(0, Math.round(parsedValue)) : 0
-        };
-      })
+  function toggleActive(plan: ManagedPlanRecord, profileKey: PlanProfile) {
+    setPlans((current) => ({
+      ...current,
+      [profileKey]: current[profileKey].map((p) => (p.id === plan.id ? { ...p, active: !p.active } : p))
     }));
   }
 
   async function handleSave() {
+    setSaving(true);
     try {
-      const savedPlans = await saveManagedPlanCatalog(plans);
-      setPlans(cloneManagedPlanCatalog(savedPlans));
-      setNotice("Planes guardados correctamente.");
+      const saved = await saveManagedPlanCatalog(plans);
+      setPlans(cloneManagedPlanCatalog(saved));
+      toast.success("Planes publicados");
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "No se pudieron guardar los planes.");
+      toast.error("No se pudieron guardar", {
+        description: error instanceof Error ? error.message : undefined
+      });
+    } finally {
+      setSaving(false);
     }
   }
 
   async function handleReload() {
     try {
-      const nextPlans = await fetchManagedPlanCatalog();
-      setPlans(cloneManagedPlanCatalog(nextPlans));
-      setNotice("Se recargaron los planes persistidos.");
+      const next = await fetchManagedPlanCatalog();
+      setPlans(cloneManagedPlanCatalog(next));
+      toast.success("Recargado desde el servidor");
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "No se pudieron recargar los planes.");
+      toast.error("No se pudo recargar", {
+        description: error instanceof Error ? error.message : undefined
+      });
     }
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <DashboardCard>
-        <SectionHeading
-          eyebrow="Planes"
-          title="Administracion de precios"
-          description="Edita montos, descuentos y activacion por perfil sin romper la estructura visual existente."
-          action={
-            <div className="inline-flex rounded-[12px] border border-slate-200 bg-slate-50 p-1">
-              {([
-                ["personal", "Perfil personal"],
-                ["business", "Perfil empresarial"]
-              ] as const).map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setProfile(key)}
-                  className={`rounded-[10px] px-4 py-2 text-sm font-semibold ${profile === key ? "bg-[#4f2f96] text-white" : "text-slate-600"}`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          }
-        />
+    <div className="space-y-6">
+      <header className="rounded-[var(--radius-card)] border border-slate-200 bg-white p-6 shadow-[var(--shadow-card)]">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#3f237a)]">
+              Catálogo
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-slate-950">Planes y precios</h1>
+            <p className="mt-1 text-sm text-slate-600">
+              {activeCount} planes activos en total · cambios surten efecto al guardar
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" onClick={handleReload}>
+              <RefreshCw className="size-4" />
+              Recargar
+            </Button>
+            <Button className="btn-role" onClick={handleSave} disabled={saving}>
+              <Save className="size-4" />
+              {saving ? "Guardando…" : "Publicar cambios"}
+            </Button>
+          </div>
+        </div>
+      </header>
 
-        <div className="mt-8 grid gap-5">
-          {currentPlans.length ? (
-            currentPlans.map((plan) => (
-              <article key={plan.id} className="rounded-[22px] border border-slate-200 bg-slate-50 p-5">
-                <div className="flex flex-wrap items-start justify-between gap-4">
+      <Tabs value={profile} onValueChange={(v) => setProfile(v as PlanProfile)}>
+        <TabsList variant="line" className="bg-transparent">
+          <TabsTrigger value="personal">Personal ({plans.personal.length})</TabsTrigger>
+          <TabsTrigger value="business">Empresarial ({plans.business.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="personal" className="mt-6">
+          <PlansGrid plans={plans.personal} profile="personal" onEdit={openEdit} onToggle={toggleActive} />
+        </TabsContent>
+        <TabsContent value="business" className="mt-6">
+          <PlansGrid plans={plans.business} profile="business" onEdit={openEdit} onToggle={toggleActive} />
+        </TabsContent>
+      </Tabs>
+
+      <Sheet open={!!editingPlan} onOpenChange={(o) => !o && setEditingPlan(null)}>
+        <SheetContent className="w-full sm:max-w-md">
+          {editingPlan ? (
+            <>
+              <SheetHeader>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Plan {editingPlan.profile === "business" ? "empresarial" : "personal"}
+                </p>
+                <SheetTitle>{editingPlan.plan.title}</SheetTitle>
+                <SheetDescription>{editingPlan.plan.items.join(" · ")}</SheetDescription>
+              </SheetHeader>
+
+              <div className="grid gap-4 px-4 py-3">
+                <div className="space-y-2">
+                  <Label>Pago inicial (MXN)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={draft.setupFee}
+                    onChange={(e) => setDraft((c) => ({ ...c, setupFee: Math.max(0, Number(e.target.value) || 0) }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Mensualidad (MXN)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={draft.monthlyFee}
+                    onChange={(e) => setDraft((c) => ({ ...c, monthlyFee: Math.max(0, Number(e.target.value) || 0) }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Descuento (%)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={draft.discountPercentage}
+                    onChange={(e) =>
+                      setDraft((c) => ({
+                        ...c,
+                        discountPercentage: Math.min(100, Math.max(0, Number(e.target.value) || 0))
+                      }))
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-[12px] border border-slate-200 p-3">
                   <div>
-                    <h3 className="text-xl font-semibold text-slate-950">{plan.title}</h3>
-                    <p className="mt-2 text-sm text-slate-600">{plan.items.join(" · ")}</p>
+                    <p className="text-sm font-semibold text-slate-950">Mostrar en sitio</p>
+                    <p className="text-xs text-slate-500">Si está apagado el plan no es visible públicamente.</p>
                   </div>
-                  <StatusBadge tone={plan.active ? "success" : "danger"}>{plan.active ? "Activo" : "Inactivo"}</StatusBadge>
+                  <Switch checked={draft.active} onCheckedChange={(v) => setDraft((c) => ({ ...c, active: v }))} />
                 </div>
+              </div>
 
-                <div className="mt-5 grid gap-4 md:grid-cols-3">
-                  <label className="grid gap-2 text-sm font-medium text-slate-700">
-                    Pago inicial
-                    <input
-                      type="number"
-                      min="0"
-                      value={plan.setupFee ?? 0}
-                      onChange={(event) => updatePlan(plan.id, "setupFee", event.target.value)}
-                      className="dashboard-input"
-                    />
-                  </label>
-                  <label className="grid gap-2 text-sm font-medium text-slate-700">
-                    Mensualidad
-                    <input
-                      type="number"
-                      min="0"
-                      value={plan.monthlyFee ?? 0}
-                      onChange={(event) => updatePlan(plan.id, "monthlyFee", event.target.value)}
-                      className="dashboard-input"
-                    />
-                  </label>
-                  <label className="grid gap-2 text-sm font-medium text-slate-700">
-                    Descuento %
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={plan.discountPercentage}
-                      onChange={(event) => updatePlan(plan.id, "discountPercentage", event.target.value)}
-                      className="dashboard-input"
-                    />
-                  </label>
-                </div>
-
-                <label className="mt-4 inline-flex items-center gap-3 text-sm font-medium text-slate-700">
-                  <input type="checkbox" checked={plan.active} onChange={(event) => updatePlan(plan.id, "active", event.target.checked)} />
-                  Mostrar este plan en el sitio
-                </label>
-              </article>
-            ))
-          ) : (
-            <DashboardEmptyState title="Sin planes en este perfil" body="Activa al menos un plan para volver a publicarlo." />
-          )}
-        </div>
-      </DashboardCard>
-
-      <DashboardCard className="h-fit xl:sticky xl:top-6">
-        <SectionHeading eyebrow="Publicacion" title="Resumen" />
-        <div className="mt-6 grid gap-4">
-          <SummaryRow label="Planes activos" value={String(activeCount)} />
-          <SummaryRow label="Perfil actual" value={profile === "business" ? "Empresarial" : "Personal"} />
-          <SummaryRow label="Con descuento" value={String(currentPlans.filter((plan) => plan.discountPercentage > 0).length)} />
-        </div>
-        {notice ? <p className="mt-5 text-sm font-medium text-emerald-700">{notice}</p> : null}
-        <div className="mt-6 flex flex-wrap gap-3">
-          <button type="button" className="dashboard-button-primary" onClick={handleSave}>
-            Guardar cambios
-          </button>
-          <button type="button" className="dashboard-button-secondary" onClick={handleReload}>
-            Recargar guardado
-          </button>
-        </div>
-      </DashboardCard>
+              <SheetFooter>
+                <Button variant="outline" onClick={() => setEditingPlan(null)}>
+                  <X className="size-4" />
+                  Cancelar
+                </Button>
+                <Button className="btn-role" onClick={applyDraft}>
+                  <CheckCircle2 className="size-4" />
+                  Aplicar
+                </Button>
+              </SheetFooter>
+            </>
+          ) : null}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
 
-function SummaryRow({ label, value }: { label: string; value: string }) {
+function PlansGrid({
+  plans,
+  profile,
+  onEdit,
+  onToggle
+}: {
+  plans: ManagedPlanRecord[];
+  profile: PlanProfile;
+  onEdit: (plan: ManagedPlanRecord) => void;
+  onToggle: (plan: ManagedPlanRecord, profile: PlanProfile) => void;
+}) {
+  if (plans.length === 0) {
+    return <DashboardEmptyState title="Sin planes" body="No hay planes en este perfil." />;
+  }
+
   return (
-    <div className="flex items-center justify-between gap-4 rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-      <span className="text-sm text-slate-600">{label}</span>
-      <span className="text-lg font-semibold text-slate-950">{value}</span>
+    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      {plans.map((plan) => (
+        <article
+          key={plan.id}
+          className={cn(
+            "rounded-[var(--radius-card-dense)] border bg-white p-5 shadow-[var(--shadow-card-dense)] transition",
+            plan.active ? "border-slate-200" : "border-slate-200 opacity-70"
+          )}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="text-base font-semibold text-slate-950">{plan.title}</h3>
+              <p className="mt-1 line-clamp-2 text-xs text-slate-500">{plan.items.join(" · ")}</p>
+            </div>
+            {plan.active ? (
+              <Badge variant="secondary" className="bg-success-50 text-success-700">
+                <CheckCircle2 className="size-3" />
+                Activo
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="bg-slate-100 text-slate-600">
+                <XCircle className="size-3" />
+                Inactivo
+              </Badge>
+            )}
+          </div>
+
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <Stat label="Setup" value={`$${(plan.setupFee ?? 0).toLocaleString("es-MX")}`} />
+            <Stat label="Mensual" value={`$${(plan.monthlyFee ?? 0).toLocaleString("es-MX")}`} />
+            <Stat label="Desc." value={`${plan.discountPercentage}%`} />
+          </div>
+
+          <div className="mt-4 flex items-center justify-between gap-2">
+            <Switch checked={plan.active} onCheckedChange={() => onToggle(plan, profile)} />
+            <Button variant="outline" size="sm" onClick={() => onEdit(plan)}>
+              <Pencil className="size-3.5" />
+              Editar
+            </Button>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[10px] border border-slate-200 bg-slate-50 px-2 py-2 text-center">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold text-slate-950">{value}</p>
     </div>
   );
 }

@@ -33,6 +33,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { CommandPalette, useCommandPaletteState } from "@/features/dashboard/components/shell/command-palette";
 import { DashboardChromeProvider } from "@/features/dashboard/components/primitives";
 import {
   getPendingMessages,
@@ -68,6 +69,7 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
   const router = useRouter();
   const { state } = useDashboardWorkspace();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const commandPalette = useCommandPaletteState();
 
   const visibleProjects = getVisibleProjects(state, role);
   const visibleQuotes = getVisibleQuotes(state, role);
@@ -171,7 +173,11 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
               </div>
 
               <div className="flex items-center gap-2">
-                <button type="button" className="cmd-trigger hidden md:inline-flex" disabled>
+                <button
+                  type="button"
+                  className="cmd-trigger hidden md:inline-flex"
+                  onClick={() => commandPalette.setOpen(true)}
+                >
                   <Search className="size-3.5" />
                   Buscar
                   <span className="cmd-kbd ml-2">⌘K</span>
@@ -226,6 +232,8 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
             </ScrollArea>
           </main>
         </div>
+
+        <CommandPalette role={role} open={commandPalette.open} onOpenChange={commandPalette.setOpen} />
       </div>
     </DashboardChromeProvider>
   );

@@ -1,169 +1,333 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { CheckCircle2, Circle, Clock, Plus, Send } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
-import { TextAreaField, TextField } from "@/components/common/form-field";
-import { DashboardCard, DashboardEmptyState, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/primitives";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TextField, TextAreaField } from "@/components/common/form-field";
+import { DashboardEmptyState } from "@/features/dashboard/components/primitives";
 import { getProjectPmEmail } from "@/features/dashboard/lib/recipients";
-import { getProjectChangeRequests, getProjectMilestones, getSelectedProject } from "@/features/dashboard/lib/selectors";
+import {
+  getProjectChangeRequests,
+  getProjectMilestones,
+  getSelectedOrPrimaryProject
+} from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { sendDashboardNotification } from "@/lib/api/client";
-import { formatLongDate } from "@/lib/utils/presenters";
+import type { ProjectMilestoneRecord } from "@/lib/types/domain";
+import { formatLongDate, formatShortDate } from "@/lib/utils/presenters";
+import { cn } from "@/lib/utils";
 
 export function ClientMilestonesPanel() {
-  const { state, addChangeRequest } = useDashboardWorkspace();
-  const project = getSelectedProject(state, "client");
-  const milestones = getProjectMilestones(state, project?.id);
+  const { state } = useDashboardWorkspace();
+  const project = getSelectedOrPrimaryProject(state, "client");
+  const milestones = (getProjectMilestones(state, project?.id) ?? [])
+    .slice()
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const changes = getProjectChangeRequests(state, project?.id);
-  const [milestoneId, setMilestoneId] = useState("");
-  const [title, setTitle] = useState("");
-  const [detail, setDetail] = useState("");
-  const [priority, setPriority] = useState<"high" | "medium" | "low">("medium");
-  const [notice, setNotice] = useState("");
-
-  const selectedMilestone = useMemo(() => milestones.find((item) => item.id === milestoneId), [milestoneId, milestones]);
 
   if (!project) {
     return (
-      <DashboardCard>
-        <DashboardEmptyState title="Selecciona un proyecto" body="Para ver hitos y solicitar cambios, primero elige un proyecto en la seccion Proyectos." />
-      </DashboardCard>
+      <DashboardEmptyState
+        title="Selecciona un proyecto"
+        body="Para ver hitos y solicitar cambios, primero elige un proyecto en la sección Proyectos."
+      />
+    );
+  }
+
+  const done = milestones.filter((m) => m.status === "done");
+  const current = milestones.filter((m) => m.status === "current");
+  const next = milestones.filter((m) => m.status === "next");
+
+  return (
+    <div className="space-y-6">
+      <header className="warm-card flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#224a78)]">
+            Roadmap
+          </p>
+          <h1 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-slate-950">{project.name}</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+            {done.length} de {milestones.length} hitos completados · entrega estimada {formatLongDate(project.dueDate)}
+          </p>
+        </div>
+        <NewChangeRequestDialog project={project} milestones={milestones} />
+      </header>
+
+      <Tabs defaultValue="all">
+        <TabsList variant="line" className="bg-transparent">
+          <TabsTrigger value="all">Todos ({milestones.length})</TabsTrigger>
+          <TabsTrigger value="current">En curso ({current.length})</TabsTrigger>
+          <TabsTrigger value="next">Próximos ({next.length})</TabsTrigger>
+          <TabsTrigger value="done">Completados ({done.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="mt-6">
+          <MilestoneList items={milestones} />
+        </TabsContent>
+        <TabsContent value="current" className="mt-6">
+          <MilestoneList items={current} />
+        </TabsContent>
+        <TabsContent value="next" className="mt-6">
+          <MilestoneList items={next} />
+        </TabsContent>
+        <TabsContent value="done" className="mt-6">
+          <MilestoneList items={done} />
+        </TabsContent>
+      </Tabs>
+
+      <section className="rounded-[var(--radius-card)] border border-slate-200 bg-white p-6 shadow-[var(--shadow-card)]">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Cambios solicitados
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-slate-950">Tu historial</h2>
+          </div>
+          <span className="text-xs text-slate-500">{changes.length} en total</span>
+        </div>
+
+        {changes.length === 0 ? (
+          <div className="mt-5">
+            <DashboardEmptyState
+              title="Sin cambios solicitados"
+              body="Cuando registres uno, lo verás aquí junto con su estado y prioridad."
+            />
+          </div>
+        ) : (
+          <div className="mt-5 space-y-3">
+            {changes.map((change) => {
+              const tone =
+                change.priority === "high"
+                  ? "badge-status-error"
+                  : change.priority === "medium"
+                    ? "badge-status-warning"
+                    : "badge-status-info";
+              return (
+                <article
+                  key={change.id}
+                  className="rounded-[16px] border border-slate-200 p-4 transition hover:border-[var(--role,#5e92c2)]/40"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-950">{change.title}</p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{change.detail}</p>
+                    </div>
+                    <span className={tone}>{change.priority}</span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-slate-500">
+                    <span>{change.milestoneId ? "Asociado a un hito" : "Asociado al proyecto"}</span>
+                    <span>·</span>
+                    <span>Estado: {change.status}</span>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function MilestoneList({ items }: { items: ProjectMilestoneRecord[] }) {
+  if (items.length === 0) {
+    return (
+      <DashboardEmptyState
+        title="Sin hitos"
+        body="No hay hitos en esta categoría todavía."
+      />
     );
   }
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_340px]">
-      <DashboardCard>
-        <SectionHeading title={project.name} description="Los hitos y cambios mostrados aqui pertenecen al proyecto seleccionado." />
-
-        <div className="mt-5 grid gap-3">
-          {milestones.length > 0 ? (
-            milestones.map((milestone) => (
-              <article key={milestone.id} className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-950">{milestone.title}</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{milestone.summary}</p>
-                  </div>
-                  <StatusBadge tone={milestone.status === "done" ? "success" : milestone.status === "current" ? "accent" : "neutral"}>
-                    {milestone.status === "done" ? "Completado" : milestone.status === "current" ? "En proceso" : "Pendiente"}
-                  </StatusBadge>
-                </div>
-                <p className="mt-3 text-xs font-medium text-slate-500">{formatLongDate(milestone.date)}</p>
-              </article>
-            ))
-          ) : (
-            <DashboardEmptyState title="Sin hitos registrados" body="Este proyecto todavia no tiene hitos visibles." />
+    <ol className="space-y-3">
+      {items.map((m) => (
+        <li
+          key={m.id}
+          className={cn(
+            "rounded-[var(--radius-card-dense)] border bg-white p-5 shadow-[var(--shadow-card-dense)]",
+            m.status === "current" && "border-[var(--role,#5e92c2)]/40 ring-1 ring-[var(--role,#5e92c2)]/20"
           )}
-        </div>
-
-        <div className="mt-6 border-t border-slate-200 pt-5">
-          <SectionHeading title="Cambios enviados" />
-          <div className="mt-4 grid gap-3">
-            {changes.length > 0 ? (
-              changes.map((change) => (
-                <article key={change.id} className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-950">{change.title}</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">{change.detail}</p>
-                    </div>
-                    <StatusBadge tone={change.priority === "high" ? "danger" : change.priority === "medium" ? "warning" : "accent"}>{change.priority}</StatusBadge>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-500">
-                    {change.milestoneId ? <span>Relacionado a hito</span> : <span>Relacionado al proyecto</span>}
-                    <span>{change.status}</span>
-                  </div>
-                </article>
-              ))
-            ) : (
-              <DashboardEmptyState title="Sin cambios registrados" body="Cuando solicites un ajuste, aparecerá aqui y tambien quedará visible para el PM." />
-            )}
-          </div>
-        </div>
-      </DashboardCard>
-
-      <DashboardMutedCard className="h-fit xl:sticky xl:top-4">
-        <SectionHeading title="Solicitar cambio" description="Puedes relacionarlo al proyecto general o a un hito especifico." />
-
-        <form
-          className="mt-4 grid gap-3"
-          onSubmit={async (event) => {
-            event.preventDefault();
-
-            if (!title.trim() || !detail.trim()) {
-              return;
-            }
-
-            const nextTitle = title.trim();
-            const nextDetail = detail.trim();
-            const composedDetail = selectedMilestone ? `${nextDetail}\n\nHito relacionado: ${selectedMilestone.title}` : nextDetail;
-
-            addChangeRequest({
-              projectId: project.id,
-              clientId: project.clientId,
-              milestoneId: selectedMilestone?.id,
-              title: nextTitle,
-              detail: composedDetail,
-              priority
-            });
-
-            setTitle("");
-            setDetail("");
-            setMilestoneId("");
-
-            try {
-              const recipientEmail = getProjectPmEmail(state, project.id);
-              const pmName = state.users.find((user) => user.id === project.pmId)?.name ?? "PM asignado";
-
-              if (!recipientEmail) {
-                throw new Error("No encontramos el correo del PM asignado.");
-              }
-
-              await sendDashboardNotification({
-                type: "change_request",
-                recipientEmail,
-                recipientName: pmName,
-                requestedBy: project.clientName,
-                projectName: project.name,
-                title: nextTitle,
-                detail: composedDetail,
-                priority
-              });
-
-              setNotice("");
-            } catch (error) {
-              setNotice(error instanceof Error ? error.message : "No pudimos enviar la notificacion del cambio.");
-            }
-          }}
         >
-          <label className="grid gap-2 text-sm font-medium text-slate-700">
-            Relacionado a
-            <select value={milestoneId} onChange={(event) => setMilestoneId(event.target.value)} className="dashboard-select">
-              <option value="">Proyecto completo</option>
-              {milestones.map((milestone) => (
-                <option key={milestone.id} value={milestone.id}>
-                  {milestone.title}
-                </option>
-              ))}
-            </select>
-          </label>
-          <TextField label="Titulo" placeholder="Ej. Ajustar prioridad del bloque comercial" value={title} onChange={setTitle} />
-          <label className="grid gap-2 text-sm font-medium text-slate-700">
-            Prioridad
-            <select value={priority} onChange={(event) => setPriority(event.target.value as "high" | "medium" | "low")} className="dashboard-select">
-              <option value="high">Alta</option>
-              <option value="medium">Media</option>
-              <option value="low">Baja</option>
-            </select>
-          </label>
-          <TextAreaField label="Descripcion" placeholder="Describe el cambio y el motivo." rows={4} value={detail} onChange={setDetail} />
-          {notice ? <p className="text-sm font-medium text-rose-600">{notice}</p> : null}
-          <button type="submit" className="dashboard-button-primary w-full justify-center">
-            Enviar cambio
-          </button>
-        </form>
-      </DashboardMutedCard>
-    </div>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <span
+                className={cn(
+                  "mt-0.5 grid size-8 place-items-center rounded-full",
+                  m.status === "done"
+                    ? "bg-success-50 text-success-600"
+                    : m.status === "current"
+                      ? "bg-[var(--role-soft,#eff6fb)] text-[var(--role-strong,#224a78)]"
+                      : "bg-slate-100 text-slate-400"
+                )}
+              >
+                {m.status === "done" ? (
+                  <CheckCircle2 className="size-4" />
+                ) : m.status === "current" ? (
+                  <Clock className="size-4" />
+                ) : (
+                  <Circle className="size-4" />
+                )}
+              </span>
+              <div className="min-w-0">
+                <p className="text-base font-semibold text-slate-950">{m.title}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{m.summary}</p>
+              </div>
+            </div>
+            <span className="whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+              {formatShortDate(m.date)}
+            </span>
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function NewChangeRequestDialog({
+  project,
+  milestones
+}: {
+  project: { id: string; name: string; clientId: string; clientName: string; pmId: string };
+  milestones: ProjectMilestoneRecord[];
+}) {
+  const { state, addChangeRequest } = useDashboardWorkspace();
+  const [open, setOpen] = useState(false);
+  const [milestoneId, setMilestoneId] = useState("project");
+  const [title, setTitle] = useState("");
+  const [detail, setDetail] = useState("");
+  const [priority, setPriority] = useState<"high" | "medium" | "low">("medium");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit() {
+    if (!title.trim() || !detail.trim()) {
+      toast.error("Faltan datos", { description: "Necesitamos título y descripción." });
+      return;
+    }
+
+    setSubmitting(true);
+    const selectedMilestone = milestones.find((m) => m.id === milestoneId);
+    const composedDetail = selectedMilestone
+      ? `${detail.trim()}\n\nHito relacionado: ${selectedMilestone.title}`
+      : detail.trim();
+
+    addChangeRequest({
+      projectId: project.id,
+      clientId: project.clientId,
+      milestoneId: selectedMilestone?.id,
+      title: title.trim(),
+      detail: composedDetail,
+      priority
+    });
+
+    try {
+      const recipientEmail = getProjectPmEmail(state, project.id);
+      const pmName = state.users.find((u) => u.id === project.pmId)?.name ?? "PM asignado";
+
+      if (recipientEmail) {
+        await sendDashboardNotification({
+          type: "change_request",
+          recipientEmail,
+          recipientName: pmName,
+          requestedBy: project.clientName,
+          projectName: project.name,
+          title: title.trim(),
+          detail: composedDetail,
+          priority
+        });
+      }
+
+      toast.success("Cambio solicitado", {
+        description: "Tu PM recibirá una notificación."
+      });
+      setOpen(false);
+      setTitle("");
+      setDetail("");
+      setMilestoneId("project");
+    } catch (error) {
+      toast.error("Quedó registrado pero no enviamos email", {
+        description: error instanceof Error ? error.message : undefined
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="btn-role">
+          <Plus className="size-4" />
+          Solicitar cambio
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Solicitar un cambio</DialogTitle>
+          <DialogDescription>
+            Tu PM lo verá inmediatamente. Sé claro con el qué y el por qué.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <Label>Asociar a</Label>
+            <Select value={milestoneId} onValueChange={setMilestoneId}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="project">Proyecto completo</SelectItem>
+                {milestones.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <TextField label="Título" placeholder="Ej. Ajustar prioridad del bloque comercial" value={title} onChange={setTitle} />
+
+          <div className="space-y-2">
+            <Label>Prioridad</Label>
+            <Select value={priority} onValueChange={(v: "high" | "medium" | "low") => setPriority(v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="high">Alta</SelectItem>
+                <SelectItem value="medium">Media</SelectItem>
+                <SelectItem value="low">Baja</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <TextAreaField
+            label="Descripción"
+            placeholder="Describe el cambio y el motivo."
+            rows={5}
+            value={detail}
+            onChange={setDetail}
+          />
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
+          <Button className="btn-role" onClick={handleSubmit} disabled={submitting}>
+            <Send className="size-4" />
+            {submitting ? "Enviando…" : "Enviar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

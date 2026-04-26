@@ -1,111 +1,248 @@
 "use client";
 
+import { CheckCircle2, MoreHorizontal, Plus, ShieldOff, UserPlus } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TextField } from "@/components/common/form-field";
-import { DashboardCard, SectionHeading } from "@/features/dashboard/components/primitives";
-import { getClientUsers, getPmUsers } from "@/features/dashboard/lib/selectors";
+import { getClientUsers, getPmStats, getPmUsers } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { sendDashboardNotification } from "@/lib/api/client";
-import type { UserState } from "@/lib/types/domain";
+import type { UserRecord, UserState } from "@/lib/types/domain";
 
 export function AdminTeamPanel() {
-  const { state, createPmAccount, setUserState } = useDashboardWorkspace();
+  const { state, setUserState } = useDashboardWorkspace();
   const clients = getClientUsers(state);
   const pms = getPmUsers(state);
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
-  const [notice, setNotice] = useState("");
 
-  function nextStateFor(current: UserState): UserState {
-    return current === "active" ? "banned" : "active";
+  function toggleState(user: UserRecord) {
+    const next: UserState = user.state === "active" ? "banned" : "active";
+    setUserState(user.id, next);
+    toast.success(next === "active" ? `${user.name} reactivado` : `${user.name} dado de baja`);
   }
 
   return (
-    <div className="grid h-full gap-6 xl:grid-cols-[minmax(0,1.08fr)_340px]">
-      <DashboardCard>
-        <SectionHeading eyebrow="Usuarios" title="Clientes y project managers" />
-        <div className="mt-8 grid gap-8 lg:grid-cols-2">
-          <UserColumn title="Clientes" items={clients} onToggleState={setUserState} nextStateFor={nextStateFor} />
-          <UserColumn title="Project managers" items={pms} onToggleState={setUserState} nextStateFor={nextStateFor} />
+    <div className="space-y-6">
+      <header className="rounded-[var(--radius-card)] border border-slate-200 bg-white p-6 shadow-[var(--shadow-card)]">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#3f237a)]">
+              Equipo
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-slate-950">Usuarios y PMs</h1>
+            <p className="mt-1 text-sm text-slate-600">
+              {clients.length} clientes · {pms.length} project managers
+            </p>
+          </div>
+          <CreatePmDialog />
         </div>
-      </DashboardCard>
+      </header>
 
-      <DashboardCard className="h-fit xl:sticky xl:top-6">
-        <SectionHeading eyebrow="Crear PM" title="Nueva cuenta interna" />
-        <form
-          className="mt-6 grid gap-4"
-          onSubmit={async (event) => {
-            event.preventDefault();
+      <Tabs defaultValue="pms">
+        <TabsList variant="line" className="bg-transparent">
+          <TabsTrigger value="pms">PMs ({pms.length})</TabsTrigger>
+          <TabsTrigger value="clients">Clientes ({clients.length})</TabsTrigger>
+        </TabsList>
 
-            if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim() || !form.phone.trim()) {
-              return;
-            }
-
-            const nextForm = { ...form };
-            createPmAccount(form);
-            setForm({ firstName: "", lastName: "", email: "", phone: "" });
-
-            try {
-              await sendDashboardNotification({
-                type: "pm_account_created",
-                pmEmail: nextForm.email,
-                pmName: `${nextForm.firstName} ${nextForm.lastName}`
-              });
-
-              setNotice("");
-            } catch (error) {
-              setNotice(error instanceof Error ? error.message : "No pudimos enviar el correo al nuevo PM.");
-            }
-          }}
-        >
-          <TextField label="Nombre" placeholder="Nombre" value={form.firstName} onChange={(value) => setForm((current) => ({ ...current, firstName: value }))} />
-          <TextField label="Apellidos" placeholder="Apellidos" value={form.lastName} onChange={(value) => setForm((current) => ({ ...current, lastName: value }))} />
-          <TextField label="Correo" placeholder="correo@codenium.com" value={form.email} onChange={(value) => setForm((current) => ({ ...current, email: value }))} />
-          <TextField label="Telefono" placeholder="+52..." value={form.phone} onChange={(value) => setForm((current) => ({ ...current, phone: value }))} />
-          {notice ? <p className="text-sm font-medium text-rose-600">{notice}</p> : null}
-          <button type="submit" className="dashboard-button-primary w-fit">
-            Crear PM
-          </button>
-        </form>
-      </DashboardCard>
+        <TabsContent value="pms" className="mt-6">
+          <UserTable users={pms} state={state} onToggle={toggleState} kind="pm" />
+        </TabsContent>
+        <TabsContent value="clients" className="mt-6">
+          <UserTable users={clients} state={state} onToggle={toggleState} kind="client" />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
 
-function UserColumn({
-  title,
-  items,
-  onToggleState,
-  nextStateFor
+function UserTable({
+  users,
+  state,
+  onToggle,
+  kind
 }: {
-  title: string;
-  items: Array<{ id: string; name: string; email: string; company?: string; state: UserState }>;
-  onToggleState: (userId: string, state: UserState) => void;
-  nextStateFor: (state: UserState) => UserState;
+  users: UserRecord[];
+  state: ReturnType<typeof useDashboardWorkspace>["state"];
+  onToggle: (user: UserRecord) => void;
+  kind: "pm" | "client";
 }) {
   return (
-    <section>
-      <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-4">
-        <h3 className="text-lg font-semibold text-slate-950">{title}</h3>
-        <span className="text-sm font-semibold text-slate-500">{items.length}</span>
-      </div>
-      <div className="mt-4 grid gap-4">
-        {items.map((user) => (
-          <div key={user.id} className="dashboard-gridline grid gap-3 pb-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="font-semibold text-slate-950">{user.name}</p>
-                <p className="mt-1 text-sm text-slate-500">{user.company ?? user.email}</p>
-              </div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{user.state}</p>
-            </div>
-            <p className="text-sm text-slate-600">{user.email}</p>
-            <button type="button" className="dashboard-button-secondary w-fit" onClick={() => onToggleState(user.id, nextStateFor(user.state))}>
-              {user.state === "banned" ? "Reactivar" : "Banear"}
-            </button>
-          </div>
-        ))}
-      </div>
-    </section>
+    <div className="rounded-[var(--radius-card-dense)] border border-slate-200 bg-white shadow-[var(--shadow-card-dense)]">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Usuario</TableHead>
+            <TableHead>Email</TableHead>
+            {kind === "pm" ? <TableHead>Carga</TableHead> : <TableHead>Empresa</TableHead>}
+            <TableHead>Estado</TableHead>
+            <TableHead className="w-12" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {users.map((user) => {
+            const initials = user.name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+            return (
+              <TableRow key={user.id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="size-8">
+                      <AvatarFallback className="bg-[var(--role-soft,#efe9fb)] text-xs font-semibold text-[var(--role-strong,#3f237a)]">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-slate-950">{user.name}</p>
+                      <p className="text-[11px] text-slate-500">{user.title}</p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="text-sm text-slate-700">{user.email}</TableCell>
+                {kind === "pm" ? (
+                  <TableCell className="text-sm text-slate-700">
+                    {(() => {
+                      const stats = getPmStats(state, user.id);
+                      return `${stats.activeProjects} activos · ${stats.completedProjects} cerrados`;
+                    })()}
+                  </TableCell>
+                ) : (
+                  <TableCell className="text-sm text-slate-700">{user.company ?? "—"}</TableCell>
+                )}
+                <TableCell>
+                  {user.state === "active" ? (
+                    <span className="badge-status-success">
+                      <CheckCircle2 className="size-3" />
+                      Activo
+                    </span>
+                  ) : (
+                    <span className="badge-status-error">
+                      <ShieldOff className="size-3" />
+                      Baneado
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon-sm">
+                        <MoreHorizontal className="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => onToggle(user)}
+                        variant={user.state === "active" ? "destructive" : "default"}
+                      >
+                        {user.state === "active" ? (
+                          <>
+                            <ShieldOff className="size-4" />
+                            Banear
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="size-4" />
+                            Reactivar
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+          {users.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="py-8 text-center text-sm text-slate-500">
+                Sin usuarios en esta categoría.
+              </TableCell>
+            </TableRow>
+          ) : null}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
+
+function CreatePmDialog() {
+  const { createPmAccount } = useDashboardWorkspace();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit() {
+    if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim()) {
+      toast.error("Faltan datos", { description: "Nombre, apellido y correo son obligatorios." });
+      return;
+    }
+    setSubmitting(true);
+    createPmAccount(form);
+    try {
+      await sendDashboardNotification({
+        type: "pm_account_created",
+        pmEmail: form.email,
+        pmName: `${form.firstName} ${form.lastName}`
+      });
+      toast.success("PM creado", { description: "Le enviamos sus credenciales por correo." });
+      setOpen(false);
+      setForm({ firstName: "", lastName: "", email: "", phone: "" });
+    } catch (error) {
+      toast.warning("PM creado pero no enviamos email", {
+        description: error instanceof Error ? error.message : undefined
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="btn-role">
+          <Plus className="size-4" />
+          Nuevo PM
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            <span className="inline-flex items-center gap-2">
+              <UserPlus className="size-5 text-[var(--role-strong,#3f237a)]" />
+              Crear Project Manager
+            </span>
+          </DialogTitle>
+          <DialogDescription>
+            La persona recibirá un correo con sus credenciales y podrá ingresar al dashboard.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4">
+          <div className="grid grid-cols-2 gap-3">
+            <TextField label="Nombre" placeholder="María" value={form.firstName} onChange={(v) => setForm((c) => ({ ...c, firstName: v }))} />
+            <TextField label="Apellidos" placeholder="González" value={form.lastName} onChange={(v) => setForm((c) => ({ ...c, lastName: v }))} />
+          </div>
+          <TextField label="Correo" placeholder="maria@codenium.com" value={form.email} onChange={(v) => setForm((c) => ({ ...c, email: v }))} />
+          <TextField label="Teléfono" placeholder="+52 …" value={form.phone} onChange={(v) => setForm((c) => ({ ...c, phone: v }))} />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button className="btn-role" onClick={handleSubmit} disabled={submitting}>
+            {submitting ? "Creando…" : "Crear PM"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+void Badge;

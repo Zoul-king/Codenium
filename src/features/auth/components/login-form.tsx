@@ -1,12 +1,32 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
 
-import { AuthField, AuthMessage } from "@/features/auth/components/auth-fields";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { AuthMessage } from "@/features/auth/components/auth-fields";
 import { getDashboardRoute } from "@/features/auth/lib/auth-service";
 import { writeSession } from "@/features/auth/lib/session-store";
 import { cn } from "@/lib/utils";
+
+const loginSchema = z.object({
+  email: z.string().min(1, "Ingresa tu correo").email("Correo inválido"),
+  password: z.string().min(1, "Ingresa tu contraseña")
+});
+
+type LoginValues = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -18,27 +38,25 @@ interface LoginFormProps {
 export function LoginForm({ onSuccess, onForgotPassword, showSupportText = false, submitClassName }: LoginFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setMessage(null);
+  const form = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" }
+  });
 
+  async function onSubmit(values: LoginValues) {
+    form.clearErrors("root");
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, password })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values)
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        setMessage(result.error || "No se pudo iniciar sesión.");
+        form.setError("root", { message: result.error || "No se pudo iniciar sesión." });
         return;
       }
 
@@ -51,36 +69,63 @@ export function LoginForm({ onSuccess, onForgotPassword, showSupportText = false
       });
 
       onSuccess?.();
-
       startTransition(() => {
         router.push(getDashboardRoute(result.role));
       });
     } catch {
-      setMessage("Ocurrió un error al iniciar sesión.");
+      form.setError("root", { message: "Ocurrió un error al iniciar sesión." });
     }
   }
 
   return (
-    <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-      <div className="grid grid-cols-1 gap-6">
-        <AuthField label="Correo electrónico" placeholder="tu@empresa.com" type="email" value={email} onChange={setEmail} />
-        <AuthField label="Contraseña" placeholder="••••••••" type="password" value={password} onChange={setPassword} />
-      </div>
+    <Form {...form}>
+      <form className="flex flex-col gap-6" onSubmit={form.handleSubmit(onSubmit)}>
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Correo electrónico</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="tu@empresa.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contraseña</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="••••••••" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      {message ? <AuthMessage tone="error">{message}</AuthMessage> : null}
+        {form.formState.errors.root ? <AuthMessage tone="error">{form.formState.errors.root.message ?? ""}</AuthMessage> : null}
 
-      <button type="submit" className={cn("primary-button w-fit", submitClassName)} disabled={isPending}>
-        {isPending ? "Entrando..." : "Iniciar sesión"}
-      </button>
+        <Button type="submit" className={cn("primary-button w-fit", submitClassName)} disabled={isPending || form.formState.isSubmitting}>
+          {isPending || form.formState.isSubmitting ? "Entrando…" : "Iniciar sesión"}
+        </Button>
 
-      <div className="flex flex-col gap-2 text-sm text-body-color">
-        <button type="button" onClick={onForgotPassword} className="w-fit text-left transition-colors hover:text-primary-500">
-          Olvidé mi contraseña
-        </button>
-        {showSupportText ? (
-          <span>Prueba con `client@codenium.com`, `pm@codenium.com` o `admin@codenium.com`. Contraseña: `123provisional`.</span>
-        ) : null}
-      </div>
-    </form>
+        <div className="flex flex-col gap-2 text-sm text-body-color">
+          {onForgotPassword ? (
+            <button type="button" onClick={onForgotPassword} className="w-fit text-left transition-colors hover:text-primary-500">
+              Olvidé mi contraseña
+            </button>
+          ) : null}
+          {showSupportText ? (
+            <span>
+              Prueba con <code>client@codenium.com</code>, <code>pm@codenium.com</code> o <code>admin@codenium.com</code>. Contraseña: <code>123provisional</code>.
+            </span>
+          ) : null}
+        </div>
+      </form>
+    </Form>
   );
 }

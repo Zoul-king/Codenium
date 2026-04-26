@@ -1,12 +1,42 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
 
-import { AuthField, AuthMessage } from "@/features/auth/components/auth-fields";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { AuthMessage } from "@/features/auth/components/auth-fields";
 import { getDashboardRoute } from "@/features/auth/lib/auth-service";
 import { writeSession } from "@/features/auth/lib/session-store";
 import { cn } from "@/lib/utils";
+
+const registerSchema = z
+  .object({
+    firstName: z.string().min(2, "Mínimo 2 caracteres"),
+    lastName: z.string().min(2, "Mínimo 2 caracteres"),
+    email: z.string().min(1, "Ingresa tu correo").email("Correo inválido"),
+    phone: z.string().min(8, "Mínimo 8 dígitos"),
+    company: z.string().optional(),
+    password: z.string().min(8, "Mínimo 8 caracteres"),
+    confirmPassword: z.string()
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"]
+  });
+
+type RegisterValues = z.infer<typeof registerSchema>;
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -16,41 +46,32 @@ interface RegisterFormProps {
 export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    company: "",
-    password: "",
-    confirmPassword: ""
+
+  const form = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      company: "",
+      password: "",
+      confirmPassword: ""
+    }
   });
-  const [message, setMessage] = useState<string | null>(null);
 
-  function updateField(key: keyof typeof form, value: string) {
-    setForm((current) => ({
-      ...current,
-      [key]: value
-    }));
-  }
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setMessage(null);
-
+  async function onSubmit(values: RegisterValues) {
+    form.clearErrors("root");
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(form)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values)
       });
-
       const result = await response.json();
 
       if (!response.ok) {
-        setMessage(result.error || "No se pudo crear la cuenta.");
+        form.setError("root", { message: result.error || "No se pudo crear la cuenta." });
         return;
       }
 
@@ -61,44 +82,83 @@ export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) 
         email: result.email,
         permissions: []
       });
-
       onSuccess?.();
-
       startTransition(() => {
         router.push(getDashboardRoute(result.role));
       });
     } catch {
-      setMessage("Ocurrió un error al crear la cuenta.");
+      form.setError("root", { message: "Ocurrió un error al crear la cuenta." });
     }
   }
 
   return (
-    <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <AuthField label="Nombre" placeholder="Nombre" value={form.firstName} onChange={(value) => updateField("firstName", value)} />
-        <AuthField label="Apellido" placeholder="Apellido" value={form.lastName} onChange={(value) => updateField("lastName", value)} />
-      </div>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <AuthField label="Correo electrónico" placeholder="tu@empresa.com" type="email" value={form.email} onChange={(value) => updateField("email", value)} />
-        <AuthField label="Teléfono" placeholder="+52..." value={form.phone} onChange={(value) => updateField("phone", value)} />
-      </div>
-      <AuthField label="Empresa (opcional)" placeholder="Nombre de tu empresa" value={form.company} onChange={(value) => updateField("company", value)} />
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <AuthField label="Contraseña" placeholder="Mínimo 8 caracteres" type="password" value={form.password} onChange={(value) => updateField("password", value)} />
-        <AuthField
-          label="Confirmar contraseña"
-          placeholder="Repite tu contraseña"
-          type="password"
-          value={form.confirmPassword}
-          onChange={(value) => updateField("confirmPassword", value)}
-        />
-      </div>
+    <Form {...form}>
+      <form className="flex flex-col gap-6" onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <FormField control={form.control} name="firstName" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre</FormLabel>
+              <FormControl><Input placeholder="Nombre" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="lastName" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Apellido</FormLabel>
+              <FormControl><Input placeholder="Apellido" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
 
-      {message ? <AuthMessage tone="error">{message}</AuthMessage> : null}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <FormField control={form.control} name="email" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Correo electrónico</FormLabel>
+              <FormControl><Input type="email" placeholder="tu@empresa.com" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="phone" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Teléfono</FormLabel>
+              <FormControl><Input placeholder="+52 …" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
 
-      <button type="submit" className={cn("primary-button w-fit", submitClassName)} disabled={isPending}>
-        {isPending ? "Creando cuenta..." : "Crear cuenta"}
-      </button>
-    </form>
+        <FormField control={form.control} name="company" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Empresa (opcional)</FormLabel>
+            <FormControl><Input placeholder="Nombre de tu empresa" {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <FormField control={form.control} name="password" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contraseña</FormLabel>
+              <FormControl><Input type="password" placeholder="Mínimo 8 caracteres" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirmar contraseña</FormLabel>
+              <FormControl><Input type="password" placeholder="Repite tu contraseña" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        {form.formState.errors.root ? <AuthMessage tone="error">{form.formState.errors.root.message ?? ""}</AuthMessage> : null}
+
+        <Button type="submit" className={cn("primary-button w-fit", submitClassName)} disabled={isPending || form.formState.isSubmitting}>
+          {isPending || form.formState.isSubmitting ? "Creando cuenta…" : "Crear cuenta"}
+        </Button>
+      </form>
+    </Form>
   );
 }

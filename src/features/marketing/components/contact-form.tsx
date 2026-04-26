@@ -1,30 +1,45 @@
 "use client";
 
-import { readSession } from "@/features/auth/lib/session-store";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { ContactIcon } from "@/components/common/icons";
-import { TextAreaField, TextField } from "@/components/common/form-field";
-import { submitPublicLead } from "@/lib/api/client";
-import type { PublicLeadSource } from "@/server/email/types";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { readSession } from "@/features/auth/lib/session-store";
 import { site } from "@/features/marketing/data/site";
 import type { ContactIconType } from "@/features/marketing/types";
+import { submitPublicLead } from "@/lib/api/client";
+import type { PublicLeadSource } from "@/server/email/types";
 import { cn } from "@/lib/utils";
+
+const contactSchema = z.object({
+  firstName: z.string().min(2, "Tu nombre"),
+  lastName: z.string().min(2, "Tus apellidos"),
+  email: z.string().min(1, "Tu correo").email("Correo inválido"),
+  phone: z.string().min(8, "Mínimo 8 dígitos"),
+  message: z.string().min(10, "Mínimo 10 caracteres")
+});
+
+type ContactValues = z.infer<typeof contactSchema>;
 
 interface ContactInfoProps {
   label: string;
   value: string;
   icon: ContactIconType;
-}
-
-interface ContactFormValues {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  message: string;
 }
 
 interface ContactFormProps {
@@ -35,7 +50,7 @@ interface ContactFormProps {
   submitLabel?: string;
   summary?: ReactNode;
   successMessage?: string;
-  initialValues?: Partial<ContactFormValues>;
+  initialValues?: Partial<ContactValues>;
   reverseColumns?: boolean;
   hideContactInfo?: boolean;
   formCard?: boolean;
@@ -54,7 +69,7 @@ interface ContactFormProps {
   };
 }
 
-const defaultValues: ContactFormValues = {
+const defaultValues: ContactValues = {
   firstName: "",
   lastName: "",
   email: "",
@@ -77,39 +92,22 @@ export function ContactForm({
   hiddenFields = {},
   contactEmail = site.contact.email,
   embedded = false,
-  quotePayload,
+  quotePayload
 }: ContactFormProps) {
   const pathname = usePathname();
-  const [values, setValues] = useState<ContactFormValues>({ ...defaultValues, ...initialValues });
   const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [submitError, setSubmitError] = useState("");
+
+  const form = useForm<ContactValues>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: { ...defaultValues, ...initialValues }
+  });
+
   const hasSummary = Boolean(summary);
 
-  const isDisabled = useMemo(
-    () => !values.firstName.trim() || !values.lastName.trim() || !values.email.trim() || !values.phone.trim() || !values.message.trim(),
-    [values]
-  );
-
-  function updateValue(key: keyof ContactFormValues, value: string) {
-    setValues((current) => ({
-      ...current,
-      [key]: value
-    }));
-  }
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (isDisabled || submitting) {
-      return;
-    }
-
+  async function onSubmit(values: ContactValues) {
+    setSubmitError("");
     try {
-      setSubmitting(true);
-      setErrorMessage("");
-
-      // 1. Notificación vía Email/Lead
       await submitPublicLead({
         source,
         firstName: values.firstName.trim(),
@@ -121,29 +119,20 @@ export function ContactForm({
         hiddenFields
       });
 
-      const session = readSession();
+      readSession();
 
-      // 2. Persistencia en DB usando el quotePayload recibido
       if (quotePayload) {
         await fetch("/api/quotes", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            ...quotePayload,
-            clientId: "user-client"
-          })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...quotePayload, clientId: "user-client" })
         });
       }
 
       setSubmitted(true);
-      setValues({ ...defaultValues });
+      form.reset(defaultValues);
     } catch (error) {
-      console.error("Error submitting form:", error);
-      setErrorMessage(error instanceof Error ? error.message : "No pudimos enviar tu solicitud. Intenta de nuevo.");
-    } finally {
-      setSubmitting(false);
+      setSubmitError(error instanceof Error ? error.message : "No pudimos enviar tu solicitud. Intenta de nuevo.");
     }
   }
 
@@ -173,47 +162,97 @@ export function ContactForm({
         ) : (
           <div className={wrapperClassName}>
             {!hideContactInfo ? (
-              <div className={cn(hasSummary ? "flex flex-col gap-6" : "contact-info-stack flex w-full flex-col gap-4 lg:gap-8", reverseColumns && hasSummary ? "lg:order-last" : "")} data-animate="fadeIn">
+              <div
+                className={cn(
+                  hasSummary ? "flex flex-col gap-6" : "contact-info-stack flex w-full flex-col gap-4 lg:gap-8",
+                  reverseColumns && hasSummary ? "lg:order-last" : ""
+                )}
+                data-animate="fadeIn"
+              >
                 {hasSummary ? <div>{summary}</div> : null}
                 {!hasSummary ? (
                   <>
-                    <ContactInfoColumn label="Correo electrónico" value={contactEmail} icon="mail" boxed={false} />
-                    <ContactInfoColumn label="Teléfono" value={site.contact.phone} icon="phone" boxed={false} />
-                    <ContactInfoColumn label="Ubicación" value={`${site.contact.location}, ${site.contact.city}`} icon="location" boxed={false} />
+                    <ContactInfoCard label="Correo electrónico" value={contactEmail} icon="mail" />
+                    <ContactInfoCard label="Teléfono" value={site.contact.phone} icon="phone" />
+                    <ContactInfoCard label="Ubicación" value={`${site.contact.location}, ${site.contact.city}`} icon="location" />
                   </>
                 ) : null}
               </div>
             ) : null}
 
-            <div className={cn(hasSummary ? (reverseColumns ? "lg:order-first" : "") : hideContactInfo ? "w-full max-w-4xl" : "col-span-1 w-full sm:col-span-2")} data-animate="fadeInFromRight" data-delay="0.12">
-              <form
-                className={
-                  hasSummary || hideContactInfo
-                    ? cn("flex w-full flex-col gap-6", formCard ? "rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)] sm:p-8" : "p-0")
-                    : "flex w-full flex-col gap-6"
-                }
-                onSubmit={handleSubmit}
-              >
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <TextField label="Nombre *" placeholder="Nombre" value={values.firstName} onChange={(value) => updateValue("firstName", value)} />
-                  <TextField label="Apellidos *" placeholder="Apellidos" value={values.lastName} onChange={(value) => updateValue("lastName", value)} />
-                </div>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <TextField label="Correo electrónico *" placeholder="Correo electrónico" type="email" value={values.email} onChange={(value) => updateValue("email", value)} />
-                  <TextField label="Número de teléfono *" placeholder="Número de teléfono" value={values.phone} onChange={(value) => updateValue("phone", value)} />
-                </div>
-                <TextAreaField label="Mensaje *" placeholder="Cuéntanos brevemente que necesitas" value={values.message} onChange={(value) => updateValue("message", value)} />
-                
-                {hiddenFields
-                  ? Object.entries(hiddenFields).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} />)
-                  : null}
+            <div
+              className={cn(
+                hasSummary ? (reverseColumns ? "lg:order-first" : "") : hideContactInfo ? "w-full max-w-4xl" : "col-span-1 w-full sm:col-span-2"
+              )}
+              data-animate="fadeInFromRight"
+              data-delay="0.12"
+            >
+              <Form {...form}>
+                <form
+                  className={
+                    hasSummary || hideContactInfo
+                      ? cn("flex w-full flex-col gap-6", formCard ? "rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)] sm:p-8" : "p-0")
+                      : "flex w-full flex-col gap-6"
+                  }
+                  onSubmit={form.handleSubmit(onSubmit)}
+                >
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <FormField control={form.control} name="firstName" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nombre *</FormLabel>
+                        <FormControl><Input placeholder="Nombre" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="lastName" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Apellidos *</FormLabel>
+                        <FormControl><Input placeholder="Apellidos" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
 
-                {errorMessage && !submitted ? <p className="text-sm font-medium text-rose-600">{errorMessage}</p> : null}
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <FormField control={form.control} name="email" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Correo electrónico *</FormLabel>
+                        <FormControl><Input type="email" placeholder="Correo electrónico" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="phone" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Número de teléfono *</FormLabel>
+                        <FormControl><Input placeholder="Número de teléfono" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
 
-                <button type="submit" disabled={isDisabled || submitting} className="primary-button w-fit disabled:cursor-not-allowed disabled:opacity-70">
-                  {submitting ? "Enviando..." : submitLabel}
-                </button>
-              </form>
+                  <FormField control={form.control} name="message" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mensaje *</FormLabel>
+                      <FormControl><Textarea rows={6} placeholder="Cuéntanos brevemente que necesitas" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+
+                  {Object.entries(hiddenFields).map(([name, value]) => (
+                    <input key={name} type="hidden" name={name} value={value} />
+                  ))}
+
+                  {submitError ? <p className="text-sm font-medium text-rose-600">{submitError}</p> : null}
+
+                  <Button
+                    type="submit"
+                    disabled={form.formState.isSubmitting}
+                    className="primary-button w-fit disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {form.formState.isSubmitting ? "Enviando…" : submitLabel}
+                  </Button>
+                </form>
+              </Form>
             </div>
           </div>
         )}
@@ -226,14 +265,16 @@ export function ContactStrip() {
   return (
     <section className="section overflow-hidden bg-surface-soft">
       <div className="site-shell flex flex-col gap-10 py-16">
-        <article className="contact flex w-full flex-col items-center gap-5 text-center lg:max-w-[860px] lg:items-start lg:gap-6 lg:text-left" data-animate="fadeInFromLeft">
+        <article
+          className="contact flex w-full flex-col items-center gap-5 text-center lg:max-w-[860px] lg:items-start lg:gap-6 lg:text-left"
+          data-animate="fadeInFromLeft"
+        >
           <span className="type-kicker-accent">Contactanos</span>
           <h2 className="type-section-title">
             Tienes algun <span className="text-primary-500">proyecto</span> en mente?
           </h2>
           <p className="max-w-[760px] text-sm leading-7 text-slate-600 sm:text-base">
-            Comparte tu idea y te ayudaremos a convertirla en un siguiente paso claro.
-            Nuestro equipo esta listo para asesorarte en la mejor ruta tecnica para tu negocio.
+            Comparte tu idea y te ayudaremos a convertirla en un siguiente paso claro. Nuestro equipo esta listo para asesorarte en la mejor ruta tecnica para tu negocio.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">
             <Link href="/quote" className="primary-button">
@@ -249,13 +290,9 @@ export function ContactStrip() {
   );
 }
 
-function ContactInfoColumn({ label, value, icon, boxed = false }: ContactInfoProps & { boxed?: boolean }) {
-  return <ContactInfoCard label={label} value={value} icon={icon} boxed={boxed} />;
-}
-
-function ContactInfoCard({ label, value, icon, boxed }: ContactInfoProps & { boxed: boolean }) {
+function ContactInfoCard({ label, value, icon }: ContactInfoProps) {
   return (
-    <div className={boxed ? "rounded-[20px] bg-white p-5 shadow-[0_16px_40px_rgba(14,20,36,0.08)]" : ""}>
+    <div>
       <div className="flex flex-col gap-2 lg:gap-3">
         <ContactIcon type={icon} />
         <h3 className="text-base font-semibold sm:text-lg">{label}</h3>
