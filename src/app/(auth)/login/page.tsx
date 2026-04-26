@@ -8,7 +8,7 @@ export const metadata = createMetadata(loginPage);
 export default function LoginPage() {
   return (
     <MarketingShell headerVariant="white">
-      <section className="section soft-section bg-foreground pt-[130px]">
+      <section className="section soft-section bg-surface-soft pt-[130px]">
         <div className="site-shell py-16 lg:py-20">
           <div className="mx-auto max-w-[640px]">
             <AuthPanel initialMode="login" showSessionStatus />

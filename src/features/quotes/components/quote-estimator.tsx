@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 
-import { TextAreaField } from "@/components/ui/form-controls";
+import { TextAreaField } from "@/components/common/form-field";
 import { quoteSections } from "@/features/quotes/lib/content";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
 import { quoteInfrastructureOptions, quoteModules, quoteProjectTypes } from "@/lib/mocks";

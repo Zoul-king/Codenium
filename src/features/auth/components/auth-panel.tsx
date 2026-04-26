@@ -23,7 +23,7 @@ export function AuthPanel({ initialMode = "login", onSuccess, compact = false, s
   return (
     <div className={cn("rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)] sm:p-8", compact ? "p-0 shadow-none sm:p-0" : "")}>
       <div className={cn("flex flex-col gap-3", compact ? "" : "mb-6")}>
-        <div className="flex gap-2 rounded-[18px] bg-foreground p-2">
+        <div className="flex gap-2 rounded-[18px] bg-surface-soft p-2">
           <button
             type="button"
             onClick={() => setMode("login")}

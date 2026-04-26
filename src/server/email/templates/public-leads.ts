@@ -1,4 +1,4 @@
-import type { PublicLeadPayload } from "@/lib/email-payloads";
+import type { PublicLeadPayload } from "@/server/email/types";
 import { formatKeyValueHtml, formatKeyValueText, wrapEmailHtml } from "@/server/email/templates/shared";
 
 interface PublicLeadTemplateInput {

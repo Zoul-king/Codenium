@@ -4,7 +4,7 @@ import { Hero } from "@/features/marketing/components/hero";
 import { MarketingShell } from "@/features/marketing/components/marketing-shell";
 import { contactPage, faqs } from "@/features/marketing/data/contact";
 import { createMetadata } from "@/features/marketing/lib/metadata";
-import { parseQuoteSelectionParams } from "@/lib/quote-selection";
+import { parseQuoteSelectionParams } from "@/features/quotes/lib/quote-selection";
 import { getPublicContactEmail } from "@/server/email/config";
 
 export const metadata = createMetadata(contactPage);

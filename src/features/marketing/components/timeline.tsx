@@ -9,7 +9,7 @@ interface TimelineProps {
 
 export function Timeline({ steps }: TimelineProps) {
   return (
-    <section className="soft-section relative overflow-hidden bg-foreground">
+    <section className="soft-section relative overflow-hidden bg-surface-soft">
       <div className="timeline section site-shell relative z-20 py-14 text-center lg:py-20">
         <span className="font-semibold uppercase tracking-[0.18em] text-accent-500" data-animate="fadeIn">
           Nuestro proceso de trabajo

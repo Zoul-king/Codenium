@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import type { ApiActionResult, PublicLeadPayload } from "@/lib/email-payloads";
+import type { ApiActionResult, PublicLeadPayload } from "@/server/email/types";
 import {
   sendContactConfirmationToLead,
   sendContactNotificationToCompany,

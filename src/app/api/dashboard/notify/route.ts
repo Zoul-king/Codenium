@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import type { ApiActionResult, DashboardNotificationPayload } from "@/lib/email-payloads";
+import type { ApiActionResult, DashboardNotificationPayload } from "@/server/email/types";
 import {
   sendChangeRequestEmail,
   sendDashboardMessageEmail,

@@ -1,6 +1,6 @@
 import { site } from "@/features/marketing/data/site";
 import type { MarketingPageData, PlanCatalog, ServicePricingItem } from "@/features/marketing/types";
-import { buildManagedPlanCatalog, defaultManagedPlans } from "@/lib/plan-catalog";
+import { buildManagedPlanCatalog, defaultManagedPlans } from "@/features/marketing/lib/plan-catalog";
 
 export const plansPage: MarketingPageData = {
   slug: "/plans",

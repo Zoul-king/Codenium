@@ -2,6 +2,8 @@
 
 @theme {
   --font-sans: var(--font-poppins), sans-serif;
+
+  /* Marca (existente) */
   --color-primary: #224a78;
   --color-primary-50: #edf4fb;
   --color-primary-100: #d6e6f4;
@@ -10,6 +12,7 @@
   --color-primary-400: #5e92c2;
   --color-primary-500: #224a78;
   --color-primary-600: #18395e;
+  --color-primary-700: #112a48;
   --color-primary-800: #10243b;
   --color-accent-400: #6c49b7;
   --color-accent-500: #4f2f96;
@@ -17,7 +20,82 @@
   --color-secondary-500: #68b8b2;
   --color-secondary-600: #4f9792;
   --color-body-color: #0f172a;
-  --color-foreground: #f8fafc;
+  --color-surface-soft: #f8fafc; /* renombrado desde --color-foreground (legacy marketing) */
+
+  /* Estados */
+  --color-success-50: #ecfdf5;
+  --color-success-100: #d1fae5;
+  --color-success-500: #10b981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+  --color-error-50: #fef2f2;
+  --color-error-100: #fee2e2;
+  --color-error-500: #ef4444;
+  --color-error-600: #dc2626;
+  --color-error-700: #b91c1c;
+  --color-info-50: #eff6ff;
+  --color-info-100: #dbeafe;
+  --color-info-500: #3b82f6;
+  --color-info-600: #2563eb;
+  --color-info-700: #1d4ed8;
+
+  /* Acentos por rol */
+  --color-role-client-50: #eff6fb;
+  --color-role-client-100: #d6e6f4;
+  --color-role-client-500: #5e92c2;
+  --color-role-client-600: #224a78;
+  --color-role-pm-50: #eafaf7;
+  --color-role-pm-100: #ccf0e9;
+  --color-role-pm-500: #68b8b2;
+  --color-role-pm-600: #4f9792;
+  --color-role-admin-50: #efe9fb;
+  --color-role-admin-100: #ddd0f3;
+  --color-role-admin-500: #4f2f96;
+  --color-role-admin-600: #3f237a;
+
+  /* Tokens neutros + radii */
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-border-soft: #e2e8f0;
+  --radius-card: 24px;
+  --radius-card-dense: 16px;
+  --shadow-card: 0 18px 40px rgba(15, 23, 42, 0.06);
+  --shadow-card-dense: 0 6px 16px rgba(15, 23, 42, 0.05);
+}
+
+/* Tokens requeridos por shadcn/ui (mapeados a la paleta de marca) */
+:root {
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0f172a;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #0f172a;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #0f172a;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #224a78;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 @layer base {
@@ -66,6 +144,75 @@
 }
 
 @layer components {
+  /* Role theming — los descendientes usan var(--role), var(--role-soft), var(--role-strong) */
+  .role-themed[data-role="client"] {
+    --role: var(--color-role-client-500);
+    --role-soft: var(--color-role-client-50);
+    --role-strong: var(--color-role-client-600);
+  }
+
+  .role-themed[data-role="pm"] {
+    --role: var(--color-role-pm-500);
+    --role-soft: var(--color-role-pm-50);
+    --role-strong: var(--color-role-pm-600);
+  }
+
+  .role-themed[data-role="admin"] {
+    --role: var(--color-role-admin-500);
+    --role-soft: var(--color-role-admin-50);
+    --role-strong: var(--color-role-admin-600);
+  }
+
+  /* Botones tematizados */
+  .btn-role {
+    @apply inline-flex items-center justify-center gap-2 rounded-[14px] bg-[var(--role-strong,#224a78)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(15,23,42,0.12)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-role-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-[14px] border border-[var(--role,#5e92c2)] bg-white px-4 py-2.5 text-sm font-semibold text-[var(--role-strong,#224a78)] transition hover:bg-[var(--role-soft,#eff6fb)];
+  }
+
+  /* Badges de estado */
+  .badge-status-success { @apply inline-flex items-center gap-1 rounded-full bg-success-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-success-700; }
+  .badge-status-warning { @apply inline-flex items-center gap-1 rounded-full bg-warning-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-warning-700; }
+  .badge-status-error   { @apply inline-flex items-center gap-1 rounded-full bg-error-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-error-700; }
+  .badge-status-info    { @apply inline-flex items-center gap-1 rounded-full bg-info-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-info-700; }
+  .badge-status-neutral { @apply inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-700; }
+
+  /* Cards por rol */
+  .warm-card {
+    @apply rounded-[var(--radius-card)] border border-[var(--role,#5e92c2)]/20 bg-[linear-gradient(165deg,var(--role-soft,#eff6fb)_0%,#ffffff_70%)] p-6 shadow-[var(--shadow-card)] lg:p-8;
+  }
+
+  .ops-card {
+    @apply rounded-[var(--radius-card-dense)] border border-slate-200 bg-white p-4 shadow-[var(--shadow-card-dense)] transition hover:border-[var(--role,#68b8b2)]/40 lg:p-5;
+  }
+
+  .kpi-card {
+    @apply rounded-[var(--radius-card-dense)] border border-slate-200 bg-white p-4 shadow-[var(--shadow-card-dense)];
+  }
+
+  .kpi-value {
+    @apply text-[28px] font-semibold leading-none tracking-[-0.04em] text-slate-950 lg:text-[32px];
+  }
+
+  .kpi-label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500;
+  }
+
+  .kpi-delta-up   { @apply inline-flex items-center gap-1 text-xs font-semibold text-success-600; }
+  .kpi-delta-down { @apply inline-flex items-center gap-1 text-xs font-semibold text-error-600; }
+  .kpi-delta-flat { @apply inline-flex items-center gap-1 text-xs font-semibold text-slate-500; }
+
+  /* Command palette trigger */
+  .cmd-trigger {
+    @apply inline-flex items-center gap-2 rounded-[12px] border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50;
+  }
+
+  .cmd-kbd {
+    @apply inline-flex items-center gap-0.5 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500;
+  }
+
   .site-shell {
     @apply mx-auto w-full max-w-7xl;
   }

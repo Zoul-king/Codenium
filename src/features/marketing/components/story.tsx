@@ -7,7 +7,7 @@ interface StoryProps {
 
 export function Story({ paragraphs, missionVision }: StoryProps) {
   return (
-    <section className="section soft-section bg-foreground">
+    <section className="section soft-section bg-surface-soft">
       <div className="site-shell py-14">
         <div className="grid gap-8 rounded-[32px] border border-slate-200 bg-white p-8 shadow-[0_18px_48px_rgba(15,23,42,0.06)] lg:grid-cols-[1.15fr_0.85fr] lg:p-10">
           <article className="flex flex-col gap-4 text-sm leading-7 text-slate-600 lg:text-base" data-animate="fadeInFromLeft">

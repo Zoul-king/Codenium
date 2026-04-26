@@ -1,4 +1,4 @@
-import { AdminQuotePanel } from "@/features/dashboard/components/admin-quote-panel";
+import { AdminQuotePanel } from "@/features/dashboard/components/admin/quote-panel";
 import type { Role } from "@/lib/types/domain";
 
 interface QuoteListProps {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { env } from "@/lib/env";
+import { env } from "@/config/env";
 
 export function GET() {
   return NextResponse.json({

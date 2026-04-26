@@ -1,7 +1,7 @@
 import "server-only";
 
-import { env, requireServerEnv } from "@/lib/env";
-import type { PublicLeadSource } from "@/lib/email-payloads";
+import { env, requireServerEnv } from "@/config/env";
+import type { PublicLeadSource } from "@/server/email/types";
 
 export interface EmailConfig {
   provider: "resend";

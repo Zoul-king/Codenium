@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import type { PlanCatalog } from "@/features/marketing/types";
-import { buildManagedPlanCatalog, fetchManagedPlanCatalog } from "@/lib/plan-catalog";
-import { readPlanProfilePreference, writePlanProfilePreference } from "@/lib/plan-profile";
-import { buildQuoteSelectionHref, writeQuoteSelection } from "@/lib/quote-selection";
+import { buildManagedPlanCatalog, fetchManagedPlanCatalog } from "@/features/marketing/lib/plan-catalog";
+import { readPlanProfilePreference, writePlanProfilePreference } from "@/features/marketing/lib/plan-profile-store";
+import { buildQuoteSelectionHref, writeQuoteSelection } from "@/features/quotes/lib/quote-selection";
 import type { PlanProfile } from "@/lib/types/domain";
 import { cn } from "@/lib/utils";
 

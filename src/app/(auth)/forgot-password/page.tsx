@@ -8,7 +8,7 @@ export const metadata = createMetadata(forgotPasswordPage);
 export default function ForgotPasswordPage() {
   return (
     <MarketingShell headerVariant="white">
-      <section className="section soft-section bg-foreground pt-[130px]">
+      <section className="section soft-section bg-surface-soft pt-[130px]">
         <div className="site-shell py-16 lg:py-20">
           <div className="mx-auto max-w-[640px] rounded-[24px] bg-white p-6 shadow-[0_16px_40px_rgba(14,20,36,0.08)] sm:p-8">
             <span className="type-kicker">Recuperar acceso</span>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { CheckIcon } from "@/components/ui/icons";
+import { CheckIcon } from "@/components/common/icons";
 import { site } from "@/features/marketing/data/site";
 import type { BenefitItem } from "@/features/marketing/types";
 

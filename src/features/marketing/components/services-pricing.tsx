@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import type { ServicePricingItem } from "@/features/marketing/types";
-import { buildContactSelectionHref, writeQuoteSelection } from "@/lib/quote-selection";
+import { buildContactSelectionHref, writeQuoteSelection } from "@/features/quotes/lib/quote-selection";
 
 interface ServicesPricingProps {
   items: ServicePricingItem[];

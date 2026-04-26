@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { BrandLogo, SocialIcon } from "@/components/ui/icons";
+import { BrandLogo, SocialIcon } from "@/components/common/icons";
 import { site } from "@/features/marketing/data/site";
 
 interface FooterProps {
