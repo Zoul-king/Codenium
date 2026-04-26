@@ -1,7 +1,7 @@
 "use client";
 
 import { readSession } from "@/features/auth/lib/session-store";
-import { getRoleLabel } from "@/lib/presenters";
+import { getRoleLabel } from "@/lib/utils/presenters";
 
 export function SessionStatus() {
   const session = readSession();

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { BrandLogo, CloseIcon, MenuIcon, SocialIcon } from "@/components/ui/icons";
+import { BrandLogo, CloseIcon, MenuIcon, SocialIcon } from "@/components/common/icons";
 import { AuthPanel } from "@/features/auth/components/auth-panel";
 import { site } from "@/features/marketing/data/site";
 import type { HeaderVariant } from "@/features/marketing/types";
@@ -74,7 +74,7 @@ interface OverlayProps {
 function AccessOverlay({ open, onClose }: OverlayProps) {
   return (
     <div className={cn("fixed inset-0 z-50 hidden lg:block", open ? "pointer-events-auto" : "pointer-events-none")} aria-hidden={!open}>
-      <div className={cn("absolute inset-0 bg-foreground/90 transition-opacity duration-500", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
+      <div className={cn("absolute inset-0 bg-surface-soft/90 transition-opacity duration-500", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
       <div className="absolute inset-0 flex items-center justify-center p-6">
         <div
           className={cn(
@@ -83,7 +83,7 @@ function AccessOverlay({ open, onClose }: OverlayProps) {
           )}
         >
           <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="rounded-[24px] bg-foreground p-8">
+            <div className="rounded-[24px] bg-surface-soft p-8">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <span className="type-kicker">Bienvenido</span>
@@ -120,7 +120,7 @@ function AccessOverlay({ open, onClose }: OverlayProps) {
 function MobileMenu({ open, onClose, contactEmail }: OverlayProps & { contactEmail: string }) {
   return (
     <div className={cn("fixed inset-0 z-50 lg:hidden", open ? "pointer-events-auto" : "pointer-events-none")} aria-hidden={!open}>
-      <div className={cn("absolute inset-0 bg-foreground transition-opacity duration-500", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
+      <div className={cn("absolute inset-0 bg-surface-soft transition-opacity duration-500", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
       <div
         className={cn(
           "absolute inset-x-0 top-0 min-h-dvh overflow-y-auto bg-white px-5 pb-8 pt-6 text-body-color transition-transform duration-500",
@@ -143,7 +143,7 @@ function MobileMenu({ open, onClose, contactEmail }: OverlayProps & { contactEma
               <Link
                 key={item.href}
                 href={item.href}
-                className="block rounded-[18px] bg-foreground px-4 py-4 text-lg font-semibold transition-colors hover:text-primary-500"
+                className="block rounded-[18px] bg-surface-soft px-4 py-4 text-lg font-semibold transition-colors hover:text-primary-500"
                 onClick={onClose}
               >
                 {item.label}
@@ -151,7 +151,7 @@ function MobileMenu({ open, onClose, contactEmail }: OverlayProps & { contactEma
             ))}
           </nav>
 
-          <div className="rounded-[24px] bg-foreground p-5">
+          <div className="rounded-[24px] bg-surface-soft p-5">
             <span className="type-kicker">Acceso</span>
             <h3 className="mt-4 text-2xl font-bold text-body-color">Entra o crea tu cuenta</h3>
             <p className="type-body mt-3">Consulta tus cotizaciones, proyectos y mensajes desde un solo lugar.</p>

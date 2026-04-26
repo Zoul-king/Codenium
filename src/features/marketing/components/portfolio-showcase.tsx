@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { ArrowRightIcon } from "@/components/ui/icons";
+import { ArrowRightIcon } from "@/components/common/icons";
 import type { PortfolioCard } from "@/features/marketing/types";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +36,7 @@ export function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
   const activeCard = cards[activeIndex];
 
   return (
-    <section className="section soft-section bg-foreground">
+    <section className="section soft-section bg-surface-soft">
       <div className="site-shell py-16 lg:py-24">
         <div className="mb-12 flex flex-col items-start gap-4" data-animate="fadeInFromTop">
           <span className="font-semibold uppercase tracking-[0.18em] text-accent-500">Proyectos desarrollados</span>

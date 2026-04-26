@@ -2,6 +2,9 @@ import localFont from "next/font/local";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+
 import "./globals.css";
 
 const poppins = localFont({
@@ -29,7 +32,10 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="es" className={poppins.variable}>
-      <body className="bg-white text-body-color antialiased">{children}</body>
+      <body className="bg-white text-body-color antialiased">
+        <TooltipProvider delayDuration={250}>{children}</TooltipProvider>
+        <Toaster richColors position="top-right" />
+      </body>
     </html>
   );
 }

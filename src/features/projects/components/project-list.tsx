@@ -1,9 +1,9 @@
 "use client";
 
-import { DashboardCard, DashboardMutedCard, ProgressBar, SectionHeading, StatusBadge } from "@/features/dashboard/components/dashboard-ui";
+import { DashboardCard, DashboardMutedCard, ProgressBar, SectionHeading, StatusBadge } from "@/features/dashboard/components/primitives";
 import { getUserById, getVisibleProjects } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
-import { formatLongDate, getProjectStatusLabel } from "@/lib/presenters";
+import { formatLongDate, getProjectStatusLabel } from "@/lib/utils/presenters";
 import type { Role } from "@/lib/types/domain";
 
 interface ProjectListProps {

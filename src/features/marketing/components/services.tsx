@@ -1,8 +1,8 @@
 "use client";
 
-import { ServiceIcon } from "@/components/ui/icons";
+import { ServiceIcon } from "@/components/common/icons";
 import type { ServiceItem } from "@/features/marketing/types";
-import { buildContactSelectionHref, writeQuoteSelection } from "@/lib/quote-selection";
+import { buildContactSelectionHref, writeQuoteSelection } from "@/features/quotes/lib/quote-selection";
 
 interface ServicesProps {
   items: ServiceItem[];
@@ -12,7 +12,7 @@ interface ServicesProps {
 export function Services({ items, compact = false }: ServicesProps) {
   if (compact) {
     return (
-      <section className="soft-section bg-foreground">
+      <section className="soft-section bg-surface-soft">
         <div className="services section site-shell py-16 text-center">
           <div className="info" data-animate="fadeInFromTop">
             <span className="type-kicker-accent">Nuestros servicios</span>

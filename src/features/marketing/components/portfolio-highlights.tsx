@@ -7,7 +7,7 @@ const items = [
 
 export function PortfolioHighlights() {
   return (
-    <section className="section bg-foreground">
+    <section className="section bg-surface-soft">
       <div className="site-shell py-12">
         {items.map((item, index) => (
           <article key={item.title} className="rounded-[28px] border border-slate-200 bg-white px-6 py-7 shadow-[0_16px_36px_rgba(15,23,42,0.06)] lg:px-8" data-animate="fadeInFromBottom" data-delay={String(index * 0.06)}>

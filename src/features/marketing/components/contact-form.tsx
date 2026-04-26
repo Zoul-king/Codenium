@@ -5,10 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 
-import { ContactIcon } from "@/components/ui/icons";
-import { TextAreaField, TextField } from "@/components/ui/form-controls";
-import { submitPublicLead } from "@/lib/client-api";
-import type { PublicLeadSource } from "@/lib/email-payloads";
+import { ContactIcon } from "@/components/common/icons";
+import { TextAreaField, TextField } from "@/components/common/form-field";
+import { submitPublicLead } from "@/lib/api/client";
+import type { PublicLeadSource } from "@/server/email/types";
 import { site } from "@/features/marketing/data/site";
 import type { ContactIconType } from "@/features/marketing/types";
 import { cn } from "@/lib/utils";
@@ -224,7 +224,7 @@ export function ContactForm({
 
 export function ContactStrip() {
   return (
-    <section className="section overflow-hidden bg-foreground">
+    <section className="section overflow-hidden bg-surface-soft">
       <div className="site-shell flex flex-col gap-10 py-16">
         <article className="contact flex w-full flex-col items-center gap-5 text-center lg:max-w-[860px] lg:items-start lg:gap-6 lg:text-left" data-animate="fadeInFromLeft">
           <span className="type-kicker-accent">Contactanos</span>

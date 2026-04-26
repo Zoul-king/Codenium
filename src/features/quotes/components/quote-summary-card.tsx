@@ -1,7 +1,7 @@
 import { getInfrastructureLabel, getSelectedQuoteModules } from "@/features/quotes/lib/content";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
 import { quoteProjectTypes } from "@/lib/mocks";
-import type { QuoteSelection } from "@/lib/quote-selection";
+import type { QuoteSelection } from "@/features/quotes/lib/quote-selection";
 import type { QuoteDraft, QuoteEstimate } from "@/lib/types/domain";
 
 interface QuoteSummaryCardProps {

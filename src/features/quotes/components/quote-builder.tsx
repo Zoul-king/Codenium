@@ -10,8 +10,8 @@ import { QuoteSummaryCard } from "@/features/quotes/components/quote-summary-car
 import { getInfrastructureLabel, getSelectedQuoteModules } from "@/features/quotes/lib/content";
 import { calculateQuoteEstimate, formatCurrency } from "@/features/quotes/lib/estimate";
 import { quoteProjectTypes } from "@/lib/mocks";
-import { readPlanProfilePreference, writePlanProfilePreference } from "@/lib/plan-profile";
-import { clearQuoteSelection, parseQuoteSelectionParams, readQuoteSelection, writeQuoteSelection, type QuoteSelection } from "@/lib/quote-selection";
+import { readPlanProfilePreference, writePlanProfilePreference } from "@/features/marketing/lib/plan-profile-store";
+import { clearQuoteSelection, parseQuoteSelectionParams, readQuoteSelection, writeQuoteSelection, type QuoteSelection } from "@/features/quotes/lib/quote-selection";
 import type { QuoteDraft } from "@/lib/types/domain";
 
 function createInitialDraft(): QuoteDraft {
@@ -80,7 +80,7 @@ export function QuoteBuilder() {
   };
 
   return (
-    <section className="section soft-section bg-foreground">
+    <section className="section soft-section bg-surface-soft">
       <div className="site-shell py-16 lg:py-20">
         <div className="mb-8 flex flex-col gap-3" data-animate="fadeInFromTop">
           <span className="type-kicker-accent">Cotizador</span>

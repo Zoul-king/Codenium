@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { PublicLeadPayload } from "@/lib/email-payloads";
+import type { PublicLeadPayload } from "@/server/email/types";
 import { getCompanyInbox, getEmailConfig } from "@/server/email/config";
 import { sendEmail } from "@/server/email/send-email";
 import {

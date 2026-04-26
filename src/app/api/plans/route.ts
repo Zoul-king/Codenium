@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient, type PlanCategory } from "@prisma/client";
 
-import { mergeManagedPlanCatalog, type ManagedPlanCatalog } from "@/lib/plan-catalog";
+import { mergeManagedPlanCatalog, type ManagedPlanCatalog } from "@/features/marketing/lib/plan-catalog";
 import type { PlanProfile } from "@/lib/types/domain";
 
 const prisma = new PrismaClient();

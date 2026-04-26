@@ -8,7 +8,7 @@ export function Logos({ items }: LogosProps) {
   const repeated = [...items, ...items];
 
   return (
-    <section className="section relative bg-foreground">
+    <section className="section relative bg-surface-soft">
       <div className="site-shell flex min-h-[52vh] flex-col gap-10 py-16">
         <article className="flex w-full flex-col gap-4 text-center md:text-left" data-animate="fadeInFromTop">
           <span className="type-kicker-accent">Nuestros clientes</span>

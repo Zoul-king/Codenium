@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { DashboardShell } from "@/features/dashboard/components/dashboard-shell";
+import { DashboardShell } from "@/features/dashboard/components/shell/dashboard-shell";
 import { getDefaultDashboardSection, isValidDashboardSection, resolveRole } from "@/features/dashboard/lib/routes";
 import { renderDashboardSection } from "@/features/dashboard/lib/view";
 

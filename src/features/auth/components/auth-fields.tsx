@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes } from "react";
 
-import { TextField } from "@/components/ui/form-controls";
+import { TextField } from "@/components/common/form-field";
 
 interface AuthFieldProps {
   label: string;

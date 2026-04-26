@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { ContactIcon, ToolIcon, WhatsAppIcon } from "@/components/ui/icons";
+import { ContactIcon, ToolIcon, WhatsAppIcon } from "@/components/common/icons";
 import { site } from "@/features/marketing/data/site";
 
 type ChatMessage = {
