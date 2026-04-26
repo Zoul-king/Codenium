@@ -1,40 +1,77 @@
 "use client";
 
+import { CheckCircle2, Filter, MoreHorizontal, Search, UserCheck, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
-import { DashboardCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/primitives";
-import { getPmStats, getPmUsers, getVisibleQuotes, getUserById } from "@/features/dashboard/lib/selectors";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  getPmStats,
+  getPmUsers,
+  getUserById,
+  getVisibleQuotes
+} from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
 import { sendDashboardNotification } from "@/lib/api/client";
-import { formatLongDate, getQuoteStatusLabel } from "@/lib/utils/presenters";
-import type { QuoteStatus } from "@/lib/types/domain";
+import type { QuoteRecord, QuoteStatus } from "@/lib/types/domain";
+import { formatLongDate, formatShortDate, getQuoteStatusLabel } from "@/lib/utils/presenters";
+
+const STATUS_FILTERS: { value: QuoteStatus | "all"; label: string }[] = [
+  { value: "all", label: "Todos" },
+  { value: "pending", label: "Pendientes" },
+  { value: "reviewed", label: "Revisadas" },
+  { value: "accepted", label: "Aceptadas" },
+  { value: "rejected", label: "Rechazadas" }
+];
 
 export function AdminQuotePanel() {
   const { state, acceptQuote, setQuoteStatus } = useDashboardWorkspace();
   const pmUsers = getPmUsers(state);
   const quotes = getVisibleQuotes(state, "admin");
-  const [assignment, setAssignment] = useState<Record<string, string>>({});
-  const [notice, setNotice] = useState("");
 
-  const assignmentState = useMemo(
-    () => ({
-      ...Object.fromEntries(quotes.map((quote) => [quote.id, quote.pmId ?? ""])),
-      ...assignment
-    }),
-    [assignment, quotes]
-  );
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<QuoteStatus | "all">("all");
+  const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
+  const [pmAssignment, setPmAssignment] = useState("");
 
-  async function notifyQuoteStatus(quoteId: string, status: Exclude<QuoteStatus, "accepted">) {
-    const quote = quotes.find((item) => item.id === quoteId);
-    const client = quote ? getUserById(state, quote.clientId) : undefined;
+  const filtered = useMemo(() => {
+    return quotes.filter((q) => {
+      if (statusFilter !== "all" && q.status !== statusFilter) return false;
+      if (search && ![q.title, q.code, q.clientName].some((s) => s.toLowerCase().includes(search.toLowerCase()))) {
+        return false;
+      }
+      return true;
+    });
+  }, [quotes, search, statusFilter]);
 
-    if (!quote || !client?.email) {
-      throw new Error("No encontramos el correo del cliente para avisar el cambio de estado.");
+  const selectedQuote = quotes.find((q) => q.id === selectedQuoteId) ?? null;
+
+  function openDetail(q: QuoteRecord) {
+    setSelectedQuoteId(q.id);
+    setPmAssignment(q.pmId ?? "");
+  }
+
+  async function notifyStatus(quote: QuoteRecord, status: Exclude<QuoteStatus, "accepted">) {
+    const client = getUserById(state, quote.clientId);
+    if (!client?.email) {
+      toast.error("Sin correo del cliente", { description: "No podemos notificar el cambio." });
+      return;
     }
-
-    await setQuoteStatus(quoteId, status);
-
+    await setQuoteStatus(quote.id, status);
     await sendDashboardNotification({
       type: "quote_status_update",
       recipientEmail: client.email,
@@ -43,188 +80,242 @@ export function AdminQuotePanel() {
       quoteTitle: quote.title,
       status
     });
+    toast.success(`Cotización marcada como ${getQuoteStatusLabel(status)}`);
+  }
+
+  async function handleAccept() {
+    if (!selectedQuote || !pmAssignment) return;
+    try {
+      await acceptQuote(selectedQuote.id, pmAssignment);
+      const pm = getUserById(state, pmAssignment);
+      const client = getUserById(state, selectedQuote.clientId);
+
+      if (pm?.email && client?.email) {
+        await sendDashboardNotification({
+          type: "quote_assignment",
+          quoteCode: selectedQuote.code,
+          quoteTitle: selectedQuote.title,
+          clientEmail: client.email,
+          clientName: client.name,
+          pmEmail: pm.email,
+          pmName: pm.name,
+          projectName: selectedQuote.title
+        });
+      }
+      toast.success("Cotización convertida en proyecto");
+      setSelectedQuoteId(null);
+    } catch (error) {
+      toast.error("No pudimos completar la conversión", {
+        description: error instanceof Error ? error.message : undefined
+      });
+    }
   }
 
   return (
-    <div className="grid h-full gap-6 xl:grid-cols-[minmax(0,1.15fr)_340px]">
-      <DashboardCard>
-        <SectionHeading eyebrow="Cotizaciones" title="Entrada comercial" description="Administra el estado comercial y convierte cotizaciones aceptadas en proyectos activos." />
-        <div className="mt-8 grid gap-6">
-          {quotes.map((quote) => {
-            const selectedPm = pmUsers.find((pm) => pm.id === assignmentState[quote.id]);
-            const pmStats = selectedPm ? getPmStats(state, selectedPm.id) : null;
+    <div className="space-y-6">
+      <header className="rounded-[var(--radius-card)] border border-slate-200 bg-white p-6 shadow-[var(--shadow-card)]">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#3f237a)]">
+              Pipeline comercial
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-slate-950">Cotizaciones</h1>
+            <p className="mt-1 text-sm text-slate-600">{quotes.length} en total · administra estado y asignación de PM</p>
+          </div>
 
-            return (
-              <div key={quote.id} className="dashboard-gridline grid gap-5 pb-6">
-                <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+              <Input
+                placeholder="Buscar…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="h-9 w-[200px] pl-9"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="size-4 text-slate-500" />
+              <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
+                <SelectTrigger className="h-9 w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_FILTERS.map((f) => (
+                    <SelectItem key={f.value} value={f.value}>
+                      {f.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="rounded-[var(--radius-card-dense)] border border-slate-200 bg-white shadow-[var(--shadow-card-dense)]">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Cotización</TableHead>
+              <TableHead>Cliente</TableHead>
+              <TableHead>Tipo</TableHead>
+              <TableHead>Estimado</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead className="text-right">Fecha</TableHead>
+              <TableHead className="w-12" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((quote) => (
+              <TableRow key={quote.id} className="cursor-pointer" onClick={() => openDetail(quote)}>
+                <TableCell>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{quote.code}</p>
-                    <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{quote.title}</h3>
-                    <p className="mt-2 text-sm text-slate-600">
-                      {quote.clientName} · {formatLongDate(quote.createdAt)}
-                    </p>
+                    <p className="font-medium text-slate-950">{quote.title}</p>
+                    <p className="text-[11px] text-slate-500">{quote.code}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-slate-500">{quote.quoteKind === "prequote" ? "Precotizacion" : "Cotizacion formal"}</p>
-                    <div className="mt-2">
-                      <StatusBadge tone={getStatusTone(quote.status)}>{getQuoteStatusLabel(quote.status)}</StatusBadge>
-                    </div>
+                </TableCell>
+                <TableCell className="text-sm text-slate-700">{quote.clientName}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="text-[10px] uppercase">
+                    {quote.quoteKind === "prequote" ? "Pre" : "Formal"}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-sm text-slate-700">
+                  {formatCurrency(quote.estimate.build.min)}
+                </TableCell>
+                <TableCell>
+                  <QuoteStatusBadge status={quote.status} />
+                </TableCell>
+                <TableCell className="text-right text-xs text-slate-500">
+                  {formatShortDate(quote.createdAt)}
+                </TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon-sm">
+                        <MoreHorizontal className="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => openDetail(quote)}>
+                        <UserCheck className="size-4" />
+                        Asignar PM y aceptar
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => notifyStatus(quote, "reviewed")}>
+                        Marcar revisada
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => notifyStatus(quote, "rejected")} variant="destructive">
+                        Rechazar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+            {filtered.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="py-8 text-center text-sm text-slate-500">
+                  No hay cotizaciones que coincidan con los filtros.
+                </TableCell>
+              </TableRow>
+            ) : null}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Sheet open={!!selectedQuote} onOpenChange={(o) => !o && setSelectedQuoteId(null)}>
+        <SheetContent className="w-full sm:max-w-lg">
+          {selectedQuote ? (
+            <>
+              <SheetHeader>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  {selectedQuote.code}
+                </p>
+                <SheetTitle>{selectedQuote.title}</SheetTitle>
+                <SheetDescription>
+                  {selectedQuote.clientName} · {formatLongDate(selectedQuote.createdAt)}
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="grid gap-4 px-4 py-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <Cell label="Origen" value={selectedQuote.intakeSource === "service" ? "Servicio" : "Plan"} />
+                  <Cell label="Selección" value={selectedQuote.selectionLabel} />
+                  <Cell label="Perfil" value={selectedQuote.planProfile === "business" ? "Empresarial" : "Personal"} />
+                  <Cell
+                    label="Estimado"
+                    value={`${formatCurrency(selectedQuote.estimate.build.min)} – ${formatCurrency(selectedQuote.estimate.build.max)}`}
+                  />
+                </div>
+
+                <div className="rounded-[12px] border border-slate-200 p-4">
+                  <p className="kpi-label">Estado actual</p>
+                  <div className="mt-2">
+                    <QuoteStatusBadge status={selectedQuote.status} />
                   </div>
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  <InfoCell label="Origen" value={quote.intakeSource === "service" ? "Servicio" : "Plan"} />
-                  <InfoCell label="Seleccion" value={quote.selectionLabel} />
-                  <InfoCell label="Perfil" value={quote.planProfile === "business" ? "Empresarial" : "Personal"} />
-                  <InfoCell label="Estimado" value={`${formatCurrency(quote.estimate.build.min)} - ${formatCurrency(quote.estimate.build.max)}`} />
-                </div>
-
-                <div className="grid gap-4 border-t border-slate-200 pt-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-                  <label className="grid gap-2 text-sm font-medium text-slate-700">
-                    Asignar PM
-                    <select
-                      value={assignmentState[quote.id]}
-                      onChange={(event) => setAssignment((current) => ({ ...current, [quote.id]: event.target.value }))}
-                      className="dashboard-select"
-                    >
-                      <option value="">Selecciona un PM</option>
+                <div className="space-y-2">
+                  <Label>Asignar PM</Label>
+                  <Select value={pmAssignment} onValueChange={setPmAssignment}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un PM" />
+                    </SelectTrigger>
+                    <SelectContent>
                       {pmUsers.map((pm) => {
                         const stats = getPmStats(state, pm.id);
-
                         return (
-                          <option key={pm.id} value={pm.id}>
-                            {pm.name} - {stats.activeProjects} activos / {stats.completedProjects} cerrados
-                          </option>
+                          <SelectItem key={pm.id} value={pm.id}>
+                            {pm.name} · {stats.activeProjects} activos
+                          </SelectItem>
                         );
                       })}
-                    </select>
-                  </label>
-
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      className="dashboard-button-primary"
-                      disabled={!assignmentState[quote.id]}
-                      onClick={async () => {
-                        try {
-                          const pmId = assignmentState[quote.id];
-
-                          if (!pmId) {
-                            return;
-                          }
-
-                          await acceptQuote(quote.id, pmId);
-
-                          const assignedPm = getUserById(state, pmId);
-                          const client = getUserById(state, quote.clientId);
-
-                          if (!assignedPm?.email || !client?.email) {
-                            throw new Error("No encontramos los correos del cliente o del PM asignado.");
-                          }
-
-                          await sendDashboardNotification({
-                            type: "quote_assignment",
-                            quoteCode: quote.code,
-                            quoteTitle: quote.title,
-                            clientEmail: client.email,
-                            clientName: client.name,
-                            pmEmail: assignedPm.email,
-                            pmName: assignedPm.name,
-                            projectName: quote.title
-                          });
-
-                          setNotice("");
-                        } catch (error) {
-                          setNotice(error instanceof Error ? error.message : "No pudimos completar la conversion.");
-                        }
-                      }}
-                    >
-                      Convertir y aceptar
-                    </button>
-                    <button
-                      type="button"
-                      className="dashboard-button-secondary"
-                      onClick={async () => {
-                        try {
-                          await notifyQuoteStatus(quote.id, "reviewed");
-                          setNotice("");
-                        } catch (error) {
-                          setNotice(error instanceof Error ? error.message : "No pudimos notificar la revision.");
-                        }
-                      }}
-                    >
-                      Marcar revisada
-                    </button>
-                    <button
-                      type="button"
-                      className="dashboard-button-secondary"
-                      onClick={async () => {
-                        try {
-                          await notifyQuoteStatus(quote.id, "rejected");
-                          setNotice("");
-                        } catch (error) {
-                          setNotice(error instanceof Error ? error.message : "No pudimos notificar el rechazo.");
-                        }
-                      }}
-                    >
-                      Rechazar
-                    </button>
-                    <button
-                      type="button"
-                      className="dashboard-button-secondary"
-                      onClick={async () => {
-                        try {
-                          await notifyQuoteStatus(quote.id, "pending");
-                          setNotice("");
-                        } catch (error) {
-                          setNotice(error instanceof Error ? error.message : "No pudimos regresar la cotizacion a pendiente.");
-                        }
-                      }}
-                    >
-                      Volver a pendiente
-                    </button>
-                  </div>
+                    </SelectContent>
+                  </Select>
                 </div>
-
-                {pmStats ? <p className="text-sm text-slate-500">{selectedPm?.name} lleva {pmStats.activeProjects} activos y {pmStats.completedProjects} cerrados.</p> : null}
               </div>
-            );
-          })}
-        </div>
-      </DashboardCard>
 
-      <DashboardCard className="h-fit xl:sticky xl:top-6">
-        <SectionHeading eyebrow="Asignacion" title="Capacidad visible" />
-        {notice ? <p className="mt-4 text-sm font-medium text-rose-600">{notice}</p> : null}
-        <div className="mt-6 grid gap-4">
-          {pmUsers.map((pm) => {
-            const stats = getPmStats(state, pm.id);
-
-            return (
-              <div key={pm.id} className="dashboard-gridline grid gap-2 pb-4">
-                <p className="font-semibold text-slate-950">{pm.name}</p>
-                <p className="text-sm text-slate-600">{stats.activeProjects} activos · {stats.completedProjects} cerrados</p>
-              </div>
-            );
-          })}
-        </div>
-      </DashboardCard>
+              <SheetFooter>
+                <Button variant="outline" onClick={() => notifyStatus(selectedQuote, "reviewed")}>
+                  Marcar revisada
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => notifyStatus(selectedQuote, "rejected")}
+                  className="border-error-500/40 text-error-700 hover:bg-error-50"
+                >
+                  <X className="size-4" />
+                  Rechazar
+                </Button>
+                <Button className="btn-role" onClick={handleAccept} disabled={!pmAssignment}>
+                  <CheckCircle2 className="size-4" />
+                  Aceptar y crear proyecto
+                </Button>
+              </SheetFooter>
+            </>
+          ) : null}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
 
-function InfoCell({ label, value }: { label: string; value: string }) {
+function Cell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
-      <p className="mt-2 text-sm font-semibold leading-6 text-slate-950">{value}</p>
+    <div className="rounded-[12px] border border-slate-200 bg-slate-50 p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-slate-950">{value}</p>
     </div>
   );
 }
 
-function getStatusTone(status: QuoteStatus) {
-  if (status === "accepted") return "success";
-  if (status === "reviewed") return "accent";
-  if (status === "rejected") return "danger";
-  return "warning";
+function QuoteStatusBadge({ status }: { status: QuoteStatus }) {
+  const cls = {
+    pending: "badge-status-warning",
+    reviewed: "badge-status-info",
+    accepted: "badge-status-success",
+    rejected: "badge-status-error"
+  }[status];
+  return <span className={cls}>{getQuoteStatusLabel(status)}</span>;
 }

@@ -1,89 +1,160 @@
 "use client";
 
-import { DashboardCard, DashboardEmptyState, DashboardMutedCard, SectionHeading, StatusBadge } from "@/features/dashboard/components/primitives";
-import { getMilestonePayment, getProjectMilestones, getSelectedProject } from "@/features/dashboard/lib/selectors";
+import { CheckCircle2, Clock, CreditCard, Lock } from "lucide-react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { useDashboardChrome, DashboardEmptyState } from "@/features/dashboard/components/primitives";
+import {
+  getMilestonePayment,
+  getProjectMilestones,
+  getSelectedOrPrimaryProject
+} from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
 import { formatLongDate } from "@/lib/utils/presenters";
+import { cn } from "@/lib/utils";
 
 export function PaymentsPanel() {
+  const chrome = useDashboardChrome();
+  const role = (chrome?.role === "pm" ? "pm" : "client") as "client" | "pm";
   const { state, markPaymentAsPaid } = useDashboardWorkspace();
-  const project = getSelectedProject(state, "client");
+  const project = getSelectedOrPrimaryProject(state, role);
   const milestones = getProjectMilestones(state, project?.id);
 
   if (!project) {
     return (
-      <DashboardCard>
-        <DashboardEmptyState title="Selecciona un proyecto" body="La vista de pagos depende del proyecto activo que elijas en la seccion Proyectos." />
-      </DashboardCard>
+      <DashboardEmptyState
+        title="Selecciona un proyecto"
+        body="La vista de pagos depende del proyecto activo."
+      />
     );
   }
 
+  const linkedPayments = milestones
+    .map((m) => ({ milestone: m, payment: getMilestonePayment(state, m.id) }))
+    .filter((entry) => entry.payment);
+
+  const totalDue = linkedPayments
+    .filter((e) => e.payment!.status !== "paid")
+    .reduce((s, e) => s + (e.payment!.amount ?? 0), 0);
+  const totalPaid = linkedPayments
+    .filter((e) => e.payment!.status === "paid")
+    .reduce((s, e) => s + (e.payment!.amount ?? 0), 0);
+
+  const isClient = role === "client";
+
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1.08fr)_320px]">
-      <DashboardCard>
-        <SectionHeading title="Pagos por hito" description="Cada pago se habilita segun el estado real del hito correspondiente." />
+    <div className="space-y-6">
+      <header className={isClient ? "warm-card" : "rounded-[var(--radius-card)] border border-slate-200 bg-white p-6 shadow-[var(--shadow-card)]"}>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#224a78)]">
+              Pagos del proyecto
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-slate-950">{project.name}</h1>
+            <p className="mt-1 text-sm text-slate-600">
+              Cada pago se desbloquea cuando su hito está completado.
+            </p>
+          </div>
 
-        <div className="mt-5 grid gap-3">
-          {milestones.map((milestone) => {
-            const payment = getMilestonePayment(state, milestone.id);
-            const paymentState = resolvePaymentMilestoneState(milestone.status, payment?.status);
+          <div className="grid grid-cols-2 gap-3 text-right">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Pendiente</p>
+              <p className="mt-1 text-xl font-bold text-warning-700">{formatCurrency(totalDue)}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Pagado</p>
+              <p className="mt-1 text-xl font-bold text-success-700">{formatCurrency(totalPaid)}</p>
+            </div>
+          </div>
+        </div>
+      </header>
 
+      {milestones.length === 0 ? (
+        <DashboardEmptyState
+          title="Sin hitos definidos"
+          body="Cuando el PM publique los hitos podrás ver aquí los pagos asociados."
+        />
+      ) : (
+        <ol className="space-y-3">
+          {milestones.map((m) => {
+            const payment = getMilestonePayment(state, m.id);
+            const paymentState = resolvePaymentMilestoneState(m.status, payment?.status);
             return (
-              <article key={milestone.id} className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
+              <li
+                key={m.id}
+                className={cn(
+                  "rounded-[var(--radius-card-dense)] border bg-white p-5 shadow-[var(--shadow-card-dense)]",
+                  m.status === "current" && "border-[var(--role,#5e92c2)]/40"
+                )}
+              >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-950">{milestone.title}</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{milestone.summary}</p>
-                    <p className="mt-3 text-xs font-medium text-slate-500">{formatLongDate(milestone.date)}</p>
+                    <p className="text-sm font-semibold text-slate-950">{m.title}</p>
+                    <p className="mt-1 text-xs text-slate-500">{formatLongDate(m.date)}</p>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <StatusBadge tone={milestone.status === "done" ? "success" : milestone.status === "current" ? "accent" : "neutral"}>
-                      {milestone.status === "done" ? "Completado" : milestone.status === "current" ? "En proceso" : "Pendiente"}
-                    </StatusBadge>
-                    <StatusBadge tone={paymentState.tone}>{paymentState.label}</StatusBadge>
-                  </div>
+                  <PaymentBadge state={paymentState} />
                 </div>
 
                 {payment ? (
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-950">{payment.label}</p>
-                      <p className="mt-1 text-sm text-slate-600">{formatCurrency(payment.amount)} · vence el {formatLongDate(payment.dueDate)}</p>
+                  <div className="mt-4 flex flex-wrap items-end justify-between gap-3 border-t border-slate-100 pt-4">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-10 place-items-center rounded-full bg-[var(--role-soft,#eff6fb)] text-[var(--role-strong,#224a78)]">
+                        <CreditCard className="size-5" />
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-950">{payment.label}</p>
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          {formatCurrency(payment.amount)} · vence {formatLongDate(payment.dueDate)}
+                        </p>
+                      </div>
                     </div>
-                    {paymentState.canPay ? (
-                      <button type="button" className="dashboard-button-primary" onClick={() => markPaymentAsPaid(payment.id)}>
-                        Marcar pago realizado
-                      </button>
+                    {paymentState.canPay && isClient ? (
+                      <Button
+                        className="btn-role"
+                        onClick={() => {
+                          markPaymentAsPaid(payment.id);
+                          toast.success("¡Gracias! Marcamos tu pago como realizado.");
+                        }}
+                      >
+                        <CheckCircle2 className="size-4" />
+                        Confirmar pago
+                      </Button>
                     ) : null}
                   </div>
                 ) : (
-                  <p className="mt-4 border-t border-slate-200 pt-4 text-sm text-slate-500">Este hito no tiene un pago asociado todavia.</p>
+                  <p className="mt-4 border-t border-slate-100 pt-4 text-xs text-slate-500">
+                    Este hito no tiene un pago asociado todavía.
+                  </p>
                 )}
-              </article>
+              </li>
             );
           })}
-        </div>
-      </DashboardCard>
-
-      <DashboardMutedCard className="h-fit xl:sticky xl:top-4">
-        <SectionHeading title="Reglas de pago" />
-        <div className="mt-4 grid gap-3 text-sm text-slate-600">
-          <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
-            <p className="font-semibold text-slate-900">Pago inhabilitado</p>
-            <p className="mt-1 leading-6">El hito sigue en proceso o pendiente. Aun no corresponde liberar el pago.</p>
-          </div>
-          <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
-            <p className="font-semibold text-slate-900">Pago en espera</p>
-            <p className="mt-1 leading-6">El hito ya se completo y el pago queda listo para registrarse.</p>
-          </div>
-          <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
-            <p className="font-semibold text-slate-900">Pago realizado</p>
-            <p className="mt-1 leading-6">El estado ya se refleja tambien para el PM y para administracion.</p>
-          </div>
-        </div>
-      </DashboardMutedCard>
+        </ol>
+      )}
     </div>
+  );
+}
+
+function PaymentBadge({
+  state
+}: {
+  state: ReturnType<typeof resolvePaymentMilestoneState>;
+}) {
+  const { tone, label } = state;
+  const className =
+    tone === "success"
+      ? "badge-status-success"
+      : tone === "warning"
+        ? "badge-status-warning"
+        : "badge-status-neutral";
+  const Icon = tone === "success" ? CheckCircle2 : tone === "warning" ? Clock : Lock;
+  return (
+    <span className={className}>
+      <Icon className="size-3" />
+      {label}
+    </span>
   );
 }
 
@@ -99,5 +170,5 @@ export function resolvePaymentMilestoneState(
     return { label: "Pago en espera", tone: "warning" as const, canPay: true };
   }
 
-  return { label: "Pago inhabilitado", tone: "neutral" as const, canPay: false };
+  return { label: "Pago bloqueado", tone: "neutral" as const, canPay: false };
 }
