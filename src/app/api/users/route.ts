@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import { db } from "@/lib/db";
 
 export async function GET() {
   try {
-    const users = await prisma.user.findMany();
+    const users = await db.user.findMany();
 
     return NextResponse.json(users);
   } catch {

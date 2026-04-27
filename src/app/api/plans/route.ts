@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { PrismaClient, type PlanCategory } from "@prisma/client";
+import { type PlanCategory } from "@prisma/client";
 
+import { db } from "@/lib/db";
 import { mergeManagedPlanCatalog, type ManagedPlanCatalog } from "@/features/marketing/lib/plan-catalog";
 import type { PlanProfile } from "@/lib/types/domain";
 
-const prisma = new PrismaClient();
-
 export async function GET() {
   try {
-    const configs = await prisma.planConfig.findMany({ orderBy: { key: "asc" } });
+    const configs = await db.planConfig.findMany({ orderBy: { key: "asc" } });
 
     return NextResponse.json(
       mergeManagedPlanCatalog(
@@ -32,9 +31,9 @@ export async function PUT(request: Request) {
     const body = (await request.json()) as ManagedPlanCatalog;
     const records = [...body.personal, ...body.business];
 
-    await prisma.$transaction(
+    await db.$transaction(
       records.map((plan) =>
-        prisma.planConfig.upsert({
+        db.planConfig.upsert({
           where: { key: plan.id },
           update: {
             profile: mapPlanCategory(plan.profile),
@@ -55,7 +54,7 @@ export async function PUT(request: Request) {
       )
     );
 
-    const configs = await prisma.planConfig.findMany({ orderBy: { key: "asc" } });
+    const configs = await db.planConfig.findMany({ orderBy: { key: "asc" } });
 
     return NextResponse.json(
       mergeManagedPlanCatalog(

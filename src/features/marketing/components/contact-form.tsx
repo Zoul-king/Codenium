@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { readSession } from "@/features/auth/lib/session-store";
 import { site } from "@/features/marketing/data/site";
 import type { ContactIconType } from "@/features/marketing/types";
 import { submitPublicLead } from "@/lib/api/client";
@@ -57,16 +56,6 @@ interface ContactFormProps {
   hiddenFields?: Record<string, string>;
   contactEmail?: string;
   embedded?: boolean;
-  quotePayload?: {
-    title: string;
-    description: string;
-    projectType: string;
-    planCategory: string;
-    planTier: string;
-    billingModel: string;
-    estimatedPrice: number;
-    estimatedTimeline: string;
-  };
 }
 
 const defaultValues: ContactValues = {
@@ -91,8 +80,7 @@ export function ContactForm({
   formCard = true,
   hiddenFields = {},
   contactEmail = site.contact.email,
-  embedded = false,
-  quotePayload
+  embedded = false
 }: ContactFormProps) {
   const pathname = usePathname();
   const [submitted, setSubmitted] = useState(false);
@@ -118,16 +106,6 @@ export function ContactForm({
         originPath: pathname || `/${source}`,
         hiddenFields
       });
-
-      readSession();
-
-      if (quotePayload) {
-        await fetch("/api/quotes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...quotePayload, clientId: "user-client" })
-        });
-      }
 
       setSubmitted(true);
       form.reset(defaultValues);

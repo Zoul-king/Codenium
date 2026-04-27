@@ -2,13 +2,13 @@
 
 import { useRouter } from "next/navigation";
 
-import { clearSession } from "@/features/auth/lib/session-store";
+import { logout } from "@/features/auth/lib/session-store";
 
 export function SidebarActions() {
   const router = useRouter();
 
-  function handleLogout() {
-    clearSession();
+  async function handleLogout() {
+    await logout();
     router.push("/");
   }
 

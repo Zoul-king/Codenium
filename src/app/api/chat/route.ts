@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { chatbotContext } from "@/features/marketing/data/chatbot-context";
 
-const prisma = new PrismaClient();
+import { db } from "@/lib/db";
+import { chatbotContext } from "@/features/marketing/data/chatbot-context";
 
 type IncomingMessage = {
   role: "user" | "assistant";
@@ -17,7 +16,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const messages = await prisma.message.findMany({
+    const messages = await db.message.findMany({
       include: {
         sender: true,
         project: true
@@ -38,7 +37,7 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     if (typeof body?.projectId === "string" && typeof body?.senderId === "string" && typeof body?.message === "string") {
-      const created = await prisma.message.create({
+      const created = await db.message.create({
         data: {
           projectId: body.projectId,
           senderId: body.senderId,

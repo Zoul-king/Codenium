@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { PrismaClient, UserRole, UserStatus } from "@prisma/client";
+import { UserRole, UserStatus } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import { db } from "@/lib/db";
+import { hashPassword } from "@/lib/auth/password";
+import { createSession, toPublicUser } from "@/lib/auth/session";
 
 export async function POST(request: Request) {
   try {
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await db.user.findUnique({
       where: { email }
     });
 
@@ -54,24 +56,30 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await prisma.user.create({
+    const passwordHash = await hashPassword(password);
+
+    const user = await db.user.create({
       data: {
         firstName,
         lastName,
         email,
         phone: phone || null,
         company: company || null,
-        passwordHash: password,
+        passwordHash,
         role: UserRole.CLIENT,
         status: UserStatus.ACTIVE
       }
     });
 
+    await createSession(user.id);
+
+    const publicUser = toPublicUser(user);
+
     return NextResponse.json({
-      userId: user.id,
-      role: user.role.toLowerCase(),
-      name: `${user.firstName} ${user.lastName}`,
-      email: user.email
+      userId: publicUser.id,
+      role: publicUser.role,
+      name: publicUser.name,
+      email: publicUser.email
     });
   } catch {
     return NextResponse.json(

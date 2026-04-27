@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { PrismaClient, type QuoteStatus as PrismaQuoteStatus, type ProjectStatus as PrismaProjectStatus } from "@prisma/client";
+import { type QuoteStatus as PrismaQuoteStatus, type ProjectStatus as PrismaProjectStatus } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import { db } from "@/lib/db";
 
 // Obtener todas las cotizaciones
 export async function GET() {
   try {
-    const quotes = await prisma.quote.findMany({
+    const quotes = await db.quote.findMany({
       include: {
         client: true,
         project: {
@@ -41,7 +41,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Faltan datos para actualizar la cotización." }, { status: 400 });
     }
 
-    const quote = await prisma.quote.update({
+    const quote = await db.quote.update({
       where: { id: quoteId },
       data: { status },
       include: {
@@ -51,7 +51,7 @@ export async function PATCH(request: Request) {
     });
 
     if (status === "APPROVED") {
-      await prisma.project.upsert({
+      await db.project.upsert({
         where: { quoteId },
         update: {
           pmId,
@@ -70,7 +70,7 @@ export async function PATCH(request: Request) {
       });
     }
 
-    const refreshed = await prisma.quote.findUnique({
+    const refreshed = await db.quote.findUnique({
       where: { id: quoteId },
       include: {
         client: true,
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const quote = await prisma.quote.create({
+    const quote = await db.quote.create({
       data: {
         folio: `Q-${Date.now()}`,
         title,

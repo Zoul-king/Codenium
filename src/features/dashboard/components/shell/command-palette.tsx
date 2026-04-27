@@ -25,7 +25,7 @@ import {
   CommandSeparator,
   CommandShortcut
 } from "@/components/ui/command";
-import { clearSession } from "@/features/auth/lib/session-store";
+import { logout } from "@/features/auth/lib/session-store";
 import { dashboardNav } from "@/lib/mocks";
 import type { Role } from "@/lib/types/domain";
 
@@ -56,8 +56,8 @@ export function CommandPalette({ role, open, onOpenChange }: CommandPaletteProps
     onOpenChange(false);
   }
 
-  function handleLogout() {
-    clearSession();
+  async function handleLogout() {
+    await logout();
     router.push("/");
     onOpenChange(false);
   }

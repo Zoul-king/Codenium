@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import { db } from "@/lib/db";
+import { hashPassword, isHashed, verifyPassword } from "@/lib/auth/password";
+import { createSession, toPublicUser } from "@/lib/auth/session";
 
 export async function POST(request: Request) {
   try {
@@ -16,23 +17,32 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
+    const user = await db.user.findUnique({ where: { email } });
 
-    if (!user || user.passwordHash !== password) {
+    if (!user || !(await verifyPassword(password, user.passwordHash))) {
       return NextResponse.json(
         { error: "No pudimos validar esos datos. Revisa tu correo y contraseña." },
         { status: 401 }
       );
     }
 
-    // Se normaliza el rol a minúsculas para consistencia en el cliente
+    if (!isHashed(user.passwordHash)) {
+      const upgraded = await hashPassword(password);
+      await db.user.update({
+        where: { id: user.id },
+        data: { passwordHash: upgraded }
+      });
+    }
+
+    await createSession(user.id);
+
+    const publicUser = toPublicUser(user);
+
     return NextResponse.json({
-      userId: user.id,
-      role: user.role.toLowerCase(),
-      name: `${user.firstName} ${user.lastName}`,
-      email: user.email
+      userId: publicUser.id,
+      role: publicUser.role,
+      name: publicUser.name,
+      email: publicUser.email
     });
   } catch {
     return NextResponse.json(

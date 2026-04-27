@@ -42,7 +42,7 @@ import {
   getVisibleQuotes
 } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
-import { clearSession } from "@/features/auth/lib/session-store";
+import { logout } from "@/features/auth/lib/session-store";
 import { dashboardNav } from "@/lib/mocks";
 import type { Role } from "@/lib/types/domain";
 import { cn } from "@/lib/utils";
@@ -117,8 +117,8 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
     visibleQuotes.length
   ]);
 
-  function handleLogout() {
-    clearSession();
+  async function handleLogout() {
+    await logout();
     router.push("/");
   }
 
