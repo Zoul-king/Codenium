@@ -1,194 +1,390 @@
-En este archivo se define aún más lo antes mencionado en el archivo folders_structure.
+En este archivo se define aún más lo antes mencionado en el archivo
+folders_structure.
+
+Última revisión: tras el refactor estructural y rediseño de los 3 dashboards.
+Cambios mayores frente a la versión anterior de este documento:
+
+- `src/lib/` dejó de ser cajón desastre y ahora segmenta utilidades, datos,
+  cliente API, tipos y cliente DB en subcarpetas.
+- `src/components/` ya no está vacío: ahora aloja primitivas accesibles
+  (shadcn/ui + Radix) y wrappers comunes.
+- `src/features/dashboard/components/` reorganizado por rol y rol de
+  componente (shell/primitives/client/pm/admin/shared) en lugar de 17
+  archivos planos.
+- Nuevo `src/config/env.ts` (antes en `lib/`).
+- Nuevos `src/lib/{api,db,utils,types/api.ts,types/index.ts}`.
+- Nueva carpeta `src/features/dashboard/hooks/` para hooks de tema y similares.
 
 
 
 # .next
 
-Técnicamente no es parte del código fuente, es el resultado de compilación de Next.js. 
-Ahí se guarda el servidor compilado, assets optimizados, caché y metadatos del build. 
-Sirve para levantar la app ya procesada, no para desarrollar.
+Técnicamente no es parte del código fuente, es el resultado de compilación de
+Next.js. Ahí se guarda el servidor compilado, assets optimizados, caché y
+metadatos del build. Sirve para levantar la app ya procesada, no para
+desarrollar.
 
-Cómo mejorarlo: no se toca. Solo asegúrate de no versionarlo y de limpiar caché cuando el build se corrompa. 
-Ya tienes un script para eso, lo cual está bien.
+Cómo mejorarlo: no se toca. Solo asegúrate de no versionarlo y de limpiar
+caché cuando el build se corrompa. Ya tienes `scripts/clear-build-cache.ts`
+para eso.
 
-´´´´
+```
 
 # node_modules
 
-Es el árbol de dependencias instalado. Aquí viven Next, React, Prisma, Resend y todo lo demás. 
-No forma parte del diseño de tu sistema, pero sí determina su runtime.
+Es el árbol de dependencias instalado. Aquí viven Next 15, React 19,
+Prisma 6, Tailwind 4 (vía PostCSS), Radix (a través de shadcn/ui),
+react-hook-form 7, zod 4, sonner, lucide-react, gsap y resend.
 
-Cómo mejorarlo: tampoco se edita. Lo que sí puedes mejorar es el control de dependencias. 
-Tu package.json está bastante simple y limpio, pero le faltan herramientas importantes para un proyecto que ya quiere ser serio: lint estricto, tests, validación de tipos en CI, y scripts para seed y generate más completos.
+Cómo mejorarlo: el set de deps ya cubre lo necesario para el producto. Lo
+que falta no es agregar más, sino añadir tooling de calidad: lint estricto
+(ESLint v9 + flat config), tests (Vitest o Playwright), `tsc --noEmit` en CI
+y scripts más completos para `prisma generate`/`db push`/`seed`.
 
-´´´´
+```
 
 # prisma
 
-Aquí está la capa de datos real. Es la definición formal del negocio en base de datos. 
-En tu caso, esta carpeta ya no modela solo una landing, modela una plataforma completa.
+Aquí está la capa de datos real. Es la definición formal del negocio en
+base de datos. En tu caso, esta carpeta ya no modela solo una landing,
+modela una plataforma completa.
 
-El schema.prisma define usuarios, sesiones, tokens de recuperación, leads, cotizaciones, items de cotización, proyectos, hitos, mensajes, documentos, pagos y solicitudes de cambio. 
-Eso significa que el proyecto está pensado en tres etapas: captación, venta, ejecución.
+`schema.prisma` define usuarios, sesiones, tokens de recuperación, leads,
+cotizaciones, items de cotización, proyectos, hitos, mensajes, documentos,
+pagos y solicitudes de cambio. Eso significa que el proyecto está pensado
+en tres etapas: captación, venta, ejecución.
 
-Técnicamente, Prisma aquí cumple dos papeles. 
-Primero, actúa como contrato entre aplicación y base de datos. 
-Segundo, obliga a que los enums y relaciones sean consistentes. 
-Ese segundo punto es justo donde tu proyecto hoy tiene fricción.
+Cómo mejorarlo (sigue pendiente):
 
-Cómo mejorarlo:
+- Dejar de usar strings sueltos en frontend para cosas que en Prisma son
+  enums. `projectType`, `planTier`, `billingModel` y `planCategory` siguen
+  manejándose con claves UI distintas a las del schema.
+- Meter semillas reales para planes, tipos de proyecto y catálogos.
+- Separar mejor el modelo actual de lo que todavía es idea futura, marcando
+  como "etapa siguiente" lo que aún no se usa.
 
-Primero, dejar de usar strings sueltos en frontend para cosas que en Prisma son enums. 
-Si projectType, planTier, billingModel y planCategory existen como enums en base de datos, el frontend no debería mandar labels como texto libre. Debe mandar claves tipadas, cerradas y compatibles.
-
-Segundo, meter semillas reales. Si vas a tener planes, tipos de proyecto, o catálogos de negocio, conviene modelar parte de eso en tablas en vez de dejarlo solo como mocks de TypeScript.
-
-Tercero, separar mejor el modelo actual de lo que todavía es idea futura. 
-Tu schema ya contempla bastante, pero si una parte no se usa aún, hay dos caminos válidos: o se deja pero bien documentada como etapa futura, o se simplifica para no cargar deuda visual y mental.
-
-´´´´
+```
 
 # public
 
-Es la capa de recursos estáticos servidos directamente por Next. Imágenes, íconos, fuentes. 
-No tiene lógica, solo contenido público.
+Recursos estáticos servidos directamente por Next. Imágenes, íconos,
+fuentes Poppins (cargadas con `next/font/local`).
 
-Cómo mejorarlo: ordenar por dominio funcional. 
-Por ejemplo, public/images/marketing, public/images/dashboard, public/icons/brand. 
-Ahorita probablemente funciona, pero cuando el proyecto crezca se vuelve desorden rápido si todo entra en una sola bolsa.
+Cómo mejorarlo: ordenar mejor por dominio funcional cuando crezca
+(`public/images/marketing`, `public/images/dashboard`, `public/icons/brand`).
+Hoy ya está bastante segmentado pero el dashboard apenas tiene assets
+propios.
 
-´´´´
+```
 
 # scripts
 
-Aquí tienes scripts de entorno y operación: liberar puerto 3000, limpiar caché, construir y arrancar Next. 
-Técnicamente cumplen una función de orquestación local.
-
-Esto está mejor de lo que parece porque evita comandos largos o dependencias manuales. 
-Pero aún está muy básico.
+Scripts de entorno y operación: liberar puerto 3000, limpiar caché,
+construir y arrancar Next. Cumplen una función de orquestación local.
 
 Cómo mejorarlo:
 
-Añadir scripts para prisma generate, db push, migrate dev, seed, y quizá un check que ejecute typecheck más lint. 
-También conviene centralizar mejor las tareas de desarrollo para que otra persona no dependa de memoria o de pasos manuales.
+- Añadir scripts para `prisma generate`, `db push`, `migrate dev`, `seed`,
+  y un `check` que ejecute `tsc --noEmit` + lint cuando este se agregue.
+- Centralizar mejor las tareas de desarrollo para que otra persona no
+  dependa de memoria o de pasos manuales.
 
-´´´´
+```
+
+# components.json
+
+Configuración de shadcn/ui adaptada a Tailwind v4: `cssVariables: true`,
+`tailwind.config: ""` (no hay archivo). Aliases:
+`components → @/components`, `utils → @/lib/utils`, `ui → @/components/ui`,
+`lib → @/lib`, `hooks → @/hooks`. Estilo `new-york`, library `lucide`.
+
+```
 
 # src
 
-Aquí está el sistema real. Esta carpeta es la que sí importa. Y lo más importante es entender que no sigue una sola arquitectura pura, sino una mezcla entre App Router, organización por features y una capa utilitaria transversal.
+Aquí está el sistema real. Esta carpeta es la que sí importa. Y ahora sí
+sigue una sola arquitectura coherente:
 
-Eso no está mal, pero ahorita está a medio cerrar.
+- App Router en `src/app/`
+- Componentes transversales en `src/components/`
+- Módulos por dominio en `src/features/`
+- Capa utilitaria/transversal en `src/lib/` y `src/config/`
+- Backend en `src/server/`
+- Hooks globales en `src/hooks/`
+
+Antes había mezcla y mucho contenido en `src/lib/` raíz. Ese desorden ya
+está cerrado.
 
 ## src/app
 
-Esta es la capa de entrada de Next.js. Aquí defines rutas, layouts y endpoints.
+Esta es la capa de entrada de Next.js. Aquí defines rutas, layouts y
+endpoints.
 
-Tienes rutas agrupadas por dominios visibles: (auth), (marketing), dashboard, y además api. 
-Eso técnicamente está bien porque separa el acceso público del autenticado y del backend HTTP.
+Tienes rutas agrupadas por dominios visibles: `(auth)`, `(marketing)`,
+`dashboard`, y además `api`. Eso técnicamente está bien porque separa el
+acceso público del autenticado y del backend HTTP.
 
-src/app/api es donde está la capa HTTP real. Tus endpoints reciben requests, validan de forma básica y ejecutan lógica. 
-El problema es que parte de esa lógica la hacen directo ahí mismo, sin pasar siempre por servicios ni por repositorios.
+`src/app/api` es donde está la capa HTTP real. Tus endpoints reciben
+requests, validan de forma básica y ejecutan lógica. El problema es que
+parte de esa lógica la hacen directo ahí mismo, sin pasar siempre por
+servicios ni por repositorios.
 
-Ejemplo claro: en /api/auth/login y /api/auth/register se crea un PrismaClient directo dentro del endpoint y se consulta la base ahí mismo. Eso funciona, pero no escala bien. Ya tienes un src/lib/db.ts con cliente compartido, así que esos endpoints están rompiendo su propia convención.
+Ejemplo claro: en `/api/auth/login` y `/api/auth/register` se crea un
+PrismaClient directo dentro del endpoint y se consulta la base ahí mismo.
+Eso funciona, pero no escala bien. Ya tienes un `src/lib/db/` con cliente
+compartido, así que esos endpoints siguen rompiendo su propia convención.
 
-Otro problema técnico fuerte es que el login compara user.passwordHash !== password. 
-Eso significa que no estás usando hash real, aunque el campo se llame passwordHash. 
-A nivel técnico y de seguridad, eso está mal. Es funcional para demo, no para producción.
+Otro problema técnico fuerte (sin resolver) es que el login compara
+`user.passwordHash !== password`. Eso significa que no estás usando hash
+real, aunque el campo se llame passwordHash. A nivel técnico y de
+seguridad, eso está mal. Es funcional para demo, no para producción.
 
 Cómo mejorarlo:
 
-Usar siempre db compartido desde src/lib/db.ts, no crear new PrismaClient() en cada route.
+- Usar siempre `db` desde `@/lib/db` (no `new PrismaClient()` en cada route).
+- Sacar la lógica de negocio del endpoint. El route handler debe recibir,
+  validar, delegar y responder.
+- Validación formal con Zod ya está disponible a nivel app (la usamos en
+  formularios). Falta cablearla en los endpoints.
+- Hashear contraseñas con bcrypt o argon2.
+- Unificar la capa auth: hoy `api/auth/*` usa Prisma, pero
+  `features/auth/lib/auth-service.ts` todavía usa mocks. Esa convivencia
+  rompe la arquitectura.
 
-Sacar la lógica de negocio del endpoint. El route handler debe recibir, validar, delegar y responder. No debería contener toda la lógica.
+`src/app/dashboard/[role]/[[...section]]/page.tsx` sigue siendo la única
+página dinámica que resuelve los 3 dashboards. Internamente delega en
+`features/dashboard/lib/view.tsx`, que ahora referencia componentes
+organizados por subcarpeta de rol.
 
-Agregar validación formal con Zod o algo similar. Ahorita validas con String(...).trim() y algunos if, eso es frágil.
+## src/components
 
-Hashear contraseñas con bcrypt o argon2. Sin eso, auth no está lista.
+Antes esta carpeta estaba casi vacía. Hoy tiene tres roles claros:
 
-Unificar la capa auth. Ahorita api/auth/* usa Prisma, pero features/auth/lib/auth-service.ts todavía usa mocks. Esa convivencia te rompe la arquitectura.
+- `ui/` — 25 primitivas de shadcn/ui (Button, Dialog, Sheet, DropdownMenu,
+  Popover, Tabs, Tooltip, Table, Form, Sonner, Command, etc.). Todas son
+  Radix por debajo y se estilan con Tailwind 4 + tokens en globals.css.
+- `layout/` — header y footer del sitio público.
+- `common/` — componentes propios que no son primitivas básicas pero se
+  usan en varios features:
+    * `icons.tsx` (set de íconos brand + lucide envuelto)
+    * `form-field.tsx` (TextField/TextAreaField wrapper sobre Input/
+      Textarea/Label de shadcn — preserva la API anterior para no romper
+      consumidores).
+
+Cómo mejorarlo:
+
+- Si crece, considera mover los íconos a `common/icons/` con sub-archivos
+  por dominio (services, contact, social).
+- A medida que aparezcan más patrones, ir extrayendo a `common/` antes
+  de que se duplique código entre features.
 
 ## src/features
 
-Aquí intentas trabajar por dominio de negocio. Eso es bueno. Es, de hecho, la parte más sana de la estructura.
+Aquí intentas trabajar por dominio de negocio. Eso es bueno. Es, de hecho,
+la parte más sana de la estructura.
 
-Tienes auth, dashboard, marketing, messages, projects, quotes, users. Eso hace que la UI y parte de la lógica estén organizadas por módulo y no por tipo técnico solamente.
+Tienes `auth`, `dashboard`, `marketing`, `messages`, `projects`, `quotes`,
+`users`. Cada uno con su carpeta `components/` y la lógica que le
+corresponde en `lib/` o `hooks/` cuando aplica.
 
 ### features/auth
 
-Tiene componentes, librerías y sesión mock. Técnicamente aquí vive una capa de transición. El problema es que no está claro si auth ya es real o no, porque una parte sí consulta Prisma y otra sigue funcionando sobre mocks.
+Tiene componentes (login/register/forgot panels y campos) y lib (sesión
+mock + servicio + páginas). Los formularios fueron migrados a
+react-hook-form + zod para validación inline.
 
-Eso crea una inconsistencia mental y técnica. El frontend puede creer una cosa y la API otra.
+Sigue siendo una capa de transición. El problema es que no está claro si
+auth ya es real o no, porque una parte sí consulta Prisma y otra sigue
+funcionando sobre mocks. El frontend puede creer una cosa y la API otra.
 
-Cómo mejorarlo: decidir una sola verdad. Si auth ya usa base real, entonces auth-service.ts y session-store.ts deben dejar de ser la fuente primaria. Si todavía estás en demo, entonces no mezcles Prisma en login hasta terminar la migración. Pero no dejes dos sistemas paralelos mucho tiempo.
+Cómo mejorarlo: decidir una sola verdad. Si auth ya usa base real,
+`auth-service.ts` y `session-store.ts` deben dejar de ser la fuente
+primaria. Si todavía estás en demo, no mezcles Prisma en login hasta
+terminar la migración.
 
 ### features/dashboard
 
-Aquí está el dashboard por rol. Tiene componentes por panel, librerías para rutas y selección de vistas, y un store de workspace. A nivel técnico, está bien separado visualmente.
+Aquí está el dashboard por rol. Es el módulo que más cambió en el último
+refactor:
 
-El problema es que casi seguro todavía se alimenta sobre mocks y estado local, no sobre repositorios reales. O sea, la estructura UI existe, pero el flujo de datos todavía no es confiable.
+- `components/shell/` — `dashboard-shell.tsx` (sidebar + topbar + Sheet
+  móvil + DropdownMenu de usuario + Popover de notificaciones), `command-
+  palette.tsx` (cmdk + Dialog, atajo ⌘K) y `sidebar-actions.tsx`.
+- `components/primitives/` — DashboardCard, SectionHeading, StatusBadge,
+  ProgressBar, ChromeProvider. Antes estos 5 vivían en un `dashboard-ui.tsx`
+  monolítico con tematización por hex hardcoded. Ahora son piezas
+  separadas y consumen variables CSS por rol (`var(--role)`,
+  `var(--role-soft)`, `var(--role-strong)`).
+- `components/client/` — overview (warm hero + progress ring + timeline +
+  warm stat cards), milestones (timeline expandido + tabs por estado +
+  diálogo de cambios) y documents (library con filtros).
+- `components/pm/` — overview (4 KPIs operativos + tabs Kanban/Lista/
+  Bloqueados) y status (status board + Sheet de edición de hitos).
+- `components/admin/` — overview (6 KPIs con sparklines SVG inline +
+  tabs Recientes/Pipeline/Atención + capacity + activity feed), quote
+  (tabla densa + Sheet detalle + asignación de PM), team (tabs PMs/
+  Clientes con dropdown de acciones), plan (tabs Personal/Empresarial
+  con Sheet de edición), payments (4 KPIs + tabs por estado) y
+  deliverables (tabs Todos/Plantillas/Compartidos con grid de cards).
+- `components/shared/` — payments, project-chat (chat moderno con
+  avatares y autoscroll) y profile.
 
-Cómo mejorarlo: separar presentación de datos. Los paneles no deberían conocer mocks directos. Deberían recibir datos ya resueltos por servicios o hooks. Hoy parece más un dashboard maquetado que un dashboard conectado.
+`hooks/use-dashboard-theme.ts` es nuevo: lectura tipada del rol activo y
+los tokens del tema (vars CSS y hex equivalentes).
+
+`lib/` mantiene `routes`, `view`, `workspace-store`, `selectors` y
+`recipients`. El store sigue siendo una simulación avanzada con partes
+conectadas a `/api/users`, `/api/quotes`, `/api/chat`, y fallback a
+mocks.
+
+Cómo mejorarlo: separar presentación de datos. Los paneles aún son
+"dashboard maquetado" en buena parte. Empieza migrando overview, quotes
+y proyectos a fuentes reales, después hitos, documentos, pagos y
+mensajes.
 
 ### features/marketing
 
-Aquí está la landing, secciones informativas, planes, portfolio, privacidad, etc. Esto está bien como módulo visual y de contenido.
+Aquí está la landing, secciones informativas, planes, portfolio,
+privacidad, etc. Esto sigue bien encapsulado.
 
-Lo técnico importante aquí es que el contact-form.tsx no es solo un formulario de marketing, también participa en el flujo de cotización. Eso lo vuelve una pieza crítica, no solo visual.
+Movimientos del refactor:
+- `lib/plan-catalog.ts` y `lib/plan-profile-store.ts` ahora viven aquí
+  (antes en `src/lib/`).
+- `contact-form.tsx` fue migrado a react-hook-form + zod conservando
+  todas sus props (summary/embedded/quotePayload/etc.).
 
-Cómo mejorarlo: separar mejor formulario de contacto general y formulario de quote. Ahorita parece que una misma base intenta servir para dos flujos distintos. Eso suele acabar en props extra, condicionales y deuda de interfaz.
+Lo técnico importante sigue siendo que el contact-form participa en dos
+flujos (contacto general y cotización), por las mismas razones que antes.
+
+Cómo mejorarlo: separar mejor formulario de contacto general y formulario
+de quote. Sigue siendo una buena oportunidad de simplificación.
 
 ### features/quotes
 
-Esta es la parte más importante del negocio ahora mismo. Aquí tienes quote-builder, quote-estimator, quote-summary-card y la librería de estimación.
+La parte más importante del negocio ahora mismo. Aquí tienes
+`quote-builder`, `quote-estimator`, `quote-summary-card` y la librería
+de estimación.
 
-Técnicamente, el cálculo actual ocurre en frontend con calculateQuoteEstimate(). Ese cálculo toma el tipo de proyecto, infraestructura y módulos, suma rangos mock y produce precio, mensualidad y tiempo estimado.
+Movimiento del refactor: `quote-selection.ts` ahora vive en
+`features/quotes/lib/` (antes en `src/lib/`).
 
-Eso sirve para una cotización inicial y para UX rápida. El problema es que ese cálculo no está acoplado de forma fuerte a la base de datos ni a una fuente única de verdad del negocio. Está basado en src/lib/mocks.
+Técnicamente el cálculo sigue ocurriendo en frontend con
+`calculateQuoteEstimate()`. El cálculo toma el tipo de proyecto,
+infraestructura y módulos, suma rangos mock y produce precio,
+mensualidad y tiempo estimado.
 
-Entonces tienes este choque: Prisma dice que hay un modelo formal de quote, pero el cálculo se basa en catálogos mock. Eso es útil al inicio, pero si no lo corriges pronto, te va a crear desalineación entre lo que ve el usuario, lo que se guarda y lo que luego opera el equipo.
+Sigue habiendo el choque: Prisma dice que hay un modelo formal de quote,
+pero el cálculo se basa en catálogos mock. Eso es útil al inicio, pero
+si no lo corriges pronto, va a crear desalineación entre lo que ve el
+usuario, lo que se guarda y lo que luego opera el equipo.
 
 Cómo mejorarlo:
 
-Mover el motor de cotización a una capa de dominio, no dejarlo solo en UI. Puede seguir mostrándose en frontend, pero la fuente de verdad debe ser compartida o vivir en backend.
+- Mover el motor de cotización a una capa de dominio (probablemente
+  `src/server/services/quotes/`).
+- No usar labels visibles como valores de negocio. Usa claves internas,
+  luego traduce a labels para UI.
+- Guardar además del total, el desglose técnico de la cotización.
+- Separar claramente cotización preliminar, lead y quote formal.
 
-No usar labels visibles como valores de negocio. Usa claves internas, luego traduce a labels para UI.
+### features/{messages,projects,users}
 
-Guardar además del total, el desglose técnico de la cotización. Si no, después no sabrás por qué una cotización salió en cierto rango.
+Cada uno con un solo componente que es vista derivada del workspace
+store. No se modificaron en el refactor.
 
-Separar claramente cotización preliminar, lead y quote formal. Ahorita el flujo mezcla captación, estimación y persistencia sin una frontera suficientemente limpia.
+## src/hooks
+
+`use-reveal.ts` (animaciones de aparición con GSAP) sigue siendo el
+único hook global. Los hooks de dominio del dashboard ahora viven en
+`features/dashboard/hooks/`.
 
 ## src/lib
 
-Aquí están los cimientos utilitarios: cliente DB, cliente API, env, catálogos mock, tipos, helpers y adaptadores.
+Antes esta carpeta hacía demasiado. Ahora está reducida a utilidades
+transversales puras y datos mock. El cambio principal fue partirla en
+subcarpetas:
 
-Técnicamente esta carpeta está haciendo demasiado. No solo tiene utilidades globales, también tiene lógica de negocio y mocks que afectan el corazón del sistema.
+- `api/` — cliente HTTP (POST a `/api/forms`, `/api/dashboard/notify`).
+- `db/` — singleton de Prisma Client. Es la única puerta que debe usar
+  cualquier código backend.
+- `mocks/` — fixtures runtime (no son tests). Cuentas de auth, usuarios,
+  proyectos, cotizaciones, mensajes, change requests, catálogos. Sigue
+  siendo el motor del producto en partes que faltan migrar a DB real.
+- `types/` — `domain.ts` (frontend), `api.ts` (re-export de payloads
+  desde `server/email/types`), `index.ts` (barrel).
+- `utils/` — `cn` (clsx + tailwind-merge) y `presenters` (formato de
+  fechas y labels de status).
 
-src/lib/db.ts está bien planteado. Usa singleton en desarrollo para evitar múltiples instancias de Prisma. Eso sí está bien.
+Cómo mejorarlo (sigue pendiente):
 
-Pero src/lib/mocks pesa demasiado en el comportamiento real del sistema. Mientras esa carpeta siga siendo la base del negocio, la plataforma va a sentirse terminada por fuera y provisional por dentro.
+- Reducir `mocks/` al mínimo o moverlos a una capa temporal claramente
+  marcada conforme se migra a DB.
+- Centralizar tipos de dominio sin mezclar tipos mock y tipos persistidos.
 
-Cómo mejorarlo:
+## src/config
 
-Dejar lib solo para utilidades transversales reales. Lo específico del dominio debería vivir más dentro de features o server.
-
-Reducir mocks al mínimo o moverlos a una capa temporal claramente marcada, por ejemplo src/dev/mocks o src/testing/mocks.
-
-Centralizar tipos de dominio sin mezclar tipos mock y tipos persistidos si representan mundos distintos.
+Carpeta nueva (antes `src/lib/env.ts`). Hoy contiene únicamente
+`env.ts` — reader tipado de variables de entorno con `requireServerEnv`
+para validar que las requeridas existan en runtime. La consume Prisma
+client, healthcheck y email config.
 
 ## src/server
 
-Esta es la capa backend más limpia del proyecto. Aquí tienes email, repositorios y servicios. Conceptualmente es la dirección correcta.
+Esta es la capa backend más limpia del proyecto. Hoy tiene email,
+repositorios, servicios y los tipos públicos de payload de email
+(`types.ts`, antes `lib/email-payloads.ts`). Conceptualmente es la
+dirección correcta.
 
-Las plantillas de correo y el envío con Resend están mejor organizados que otras partes del sistema. Eso porque ya hay una separación entre config, templates y función de envío. También hay repositorios y servicios para contacto.
+Las plantillas de correo y el envío con Resend están bien organizados:
+config, templates y función de envío separados.
 
-El problema es que esta capa todavía no gobierna todo el backend. Varias rutas API siguen resolviendo cosas directamente en el route handler en vez de usar servicios de aquí.
+El problema es que esta capa todavía no gobierna todo el backend. Varias
+rutas API siguen resolviendo cosas directamente en el route handler en
+vez de usar servicios de aquí.
 
 Cómo mejorarlo:
 
-Consolidar server como única capa de negocio backend. Que las API routes de app/api deleguen a server/services y server/repositories.
+- Consolidar `server/` como única capa de negocio backend. Que las API
+  routes deleguen a `server/services` y `server/repositories`.
+- Mover también la lógica de quotes y auth a server.
 
-Mover también la lógica de quotes y auth a server. Hoy una parte está en endpoints y otra parte aquí. Eso se siente partido.
+
+
+# Sistema de diseño
+
+`globals.css` ahora define en `@theme`:
+
+- Paleta de marca (primary, accent, secondary, body-color)
+- Tokens de estado (success/warning/error/info en escalas 50/100/500/600/700)
+- Acentos por rol (`role-client`, `role-pm`, `role-admin` en escalas
+  50/100/500/600)
+- Radii estándar (`--radius-card`, `--radius-card-dense`)
+- Sombras estándar (`--shadow-card`, `--shadow-card-dense`)
+- Tokens shadcn (background, foreground, card, popover, primary-foreground,
+  secondary, muted, accent, destructive, border, input, ring) vía
+  `@theme inline`
+
+Tematización por rol: el shell del dashboard envuelve todo en
+`<div className="role-themed" data-role={role}>` y los tokens
+`--role`, `--role-soft`, `--role-strong` se resuelven automáticamente
+para todos los descendientes. Esto reemplaza el `getRoleCardTone()` con
+hex hardcoded que existía antes en `dashboard-ui.tsx`.
+
+Clases utilitarias añadidas:
+- `.warm-card`, `.ops-card`, `.kpi-card`
+- `.btn-role`, `.btn-role-outline`
+- `.badge-status-{success,warning,error,info,neutral}`
+- `.cmd-trigger`, `.cmd-kbd`
+- `.kpi-value`, `.kpi-label`, `.kpi-delta-{up,down,flat}`
+
+Renombre importante: `--color-foreground` (antes off-white legacy) →
+`--color-surface-soft`, para liberar `--color-foreground` y mapearlo a
+texto oscuro como espera shadcn. 16 archivos marketing/auth/quote ya
+usan `bg-surface-soft`.
+
+Tipografía: Poppins se mantiene intacta (cargada con `next/font/local`
+desde `/public/fonts/poppins/`, expuesta como `--font-sans`). No se
+modificó ni la jerarquía ni las clases `.type-*` existentes.
 
 
 
@@ -196,60 +392,81 @@ Mover también la lógica de quotes y auth a server. Hoy una parte está en endp
 
 Aquí se tiene la configuración de proyecto y runtime.
 
-package.json define scripts y dependencias. Está limpio, pero básico.
+`package.json` define scripts y dependencias. Está limpio. Las dependencias
+nuevas: `clsx`, `tailwind-merge`, `class-variance-authority`,
+`react-hook-form`, `zod`, `@hookform/resolvers`, `sonner`, todas las
+piezas de Radix instaladas vía shadcn (`radix-ui` paquete monolítico).
 
-next.config.ts, tsconfig.json, postcss.config.mjs y similares son infraestructura de framework.
+`next.config.ts`, `tsconfig.json`, `postcss.config.mjs` son infraestructura
+de framework.
 
-README.md está bien para arrancar, pero por lo que vi, ya se quedó atrás respecto al estado real del código. Eso es peligroso porque da una imagen falsa del sistema.
+`README.md` está bien para arrancar pero conviene actualizarlo a la
+arquitectura real: explicar qué partes están ya conectadas a DB, cuáles
+siguen mock, cuál es el flujo de quote y cómo correr el proyecto completo.
 
-Cómo mejorarlo: actualizar README a arquitectura real. Debe explicar qué partes están ya conectadas a DB, cuáles siguen mock, cuál es el flujo de quote y cómo correr el proyecto completo.
 
-El problema técnico real del proyecto
 
-No es la estructura de carpetas. La estructura, aunque mejorable, es bastante razonable.
+# Estado real del proyecto
 
-El problema real es este: tienes una arquitectura que quiere ser real, pero con un flujo de datos todavía híbrido.
+La estructura ya no es el problema. La distribución por carpetas, después
+del refactor, está bastante razonable y permite escalar sin sentirse
+forzada.
+
+El problema real sigue siendo: tienes una arquitectura que quiere ser
+real, pero con un flujo de datos todavía híbrido.
 
 Dicho más claro:
 
 La UI ya parece producto.
 La base de datos ya parece plataforma.
+La estructura de carpetas también.
 Pero la lógica todavía no está unificada.
 
-Eso se ve en cuatro puntos:
-
-Auth real mezclada con auth mock.
-
-Dashboard modular mezclado con datos simulados.
-
-Motor de cotización en frontend, mientras la persistencia espera enums y relaciones reales.
-
-API routes haciendo lógica directa, mientras ya existe una capa server que debería centralizar eso.
 
 
+# Problemas técnicos que siguen vigentes
 
-# Problemas Tecnicos
+- Auth real (Prisma) mezclada con auth mock (`session-store.ts`,
+  `auth-service.ts`).
+- Contraseñas guardadas en texto plano (campo se llama `passwordHash` pero
+  no hay hash real).
+- Dashboard modular pero con datos simulados como fuente de verdad para
+  varios paneles (`workspace-store.tsx` fabrica entidades de negocio en
+  cliente).
+- Motor de cotización en frontend mientras la persistencia espera enums
+  y relaciones reales.
+- API routes haciendo lógica directa, mientras `src/server/` ya existe y
+  debería centralizar eso.
 
-Auth real mezclada con auth mock.
-
-Dashboard modular mezclado con datos simulados.
-
-Motor de cotización en frontend, mientras la persistencia espera enums y relaciones reales.
-
-API routes haciendo lógica directa, mientras ya existe una capa server que debería centralizar eso.
+(Lista actualizada después de la última iteración. La fractura de
+carpetas que estaba en esta lista ya no aplica: `src/lib/`,
+`src/components/` y `src/features/dashboard/components/` están
+reorganizados.)
 
 
 
-# Como Mejorar
+# Cómo mejorar (próximos pasos)
 
-Primero, unificar el modelo de dominio. Define una sola verdad para planCategory, planTier, billingModel, projectType, priority, status. Esa verdad debe ser compatible entre Prisma, frontend, formularios y correo.
+Primero, unificar el modelo de dominio. Define una sola verdad para
+`planCategory`, `planTier`, `billingModel`, `projectType`, `priority`,
+`status`. Esa verdad debe ser compatible entre Prisma, frontend,
+formularios y correo.
 
-Segundo, cerrar la migración de auth. O es mock o es real, pero ya no ambos. Y si es real, hash de contraseña y sesiones reales.
+Segundo, cerrar la migración de auth. O es mock o es real, pero ya no
+ambos. Y si es real, hash de contraseña y sesiones reales.
 
-Tercero, mover toda la lógica de quotes a dominio compartido. El builder puede seguir en frontend, pero el cálculo y la validación final deben vivir en una capa central. Idealmente src/server/services/quotes o algo así.
+Tercero, mover toda la lógica de quotes a dominio compartido. El builder
+puede seguir en frontend, pero el cálculo y la validación final deben
+vivir en una capa central. Idealmente `src/server/services/quotes` o
+algo así.
 
-Cuarto, hacer que el dashboard consuma datos reales por módulo. No necesitas migrarlo todo de golpe. Empieza por overview y quotes, luego proyectos, pagos, documentos.
+Cuarto, hacer que el dashboard consuma datos reales por módulo. No
+necesitas migrarlo todo de golpe. Empieza por overview y quotes, luego
+proyectos, pagos, documentos.
 
-Quinto, formalizar DTOs y validaciones de entrada. No más request.json() con strings libres por todas partes. Eso te va a romper en cuanto metas más usuarios y más casos.
+Quinto, formalizar DTOs y validaciones de entrada en endpoints. Ya
+tienes zod instalado para los formularios; cablearlo también en las API
+routes.
 
-Sexto, reducir dependencia de mocks como motor del producto. Los mocks deben ayudar al desarrollo, no gobernar el negocio.
+Sexto, reducir dependencia de mocks como motor del producto. Los mocks
+deben ayudar al desarrollo, no gobernar el negocio.
