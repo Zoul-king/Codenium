@@ -16,6 +16,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { AuthMessage } from "@/features/auth/components/auth-fields";
 import { getDashboardRoute } from "@/features/auth/lib/auth-service";
 import { writeSession } from "@/features/auth/lib/session-store";
@@ -99,7 +100,7 @@ export function LoginForm({ onSuccess, onForgotPassword, submitClassName }: Logi
             <FormItem>
               <FormLabel>Contraseña</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <PasswordInput placeholder="••••••••" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -16,6 +16,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { AuthMessage } from "@/features/auth/components/auth-fields";
 import { getDashboardRoute } from "@/features/auth/lib/auth-service";
 import { writeSession } from "@/features/auth/lib/session-store";
@@ -140,14 +141,14 @@ export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) 
           <FormField control={form.control} name="password" render={({ field }) => (
             <FormItem>
               <FormLabel>Contraseña</FormLabel>
-              <FormControl><Input type="password" placeholder="Mínimo 8 caracteres" {...field} /></FormControl>
+              <FormControl><PasswordInput placeholder="Mínimo 8 caracteres" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
           )} />
           <FormField control={form.control} name="confirmPassword" render={({ field }) => (
             <FormItem>
               <FormLabel>Confirmar contraseña</FormLabel>
-              <FormControl><Input type="password" placeholder="Repite tu contraseña" {...field} /></FormControl>
+              <FormControl><PasswordInput placeholder="Repite tu contraseña" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
           )} />

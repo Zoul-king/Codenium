@@ -88,39 +88,20 @@ function AccessOverlay({ open, onClose }: OverlayProps) {
       <div className="absolute inset-0 flex items-center justify-center p-6">
         <div
           className={cn(
-            "w-full max-w-[1080px] rounded-[30px] bg-white p-8 text-body-color shadow-[0_24px_60px_rgba(14,20,36,0.18)] transition-all duration-500",
+            "relative w-full max-w-[560px] rounded-[30px] bg-white p-8 text-body-color shadow-[0_24px_60px_rgba(14,20,36,0.18)] transition-all duration-500",
             open ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
           )}
         >
-          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="rounded-[24px] bg-surface-soft p-8">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <span className="type-kicker">Bienvenido</span>
-                  <h2 className="mt-4 text-[32px] font-bold leading-10 text-body-color">Accede o crea tu cuenta</h2>
-                  <p className="type-body mt-4 max-w-[28rem]">
-                    Revisa tu estimado, sigue el avance de tus proyectos y mantén la conversación en un solo lugar.
-                  </p>
-                </div>
-                <button type="button" onClick={onClose} className="rounded-full border border-black/10 p-3 text-body-color transition hover:text-primary-500" aria-label="Cerrar acceso">
-                  <CloseIcon className="size-4" />
-                </button>
-              </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute right-5 top-5 rounded-full border border-black/10 p-3 text-body-color transition hover:text-primary-500"
+            aria-label="Cerrar acceso"
+          >
+            <CloseIcon className="size-4" />
+          </button>
 
-              <div className="mt-8 space-y-4">
-                <div className="rounded-[18px] bg-white p-4 shadow-[0_12px_24px_rgba(14,20,36,0.06)]">
-                  <span className="text-sm font-semibold text-primary-500">Cotización y seguimiento</span>
-                  <p className="mt-2 text-sm leading-6 text-body-color">Consulta tu estimado inicial, tus proyectos y los mensajes más recientes.</p>
-                </div>
-                <div className="rounded-[18px] bg-white p-4 shadow-[0_12px_24px_rgba(14,20,36,0.06)]">
-                  <span className="text-sm font-semibold text-secondary-600">Todo en continuidad</span>
-                  <p className="mt-2 text-sm leading-6 text-body-color">Tu cuenta conserva el contexto para no empezar desde cero cada vez.</p>
-                </div>
-              </div>
-            </div>
-
-            <AuthPanel compact onSuccess={onClose} />
-          </div>
+          <AuthPanel compact onSuccess={onClose} />
         </div>
       </div>
     </div>
