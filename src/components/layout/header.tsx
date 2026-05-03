@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { BrandLogo, CloseIcon, MenuIcon, SocialIcon } from "@/components/common/icons";
 import { AuthPanel } from "@/features/auth/components/auth-panel";
@@ -17,6 +17,12 @@ interface HeaderProps {
 export function Header({ variant, contactEmail }: HeaderProps) {
   const [accessOpen, setAccessOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const isLight = variant === "white";
   const textClassName = isLight ? "text-white" : "text-body-color";
   const navClassName = isLight ? "text-white/90 hover:text-primary-500" : "text-body-color hover:text-primary-500";
@@ -60,8 +66,12 @@ export function Header({ variant, contactEmail }: HeaderProps) {
         </div>
       </header>
 
-      <AccessOverlay open={accessOpen} onClose={() => setAccessOpen(false)} />
-      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} contactEmail={contactEmail} />
+      {mounted ? (
+        <>
+          <AccessOverlay open={accessOpen} onClose={() => setAccessOpen(false)} />
+          <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} contactEmail={contactEmail} />
+        </>
+      ) : null}
     </>
   );
 }
