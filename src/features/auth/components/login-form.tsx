@@ -31,11 +31,10 @@ type LoginValues = z.infer<typeof loginSchema>;
 interface LoginFormProps {
   onSuccess?: () => void;
   onForgotPassword?: () => void;
-  showSupportText?: boolean;
   submitClassName?: string;
 }
 
-export function LoginForm({ onSuccess, onForgotPassword, showSupportText = false, submitClassName }: LoginFormProps) {
+export function LoginForm({ onSuccess, onForgotPassword, submitClassName }: LoginFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -113,18 +112,13 @@ export function LoginForm({ onSuccess, onForgotPassword, showSupportText = false
           {isPending || form.formState.isSubmitting ? "Entrando…" : "Iniciar sesión"}
         </Button>
 
-        <div className="flex flex-col gap-2 text-sm text-body-color">
-          {onForgotPassword ? (
+        {onForgotPassword ? (
+          <div className="flex flex-col gap-2 text-sm text-body-color">
             <button type="button" onClick={onForgotPassword} className="w-fit text-left transition-colors hover:text-primary-500">
               Olvidé mi contraseña
             </button>
-          ) : null}
-          {showSupportText ? (
-            <span>
-              Prueba con <code>client@codenium.com</code>, <code>pm@codenium.com</code> o <code>admin@codenium.com</code>. Contraseña: <code>123provisional</code>.
-            </span>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </form>
     </Form>
   );
