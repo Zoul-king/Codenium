@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { AuthMessage } from "@/features/auth/components/auth-fields";
 import { getDashboardRoute } from "@/features/auth/lib/auth-service";
+import { resolveAuthRedirect } from "@/features/auth/lib/redirect";
 import { writeSession } from "@/features/auth/lib/session-store";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +47,8 @@ interface RegisterFormProps {
 
 export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<RegisterValues>({
@@ -85,7 +88,8 @@ export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) 
       });
       onSuccess?.();
       startTransition(() => {
-        router.push(getDashboardRoute(result.role));
+        const target = resolveAuthRedirect(redirectParam) ?? getDashboardRoute(result.role);
+        router.push(target);
       });
     } catch {
       form.setError("root", { message: "Ocurrió un error al crear la cuenta." });
@@ -94,8 +98,8 @@ export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) 
 
   return (
     <Form {...form}>
-      <form className="flex flex-col gap-6" onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <form className="flex flex-col gap-3 sm:gap-6" onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-2 gap-3 sm:gap-6">
           <FormField control={form.control} name="firstName" render={({ field }) => (
             <FormItem>
               <FormLabel>Nombre</FormLabel>
@@ -112,10 +116,10 @@ export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) 
           )} />
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6">
           <FormField control={form.control} name="email" render={({ field }) => (
             <FormItem>
-              <FormLabel>Correo electrónico</FormLabel>
+              <FormLabel>Correo</FormLabel>
               <FormControl><Input type="email" placeholder="tu@empresa.com" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
@@ -137,18 +141,18 @@ export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) 
           </FormItem>
         )} />
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6">
           <FormField control={form.control} name="password" render={({ field }) => (
             <FormItem>
               <FormLabel>Contraseña</FormLabel>
-              <FormControl><PasswordInput placeholder="Mínimo 8 caracteres" {...field} /></FormControl>
+              <FormControl><PasswordInput placeholder="Mín. 8 caracteres" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
           )} />
           <FormField control={form.control} name="confirmPassword" render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirmar contraseña</FormLabel>
-              <FormControl><PasswordInput placeholder="Repite tu contraseña" {...field} /></FormControl>
+              <FormLabel>Confirmar</FormLabel>
+              <FormControl><PasswordInput placeholder="Repite la contraseña" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
           )} />

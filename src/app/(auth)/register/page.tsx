@@ -8,11 +8,9 @@ export const metadata = createMetadata(registerPage);
 export default function RegisterPage() {
   return (
     <MarketingShell headerVariant="white">
-      <section className="section soft-section bg-surface-soft pt-[130px]">
-        <div className="site-shell py-16 lg:py-20">
-          <div className="mx-auto max-w-[640px]">
-            <AuthPanel initialMode="register" />
-          </div>
+      <section className="section soft-section flex min-h-[100dvh] items-center justify-center bg-surface-soft px-4 pt-28 pb-6 lg:pt-[130px] lg:pb-12">
+        <div className="mx-auto w-full max-w-[640px]">
+          <AuthPanel mode="register" />
         </div>
       </section>
     </MarketingShell>

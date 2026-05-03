@@ -3,7 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { AuthMessage } from "@/features/auth/components/auth-fields";
 import { getDashboardRoute } from "@/features/auth/lib/auth-service";
+import { resolveAuthRedirect } from "@/features/auth/lib/redirect";
 import { writeSession } from "@/features/auth/lib/session-store";
 import { cn } from "@/lib/utils";
 
@@ -31,12 +33,13 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
   onSuccess?: () => void;
-  onForgotPassword?: () => void;
   submitClassName?: string;
 }
 
-export function LoginForm({ onSuccess, onForgotPassword, submitClassName }: LoginFormProps) {
+export function LoginForm({ onSuccess, submitClassName }: LoginFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<LoginValues>({
@@ -70,7 +73,8 @@ export function LoginForm({ onSuccess, onForgotPassword, submitClassName }: Logi
 
       onSuccess?.();
       startTransition(() => {
-        router.push(getDashboardRoute(result.role));
+        const target = resolveAuthRedirect(redirectParam) ?? getDashboardRoute(result.role);
+        router.push(target);
       });
     } catch {
       form.setError("root", { message: "Ocurrió un error al iniciar sesión." });
@@ -113,13 +117,11 @@ export function LoginForm({ onSuccess, onForgotPassword, submitClassName }: Logi
           {isPending || form.formState.isSubmitting ? "Entrando…" : "Iniciar sesión"}
         </Button>
 
-        {onForgotPassword ? (
-          <div className="flex flex-col gap-2 text-sm text-body-color">
-            <button type="button" onClick={onForgotPassword} className="w-fit text-left transition-colors hover:text-primary-500">
-              Olvidé mi contraseña
-            </button>
-          </div>
-        ) : null}
+        <div className="flex flex-col gap-2 text-sm text-body-color">
+          <Link href="/forgot-password" className="w-fit transition-colors hover:text-primary-500">
+            Olvidé mi contraseña
+          </Link>
+        </div>
       </form>
     </Form>
   );

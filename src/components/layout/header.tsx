@@ -4,18 +4,20 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { BrandLogo, CloseIcon, MenuIcon, SocialIcon } from "@/components/common/icons";
-import { AuthPanel } from "@/features/auth/components/auth-panel";
+import { UserMenu } from "@/features/auth/components/user-menu";
+import { getDashboardRoute } from "@/features/auth/lib/auth-service";
 import { site } from "@/features/marketing/data/site";
 import type { HeaderVariant } from "@/features/marketing/types";
+import type { PublicUser } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   variant: HeaderVariant;
   contactEmail: string;
+  user: PublicUser | null;
 }
 
-export function Header({ variant, contactEmail }: HeaderProps) {
-  const [accessOpen, setAccessOpen] = useState(false);
+export function Header({ variant, contactEmail, user }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -44,13 +46,16 @@ export function Header({ variant, contactEmail }: HeaderProps) {
           </nav>
 
           <div className="hidden lg:block">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-[5px] border border-primary-500 bg-white px-6 py-2 text-sm font-extrabold text-primary-500 transition-all duration-500 ease-in-out hover:bg-primary-500 hover:text-white lg:text-base"
-              onClick={() => setAccessOpen(true)}
-            >
-              Iniciar sesión
-            </button>
+            {user ? (
+              <UserMenu user={user} variant={isLight ? "light" : "dark"} />
+            ) : (
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center rounded-[5px] border border-primary-500 bg-white px-6 py-2 text-sm font-extrabold text-primary-500 transition-all duration-500 ease-in-out hover:bg-primary-500 hover:text-white lg:text-base"
+              >
+                Iniciar sesión
+              </Link>
+            )}
           </div>
 
           <button
@@ -67,48 +72,20 @@ export function Header({ variant, contactEmail }: HeaderProps) {
       </header>
 
       {mounted ? (
-        <>
-          <AccessOverlay open={accessOpen} onClose={() => setAccessOpen(false)} />
-          <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} contactEmail={contactEmail} />
-        </>
+        <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} contactEmail={contactEmail} user={user} />
       ) : null}
     </>
   );
 }
 
-interface OverlayProps {
+interface MobileMenuProps {
   open: boolean;
   onClose: () => void;
+  contactEmail: string;
+  user: PublicUser | null;
 }
 
-function AccessOverlay({ open, onClose }: OverlayProps) {
-  return (
-    <div className={cn("fixed inset-0 z-50 hidden lg:block", open ? "pointer-events-auto" : "pointer-events-none")} aria-hidden={!open}>
-      <div className={cn("absolute inset-0 bg-surface-soft/90 transition-opacity duration-500", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
-      <div className="absolute inset-0 flex items-center justify-center p-6">
-        <div
-          className={cn(
-            "relative w-full max-w-[560px] rounded-[30px] bg-white p-8 text-body-color shadow-[0_24px_60px_rgba(14,20,36,0.18)] transition-all duration-500",
-            open ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-          )}
-        >
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute right-5 top-5 rounded-full border border-black/10 p-3 text-body-color transition hover:text-primary-500"
-            aria-label="Cerrar acceso"
-          >
-            <CloseIcon className="size-4" />
-          </button>
-
-          <AuthPanel compact onSuccess={onClose} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MobileMenu({ open, onClose, contactEmail }: OverlayProps & { contactEmail: string }) {
+function MobileMenu({ open, onClose, contactEmail, user }: MobileMenuProps) {
   return (
     <div className={cn("fixed inset-0 z-50 lg:hidden", open ? "pointer-events-auto" : "pointer-events-none")} aria-hidden={!open}>
       <div className={cn("absolute inset-0 bg-surface-soft transition-opacity duration-500", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
@@ -142,14 +119,7 @@ function MobileMenu({ open, onClose, contactEmail }: OverlayProps & { contactEma
             ))}
           </nav>
 
-          <div className="rounded-[24px] bg-surface-soft p-5">
-            <span className="type-kicker">Acceso</span>
-            <h3 className="mt-4 text-2xl font-bold text-body-color">Entra o crea tu cuenta</h3>
-            <p className="type-body mt-3">Consulta tus cotizaciones, proyectos y mensajes desde un solo lugar.</p>
-            <div className="mt-6">
-              <AuthPanel compact onSuccess={onClose} />
-            </div>
-          </div>
+          {user ? <MobileUserBlock user={user} onClose={onClose} /> : <MobileAuthCtas onClose={onClose} />}
 
           <div>
             <p className="text-sm font-semibold text-primary-500">Contacto</p>
@@ -174,5 +144,68 @@ function MobileMenu({ open, onClose, contactEmail }: OverlayProps & { contactEma
         </div>
       </div>
     </div>
+  );
+}
+
+function MobileAuthCtas({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <Link
+        href="/login"
+        onClick={onClose}
+        className="inline-flex items-center justify-center rounded-[5px] bg-primary-500 px-6 py-3 text-base font-extrabold text-white transition-colors hover:bg-primary-600"
+      >
+        Iniciar sesión
+      </Link>
+      <Link
+        href="/register"
+        onClick={onClose}
+        className="inline-flex items-center justify-center rounded-[5px] border border-primary-500 bg-white px-6 py-3 text-base font-extrabold text-primary-500 transition-colors hover:bg-primary-500 hover:text-white"
+      >
+        Crear cuenta
+      </Link>
+    </div>
+  );
+}
+
+function MobileUserBlock({ user, onClose }: { user: PublicUser; onClose: () => void }) {
+  return (
+    <div className="rounded-[18px] bg-surface-soft p-5">
+      <p className="text-sm font-semibold text-body-color">{user.name}</p>
+      <p className="mt-0.5 truncate text-xs text-body-color/70">{user.email}</p>
+      <div className="mt-4 flex flex-col gap-3">
+        <Link
+          href={getDashboardRoute(user.role)}
+          onClick={onClose}
+          className="inline-flex items-center justify-center rounded-[5px] bg-primary-500 px-6 py-3 text-base font-extrabold text-white transition-colors hover:bg-primary-600"
+        >
+          Mi cuenta
+        </Link>
+        <MobileLogoutButton onClose={onClose} />
+      </div>
+    </div>
+  );
+}
+
+function MobileLogoutButton({ onClose }: { onClose: () => void }) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleClick() {
+    setIsLoading(true);
+    const { logout } = await import("@/features/auth/lib/session-store");
+    await logout();
+    onClose();
+    window.location.href = "/";
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={isLoading}
+      className="inline-flex items-center justify-center rounded-[5px] border border-primary-500 bg-white px-6 py-3 text-base font-extrabold text-primary-500 transition-colors hover:bg-primary-500 hover:text-white disabled:opacity-60"
+    >
+      {isLoading ? "Cerrando…" : "Cerrar sesión"}
+    </button>
   );
 }

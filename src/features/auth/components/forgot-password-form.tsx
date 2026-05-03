@@ -24,11 +24,7 @@ const schema = z.object({
 
 type Values = z.infer<typeof schema>;
 
-interface ForgotPasswordFormProps {
-  onBack?: () => void;
-}
-
-export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
+export function ForgotPasswordForm() {
   const [feedback, setFeedback] = useState<{ success: boolean; message: string } | null>(null);
   const form = useForm<Values>({
     resolver: zodResolver(schema),
@@ -65,16 +61,9 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
 
         {feedback ? <AuthMessage tone={feedback.success ? "success" : "error"}>{feedback.message}</AuthMessage> : null}
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <Button type="submit" className="primary-button w-fit">
-            Continuar
-          </Button>
-          {onBack ? (
-            <button type="button" onClick={onBack} className="text-sm font-semibold text-body-color transition-colors hover:text-primary-500">
-              Volver al acceso
-            </button>
-          ) : null}
-        </div>
+        <Button type="submit" className="primary-button w-fit">
+          Continuar
+        </Button>
       </form>
     </Form>
   );
