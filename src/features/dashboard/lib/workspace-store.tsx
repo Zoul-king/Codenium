@@ -23,7 +23,7 @@ import type {
   UserState
 } from "@/lib/types/domain";
 
-const TODAY = "2026-04-10";
+const TODAY = new Date().toISOString().slice(0, 10);
 
 export interface DashboardWorkspaceState {
   users: UserRecord[];
@@ -35,6 +35,7 @@ export interface DashboardWorkspaceState {
   documents: ProjectDocumentRecord[];
   changeRequests: ChangeRequestRecord[];
   selectedProjectIds: Partial<Record<Role, string>>;
+  currentUserId: string | null;
 }
 
 interface CreatePmAccountInput {
@@ -67,7 +68,7 @@ interface DashboardWorkspaceContextValue {
   acceptQuote: (quoteId: string, pmId: string) => Promise<void>;
   setQuoteStatus: (quoteId: string, status: QuoteStatus) => Promise<void>;
   setUserState: (userId: string, nextState: UserState) => void;
-  createPmAccount: (input: CreatePmAccountInput) => void;
+  createPmAccount: (input: CreatePmAccountInput) => Promise<void>;
   completeMilestone: (milestoneId: string) => void;
   saveMilestone: (input: UpsertMilestoneInput) => void;
   addChangeRequest: (request: Omit<ChangeRequestRecord, "id" | "requestedAt" | "status">) => void;
@@ -91,6 +92,19 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
       let nextQuotes = [] as QuoteRecord[];
       let nextProjects = [] as ProjectRecord[];
       let nextMessages = [] as MessageRecord[];
+      let currentUserId: string | null = null;
+
+      // Carga el ID real del usuario autenticado para que los selectores
+      // funcionen correctamente con cuentas de DB (no solo con mocks).
+      try {
+        const resMe = await fetch("/api/auth/me");
+        if (resMe.ok) {
+          const me = await resMe.json();
+          currentUserId = me.user?.id ?? null;
+        }
+      } catch {
+        // Si falla, los selectores caen al modo mock por defecto.
+      }
 
       try {
         const resUsers = await fetch("/api/users");
@@ -126,21 +140,26 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
         nextMessages = [];
       }
 
-      setState((current) => ({
-        ...current,
-        users: nextUsers,
-        quotes: nextQuotes,
-        projects: nextProjects,
-        messages: nextMessages,
-        milestones: fallback.milestones,
-        payments: fallback.payments,
-        documents: fallback.documents,
-        changeRequests: fallback.changeRequests,
-        selectedProjectIds: {
-          client: nextProjects.find((project) => project.clientId === "user-client-1")?.id,
-          pm: nextProjects.find((project) => project.pmId === "user-pm-1")?.id
-        }
-      }));
+      setState((current) => {
+        const firstActiveProject = nextProjects.find((p) => p.status !== "done") ?? nextProjects[0];
+
+        return {
+          ...current,
+          users: nextUsers,
+          quotes: nextQuotes,
+          projects: nextProjects,
+          messages: nextMessages,
+          milestones: fallback.milestones,
+          payments: fallback.payments,
+          documents: fallback.documents,
+          changeRequests: fallback.changeRequests,
+          currentUserId,
+          selectedProjectIds: {
+            client: firstActiveProject?.id,
+            pm: firstActiveProject?.id
+          }
+        };
+      });
     }
 
     loadData();
@@ -206,25 +225,23 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           users: current.users.map((user) => (user.id === userId ? { ...user, state: nextState } : user))
         }));
       },
-      createPmAccount: (input) => {
+      createPmAccount: async (input) => {
+        const response = await fetch("/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input)
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo crear el PM.");
+        }
+
+        const newUser = await response.json();
+
         setState((current) => ({
           ...current,
-          users: [
-            ...current.users,
-            {
-              id: `user-pm-${current.users.filter((user) => user.role === "pm").length + 1}`,
-              createdAt: TODAY,
-              firstName: input.firstName,
-              lastName: input.lastName,
-              name: `${input.firstName} ${input.lastName}`,
-              email: input.email,
-              phone: input.phone,
-              role: "pm",
-              title: "Project Manager",
-              activeProjects: 0,
-              state: "active"
-            }
-          ]
+          users: upsertById(current.users, mapApiUser(newUser))
         }));
       },
       completeMilestone: (milestoneId) => {
@@ -235,24 +252,32 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
             return current;
           }
 
+          // Calcula los hitos actualizados primero para contar correctamente
+          const updatedMilestones = current.milestones.map((item) => {
+            if (item.id === milestoneId) return { ...item, status: "done" as const };
+            if (item.projectId === milestone.projectId && item.status === "next") return { ...item, status: "current" as const };
+            return item;
+          });
+
+          // Progreso = done / total (no +18 fijo)
+          const projectMilestones = updatedMilestones.filter((m) => m.projectId === milestone.projectId);
+          const doneCount = projectMilestones.filter((m) => m.status === "done").length;
+          const newProgress = projectMilestones.length > 0
+            ? Math.round((doneCount / projectMilestones.length) * 100)
+            : 0;
+
           return {
             ...current,
-            milestones: current.milestones.map((item) => {
-              if (item.id === milestoneId) {
-                return { ...item, status: "done" };
-              }
-
-              if (item.projectId === milestone.projectId && item.status === "next") {
-                return { ...item, status: "current" };
-              }
-
-              return item;
-            }),
+            milestones: updatedMilestones,
             payments: current.payments.map((payment) =>
-              payment.id === milestone.unlocksPaymentId && payment.status === "scheduled" ? { ...payment, status: "pending" } : payment
+              payment.id === milestone.unlocksPaymentId && payment.status === "scheduled"
+                ? { ...payment, status: "pending" as const }
+                : payment
             ),
             projects: current.projects.map((project) =>
-              project.id === milestone.projectId ? { ...project, progress: Math.min(project.progress + 18, 100) } : project
+              project.id === milestone.projectId
+                ? { ...project, progress: newProgress }
+                : project
             )
           };
         });
@@ -400,7 +425,8 @@ function createFallbackWorkspaceState(): DashboardWorkspaceState {
     payments: [...mockPayments],
     documents: [...mockDocuments],
     changeRequests: [...mockChangeRequests],
-    selectedProjectIds: {}
+    selectedProjectIds: {},
+    currentUserId: null
   };
 }
 
@@ -471,6 +497,13 @@ function mapApiQuote(quote: any, users: UserRecord[]): QuoteRecord {
   };
 }
 
+function mapDbProjectStatus(dbStatus: string): ProjectRecord["status"] {
+  if (dbStatus === "COMPLETED") return "done";
+  if (dbStatus === "ACTIVE") return "build";
+  if (dbStatus === "PAUSED") return "qa";
+  return "discovery"; // PENDING, CANCELLED, unknown
+}
+
 function mapApiProject(project: any, quote: any): ProjectRecord {
   return {
     id: project.id,
@@ -478,7 +511,7 @@ function mapApiProject(project: any, quote: any): ProjectRecord {
     clientId: project.clientId,
     clientName: quote.client?.firstName && quote.client?.lastName ? `${quote.client.firstName} ${quote.client.lastName}` : "Cliente",
     clientCompany: quote.client?.company ?? undefined,
-    status: "discovery",
+    status: mapDbProjectStatus(project.status ?? "PENDING"),
     progress: project.progress ?? 0,
     dueDate: project.dueDate ? String(project.dueDate).split("T")[0] : getProjectedDate(String(quote.createdAt).split("T")[0], 42),
     pmId: project.pmId ?? "",

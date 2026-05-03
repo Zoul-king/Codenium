@@ -76,10 +76,24 @@ export interface DashboardQuoteStatusPayload {
   status: QuoteStatus;
 }
 
+export interface DashboardMeetingScheduledPayload {
+  type: "meeting_scheduled";
+  recipientEmail: string;
+  recipientName: string;
+  projectName: string;
+  date: string;
+  time: string;
+  duration: string;
+  meetingLink?: string;
+  agenda?: string;
+  hostName: string;
+}
+
 export type DashboardNotificationPayload =
   | DashboardProjectMessagePayload
   | DashboardChangeRequestPayload
   | DashboardDeliverablePayload
   | DashboardQuoteAssignmentPayload
   | DashboardPmAccountCreatedPayload
-  | DashboardQuoteStatusPayload;
+  | DashboardQuoteStatusPayload
+  | DashboardMeetingScheduledPayload;

@@ -2,17 +2,29 @@ import { NextResponse } from "next/server";
 import { type QuoteStatus as PrismaQuoteStatus, type ProjectStatus as PrismaProjectStatus } from "@prisma/client";
 
 import { db } from "@/lib/db";
+import { getCurrentSession } from "@/lib/auth/session";
 
-// Obtener todas las cotizaciones
+// Obtener cotizaciones — admin ve todas, client solo las suyas
 export async function GET() {
+  const session = await getCurrentSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+  }
+
   try {
+    const where = session.user.role === "client" ? { clientId: session.user.id } : {};
+
     const quotes = await db.quote.findMany({
+      where,
       include: {
-        client: true,
+        client: {
+          select: { id: true, firstName: true, lastName: true, email: true, company: true }
+        },
         project: {
           include: {
-            pm: true,
-            client: true
+            pm: { select: { id: true, firstName: true, lastName: true } },
+            client: { select: { id: true, firstName: true, lastName: true } }
           }
         }
       },
@@ -22,7 +34,7 @@ export async function GET() {
     });
 
     return NextResponse.json(quotes);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "No se pudieron obtener las cotizaciones." },
       { status: 500 }
@@ -31,6 +43,16 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
+  const session = await getCurrentSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+  }
+
+  if (session.user.role !== "admin" && session.user.role !== "pm") {
+    return NextResponse.json({ error: "Acceso restringido." }, { status: 403 });
+  }
+
   try {
     const body = await request.json();
     const quoteId = typeof body?.quoteId === "string" ? body.quoteId : "";
@@ -51,10 +73,18 @@ export async function PATCH(request: Request) {
     });
 
     if (status === "APPROVED") {
+      // Verificar que el PM existe en la DB antes de usarlo como FK.
+      // Evita constraint violation cuando el frontend pasa IDs de usuarios mock.
+      let resolvedPmId: string | null = null;
+      if (pmId) {
+        const pmExists = await db.user.findUnique({ where: { id: pmId }, select: { id: true } });
+        resolvedPmId = pmExists ? pmId : null;
+      }
+
       await db.project.upsert({
         where: { quoteId },
         update: {
-          pmId,
+          pmId: resolvedPmId,
           name: quote.title,
           description: quote.description ?? undefined,
           status: "PENDING" as PrismaProjectStatus
@@ -62,7 +92,7 @@ export async function PATCH(request: Request) {
         create: {
           quoteId,
           clientId: quote.clientId,
-          pmId,
+          pmId: resolvedPmId,
           name: quote.title,
           description: quote.description ?? undefined,
           status: "PENDING" as PrismaProjectStatus
@@ -91,6 +121,12 @@ export async function PATCH(request: Request) {
 
 // Crear una nueva cotización
 export async function POST(request: Request) {
+  const session = await getCurrentSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
 
@@ -102,17 +138,18 @@ export async function POST(request: Request) {
       planTier,
       billingModel,
       estimatedPrice,
-      estimatedTimeline,
-      clientId
+      estimatedTimeline
     } = body;
 
-    // Validación de campos obligatorios
-    if (!title || !projectType || !planCategory || !planTier || !billingModel || !clientId) {
+    if (!title || !projectType || !planCategory || !planTier || !billingModel) {
       return NextResponse.json(
         { error: "Faltan datos para crear la cotización." },
         { status: 400 }
       );
     }
+
+    // clientId siempre viene de la sesión autenticada, nunca del body
+    const clientId = session.user.id;
 
     const quote = await db.quote.create({
       data: {
@@ -130,7 +167,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(quote);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "No se pudo crear la cotización." },
       { status: 500 }

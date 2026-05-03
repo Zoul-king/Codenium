@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { getCurrentSession } from "@/lib/auth/session";
 import { chatbotContext } from "@/features/marketing/data/chatbot-context";
 
 type IncomingMessage = {
@@ -15,11 +16,28 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Ruta no soportada." }, { status: 400 });
   }
 
+  const session = await getCurrentSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+  }
+
   try {
+    // admin y pm ven todos los mensajes; client solo los de sus proyectos
+    const where =
+      session.user.role === "client"
+        ? { project: { clientId: session.user.id } }
+        : {};
+
     const messages = await db.message.findMany({
+      where,
       include: {
-        sender: true,
-        project: true
+        sender: {
+          select: { firstName: true, lastName: true, role: true }
+        },
+        project: {
+          select: { name: true, clientId: true, pmId: true, quoteId: true }
+        }
       },
       orderBy: {
         createdAt: "asc"
@@ -36,11 +54,18 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    if (typeof body?.projectId === "string" && typeof body?.senderId === "string" && typeof body?.message === "string") {
+    // Rama de mensajes de dashboard — requiere sesión activa
+    if (typeof body?.projectId === "string" && typeof body?.message === "string" && !body?.messages) {
+      const session = await getCurrentSession();
+
+      if (!session) {
+        return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+      }
+
       const created = await db.message.create({
         data: {
           projectId: body.projectId,
-          senderId: body.senderId,
+          senderId: session.user.id, // nunca del body
           content: body.message.trim()
         },
         include: {

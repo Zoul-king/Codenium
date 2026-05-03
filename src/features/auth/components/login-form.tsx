@@ -21,7 +21,6 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { AuthMessage } from "@/features/auth/components/auth-fields";
 import { getDashboardRoute } from "@/features/auth/lib/auth-service";
 import { resolveAuthRedirect } from "@/features/auth/lib/redirect";
-import { writeSession } from "@/features/auth/lib/session-store";
 import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
@@ -62,14 +61,6 @@ export function LoginForm({ onSuccess, submitClassName }: LoginFormProps) {
         form.setError("root", { message: result.error || "No se pudo iniciar sesión." });
         return;
       }
-
-      writeSession({
-        userId: result.userId,
-        role: result.role,
-        name: result.name,
-        email: result.email,
-        permissions: []
-      });
 
       onSuccess?.();
       startTransition(() => {

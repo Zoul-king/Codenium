@@ -187,18 +187,18 @@ function CreatePmDialog() {
       return;
     }
     setSubmitting(true);
-    createPmAccount(form);
     try {
+      await createPmAccount(form);
       await sendDashboardNotification({
         type: "pm_account_created",
         pmEmail: form.email,
         pmName: `${form.firstName} ${form.lastName}`
       });
-      toast.success("PM creado", { description: "Le enviamos sus credenciales por correo." });
+      toast.success("PM creado", { description: "Cuenta creada en la base de datos." });
       setOpen(false);
       setForm({ firstName: "", lastName: "", email: "", phone: "" });
     } catch (error) {
-      toast.warning("PM creado pero no enviamos email", {
+      toast.error("No se pudo crear el PM", {
         description: error instanceof Error ? error.message : undefined
       });
     } finally {

@@ -11,14 +11,23 @@ import type {
   UserRecord
 } from "@/lib/types/domain";
 
-const primaryUserByRole: Record<Role, string> = {
+const mockUserByRole: Record<Role, string> = {
   client: "user-client-1",
   pm: "user-pm-1",
   admin: "user-admin-1"
 };
 
 export function getPrimaryUser(state: DashboardWorkspaceState, role: Role): UserRecord | undefined {
-  return state.users.find((user) => user.id === primaryUserByRole[role]);
+  // Cuando hay una sesión real (DB), busca por el ID del usuario autenticado.
+  // Si su rol coincide con el del dashboard que se está renderizando, lo usa.
+  // Sino, cae al ID mock para la demo.
+  if (state.currentUserId) {
+    const realUser = state.users.find((u) => u.id === state.currentUserId);
+    if (realUser && realUser.role === role) {
+      return realUser;
+    }
+  }
+  return state.users.find((user) => user.id === mockUserByRole[role]);
 }
 
 export function getUserById(state: DashboardWorkspaceState, userId?: string) {
@@ -175,7 +184,7 @@ export function getPmStats(state: DashboardWorkspaceState, pmId: string) {
 }
 
 export function getProjectsAtRisk(state: DashboardWorkspaceState) {
-  const today = new Date("2026-04-09T12:00:00");
+  const today = new Date();
 
   return state.projects.filter((project) => {
     if (project.status === "done") {
@@ -185,6 +194,6 @@ export function getProjectsAtRisk(state: DashboardWorkspaceState) {
     const dueDate = new Date(`${project.dueDate}T12:00:00`);
     const daysToDue = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-    return daysToDue <= 21 || project.progress <= 45;
+    return daysToDue <= 21 || project.progress <= 30;
   });
 }

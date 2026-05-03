@@ -7,7 +7,8 @@ import { useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { ContactIcon } from "@/components/common/icons";
+import { Mail, MapPin, Phone } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,7 +21,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { site } from "@/features/marketing/data/site";
-import type { ContactIconType } from "@/features/marketing/types";
 import { submitPublicLead } from "@/lib/api/client";
 import type { PublicLeadSource } from "@/server/email/types";
 import { cn } from "@/lib/utils";
@@ -38,7 +38,8 @@ type ContactValues = z.infer<typeof contactSchema>;
 interface ContactInfoProps {
   label: string;
   value: string;
-  icon: ContactIconType;
+  icon: "mail" | "phone" | "location";
+  href?: string;
 }
 
 interface ContactFormProps {
@@ -150,8 +151,8 @@ export function ContactForm({
                 {hasSummary ? <div>{summary}</div> : null}
                 {!hasSummary ? (
                   <>
-                    <ContactInfoCard label="Correo electrónico" value={contactEmail} icon="mail" />
-                    <ContactInfoCard label="Teléfono" value={site.contact.phone} icon="phone" />
+                    <ContactInfoCard label="Correo electrónico" value={contactEmail} icon="mail" href={`mailto:${contactEmail}`} />
+                    <ContactInfoCard label="Teléfono" value={site.contact.phone} icon="phone" href={`tel:${site.contact.phoneRaw}`} />
                     <ContactInfoCard label="Ubicación" value={`${site.contact.location}, ${site.contact.city}`} icon="location" />
                   </>
                 ) : null}
@@ -268,14 +269,29 @@ export function ContactStrip() {
   );
 }
 
-function ContactInfoCard({ label, value, icon }: ContactInfoProps) {
-  return (
-    <div>
-      <div className="flex flex-col gap-2 lg:gap-3">
-        <ContactIcon type={icon} />
-        <h3 className="text-base font-semibold sm:text-lg">{label}</h3>
-        <p className="text-sm text-gray-600">{value}</p>
+const contactIconComponents = {
+  mail: Mail,
+  phone: Phone,
+  location: MapPin
+} as const;
+
+function ContactInfoCard({ label, value, icon, href }: ContactInfoProps) {
+  const LucideIcon = contactIconComponents[icon];
+  const content = (
+    <div className="group flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)] transition-all duration-200 hover:border-primary-200 hover:shadow-[0_4px_18px_rgba(34,74,120,0.08)]">
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary-50 text-primary-500 transition group-hover:bg-primary-500 group-hover:text-white">
+        <LucideIcon className="size-4" strokeWidth={1.8} />
+      </span>
+      <div className="min-w-0">
+        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">{label}</p>
+        <p className="mt-1 text-[14px] font-semibold text-body-color">{value}</p>
       </div>
     </div>
   );
+
+  if (href) {
+    return <a href={href}>{content}</a>;
+  }
+
+  return content;
 }

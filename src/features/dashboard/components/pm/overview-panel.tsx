@@ -40,7 +40,7 @@ export function PmOverviewPanel() {
   );
   const overdueMilestones = allProjects.reduce((acc, p) => {
     const ms = getProjectMilestones(state, p.id);
-    const today = new Date("2026-04-09T12:00:00");
+    const today = new Date();
     return acc + ms.filter((m) => m.status !== "done" && new Date(`${m.date}T12:00:00`) < today).length;
   }, 0);
 

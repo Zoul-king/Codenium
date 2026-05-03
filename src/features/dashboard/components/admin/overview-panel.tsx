@@ -16,7 +16,7 @@ import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store"
 import { formatShortDate, getProjectStatusLabel, getQuoteStatusLabel } from "@/lib/utils/presenters";
 import { cn } from "@/lib/utils";
 
-const TODAY = "2026-04-10";
+const TODAY = new Date().toISOString().slice(0, 10);
 
 export function AdminOverviewPanel() {
   const { state } = useDashboardWorkspace();

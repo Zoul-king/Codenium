@@ -8,7 +8,36 @@ import {
   sendQuoteNotificationToCompany
 } from "@/server/email";
 
+// Rate limit simple en memoria: máx 3 envíos por IP cada 10 minutos
+const submissionTracker = new Map<string, { count: number; resetAt: number }>();
+const LIMIT = 3;
+const WINDOW_MS = 10 * 60 * 1000;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = submissionTracker.get(ip);
+
+  if (!entry || entry.resetAt < now) {
+    submissionTracker.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    return true;
+  }
+
+  if (entry.count >= LIMIT) return false;
+
+  entry.count++;
+  return true;
+}
+
 export async function POST(request: Request) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json<ApiActionResult>(
+      { ok: false, message: "Demasiados intentos. Intenta en unos minutos." },
+      { status: 429 }
+    );
+  }
+
   try {
     const payload = (await request.json()) as Partial<PublicLeadPayload>;
     const lead = validatePublicLead(payload);

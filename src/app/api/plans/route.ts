@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { type PlanCategory } from "@prisma/client";
 
 import { db } from "@/lib/db";
+import { getCurrentSession } from "@/lib/auth/session";
 import { mergeManagedPlanCatalog, type ManagedPlanCatalog } from "@/features/marketing/lib/plan-catalog";
 import type { PlanProfile } from "@/lib/types/domain";
 
@@ -27,6 +28,16 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  const session = await getCurrentSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+  }
+
+  if (session.user.role !== "admin") {
+    return NextResponse.json({ error: "Acceso restringido." }, { status: 403 });
+  }
+
   try {
     const body = (await request.json()) as ManagedPlanCatalog;
     const records = [...body.personal, ...body.business];

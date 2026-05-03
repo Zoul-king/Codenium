@@ -66,21 +66,28 @@ export function AdminQuotePanel() {
   }
 
   async function notifyStatus(quote: QuoteRecord, status: Exclude<QuoteStatus, "accepted">) {
-    const client = getUserById(state, quote.clientId);
-    if (!client?.email) {
-      toast.error("Sin correo del cliente", { description: "No podemos notificar el cambio." });
-      return;
+    try {
+      // Siempre actualiza el estado primero — no depende del email
+      await setQuoteStatus(quote.id, status);
+
+      const client = getUserById(state, quote.clientId);
+      if (client?.email) {
+        await sendDashboardNotification({
+          type: "quote_status_update",
+          recipientEmail: client.email,
+          recipientName: client.name,
+          quoteCode: quote.code,
+          quoteTitle: quote.title,
+          status
+        });
+      }
+
+      toast.success(`Cotización marcada como ${getQuoteStatusLabel(status)}`);
+    } catch (error) {
+      toast.error("No se pudo actualizar la cotización", {
+        description: error instanceof Error ? error.message : undefined
+      });
     }
-    await setQuoteStatus(quote.id, status);
-    await sendDashboardNotification({
-      type: "quote_status_update",
-      recipientEmail: client.email,
-      recipientName: client.name,
-      quoteCode: quote.code,
-      quoteTitle: quote.title,
-      status
-    });
-    toast.success(`Cotización marcada como ${getQuoteStatusLabel(status)}`);
   }
 
   async function handleAccept() {

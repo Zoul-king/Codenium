@@ -7,6 +7,7 @@ import {
   buildChangeRequestEmail,
   buildDashboardMessageEmail,
   buildDeliverableNotificationEmail,
+  buildMeetingScheduledEmail,
   buildPmAccountCreatedEmail,
   buildProjectAssignmentEmail,
   buildQuoteStatusEmail
@@ -149,6 +150,27 @@ export async function sendQuoteStatusEmail(input: {
   status: QuoteStatus;
 }) {
   const template = buildQuoteStatusEmail(input);
+
+  return sendEmail({
+    to: input.recipientEmail,
+    subject: template.subject,
+    text: template.text,
+    html: template.html
+  });
+}
+
+export async function sendMeetingScheduledEmail(input: {
+  recipientEmail: string;
+  recipientName: string;
+  projectName: string;
+  date: string;
+  time: string;
+  duration: string;
+  meetingLink?: string;
+  agenda?: string;
+  hostName: string;
+}) {
+  const template = buildMeetingScheduledEmail(input);
 
   return sendEmail({
     to: input.recipientEmail,

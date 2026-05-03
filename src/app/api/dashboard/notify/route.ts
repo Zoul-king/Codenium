@@ -5,12 +5,25 @@ import {
   sendChangeRequestEmail,
   sendDashboardMessageEmail,
   sendDeliverableNotificationEmail,
+  sendMeetingScheduledEmail,
   sendPmAccountCreatedEmail,
   sendProjectAssignmentEmail,
   sendQuoteStatusEmail
 } from "@/server/email";
+import { getCurrentSession } from "@/lib/auth/session";
 
 export async function POST(request: Request) {
+  const session = await getCurrentSession();
+
+  if (!session) {
+    return NextResponse.json<ApiActionResult>({ ok: false, message: "No autorizado." }, { status: 401 });
+  }
+
+  // client puede enviar notificaciones desde su propio dashboard (mensajes, documentos, hitos)
+  if (!["admin", "pm", "client"].includes(session.user.role)) {
+    return NextResponse.json<ApiActionResult>({ ok: false, message: "Acceso restringido." }, { status: 403 });
+  }
+
   try {
     const payload = validateDashboardNotificationPayload((await request.json()) as Partial<DashboardNotificationPayload>);
 
@@ -51,6 +64,19 @@ export async function POST(request: Request) {
         break;
       case "quote_status_update":
         await sendQuoteStatusEmail(payload);
+        break;
+      case "meeting_scheduled":
+        await sendMeetingScheduledEmail({
+          recipientEmail: payload.recipientEmail,
+          recipientName: payload.recipientName,
+          projectName: payload.projectName,
+          date: payload.date,
+          time: payload.time,
+          duration: payload.duration,
+          meetingLink: payload.meetingLink,
+          agenda: payload.agenda,
+          hostName: payload.hostName
+        });
         break;
       default:
         throw new Error("Tipo de notificacion no soportado.");
@@ -133,6 +159,19 @@ function validateDashboardNotificationPayload(payload: Partial<DashboardNotifica
           payload.status === "pending" || payload.status === "reviewed" || payload.status === "accepted" || payload.status === "rejected"
             ? payload.status
             : invalidField("status")
+      };
+    case "meeting_scheduled":
+      return {
+        type: "meeting_scheduled",
+        recipientEmail: requireEmail(payload.recipientEmail, "recipientEmail"),
+        recipientName: requireText(payload.recipientName, "recipientName"),
+        projectName: requireText(payload.projectName, "projectName"),
+        date: requireText(payload.date, "date"),
+        time: requireText(payload.time, "time"),
+        duration: requireText(payload.duration, "duration"),
+        meetingLink: optionalText(payload.meetingLink),
+        agenda: optionalText(payload.agenda),
+        hostName: requireText(payload.hostName, "hostName")
       };
     default:
       throw new Error("Tipo de notificacion no soportado.");

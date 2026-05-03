@@ -44,7 +44,7 @@ export function ClientOverviewPanel() {
     .filter((p) => p.status !== "paid")
     .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
   const messages = getProjectMessages(state, selectedProject.id);
-  const unreadCount = messages.filter((m) => m.status === "unread" && m.senderId !== "user-client-1").length;
+  const unreadCount = messages.filter((m) => m.status === "unread" && m.role !== "client").length;
   const completedCount = milestones.filter((m) => m.status === "done").length;
 
   return (
