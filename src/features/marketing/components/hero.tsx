@@ -11,8 +11,8 @@ interface HeroProps {
 export function Hero({ hero }: HeroProps) {
   if (hero.kind === "home") {
     return (
-      <section className="section soft-section relative flex min-h-dvh items-center justify-center overflow-hidden pt-[114px]">
-        <div className="site-shell relative z-10 flex flex-col items-center gap-6 pb-[155px] pt-12 md:flex-row lg:gap-[50px] lg:pb-[190px] lg:pt-[76px]">
+      <section className="section soft-section relative flex min-h-dvh items-center justify-center overflow-x-hidden pt-[114px] md:overflow-hidden">
+        <div className="site-shell relative z-10 flex flex-col items-center gap-6 pb-20 pt-12 md:flex-row md:pb-[155px] lg:gap-[50px] lg:pb-[190px] lg:pt-[76px]">
           <article className="hero-text hero__content relative z-10 flex w-full flex-col items-center gap-6 text-center md:items-start md:gap-10 md:text-left" data-animate="fadeInFromLeft">
             <h1 className="type-hero-home">{hero.title}</h1>
             <p className="text-base leading-7 xl:text-xl xl:leading-9">

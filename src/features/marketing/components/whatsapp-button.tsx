@@ -198,10 +198,10 @@ export function WhatsAppButton() {
   }
 
   return (
-    <div ref={containerRef} className="fixed bottom-8 right-6 z-40 hidden md:block">
+    <div ref={containerRef} className="fixed bottom-4 right-4 z-40 md:bottom-8 md:right-6">
       <div className="relative">
         {chatOpen ? (
-          <div className="absolute bottom-[calc(100%+12px)] right-0 flex h-[480px] w-[360px] flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
+          <div className="absolute bottom-[calc(100%+12px)] right-0 flex h-[min(480px,calc(100svh-100px))] w-[min(360px,calc(100vw-32px))] flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
             <div className="flex items-center justify-between border-b border-slate-200 bg-slate-950 px-4 py-3 text-white">
               <div>
                 <p className="text-sm font-semibold">FrancIA</p>
@@ -271,7 +271,7 @@ export function WhatsAppButton() {
 
         {/* Contact hub menu */}
         <div
-          className={`absolute bottom-[calc(100%+14px)] right-0 min-w-[230px] rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_20px_48px_rgba(15,23,42,0.14)] transition-all duration-200 ${
+          className={`absolute bottom-[calc(100%+14px)] right-0 w-[min(230px,calc(100vw-32px))] rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_20px_48px_rgba(15,23,42,0.14)] transition-all duration-200 ${
             open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
           }`}
         >
@@ -316,7 +316,7 @@ export function WhatsAppButton() {
         {/* Trigger button */}
         <button
           type="button"
-          className="flex items-center gap-3 rounded-full border border-white/10 bg-slate-950 py-3 pl-3 pr-5 text-[13px] font-semibold text-white shadow-[0_8px_28px_rgba(15,23,42,0.28)] transition-all duration-200 hover:bg-primary-500 hover:shadow-[0_8px_28px_rgba(79,47,150,0.35)]"
+          className="flex items-center gap-3 rounded-full border border-white/10 bg-slate-950 p-3 text-[13px] font-semibold text-white shadow-[0_8px_28px_rgba(15,23,42,0.28)] transition-all duration-200 hover:bg-primary-500 hover:shadow-[0_8px_28px_rgba(79,47,150,0.35)] md:py-3 md:pl-3 md:pr-5"
           aria-expanded={open}
           aria-label="Abrir canales de contacto"
           onClick={() => setOpen((current) => !current)}
@@ -324,7 +324,7 @@ export function WhatsAppButton() {
           <span className="grid size-9 place-content-center rounded-full bg-white/10 text-white">
             <ContactHubIcon className="size-4" />
           </span>
-          <span>Canales de contacto</span>
+          <span className="hidden md:inline">Canales de contacto</span>
         </button>
       </div>
     </div>
