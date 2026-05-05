@@ -116,8 +116,6 @@ export interface SiteConfig {
   };
   assets: {
     brand: {
-      pink: string;
-      white: string;
       header: string;
       footer: string;
     };

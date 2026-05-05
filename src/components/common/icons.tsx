@@ -26,7 +26,7 @@ interface SocialIconProps extends IconProps {
 }
 
 interface BrandLogoProps extends IconProps {
-  variant?: "brand" | "white" | "header" | "footer";
+  variant?: "header" | "footer";
   priority?: boolean;
 }
 
@@ -159,15 +159,8 @@ export function WhatsAppIcon({ className = "size-5" }: IconProps) {
   );
 }
 
-export function BrandLogo({ variant = "brand", className = "w-[112px]", priority = false }: BrandLogoProps) {
-  const asset =
-    variant === "white"
-      ? site.assets.brand.white
-      : variant === "header"
-        ? site.assets.brand.header
-        : variant === "footer"
-          ? site.assets.brand.footer
-          : site.assets.brand.pink;
+export function BrandLogo({ variant = "header", className = "w-[112px]", priority = false }: BrandLogoProps) {
+  const asset = variant === "footer" ? site.assets.brand.footer : site.assets.brand.header;
 
   return (
     <span className={cn("relative inline-flex items-center", className)} aria-label="Codenium">

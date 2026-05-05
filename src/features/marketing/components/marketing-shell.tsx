@@ -11,9 +11,10 @@ import { getPublicContactEmail } from "@/server/email/config";
 interface MarketingShellProps {
   children: ReactNode;
   headerVariant: HeaderVariant;
+  hideFooter?: boolean;
 }
 
-export async function MarketingShell({ children, headerVariant }: MarketingShellProps) {
+export async function MarketingShell({ children, headerVariant, hideFooter = false }: MarketingShellProps) {
   const contactEmail = getPublicContactEmail();
   const session = await getCurrentSession();
 
@@ -23,7 +24,7 @@ export async function MarketingShell({ children, headerVariant }: MarketingShell
       <PageShell>
         <main className="relative min-h-screen overflow-x-hidden">{children}</main>
       </PageShell>
-      <Footer contactEmail={contactEmail} />
+      {hideFooter ? null : <Footer contactEmail={contactEmail} />}
       <WhatsAppButton />
     </div>
   );

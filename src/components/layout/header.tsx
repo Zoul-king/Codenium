@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Mail, Phone } from "lucide-react";
 
 import { BrandLogo, CloseIcon, MenuIcon, SocialIcon } from "@/components/common/icons";
 import { UserMenu } from "@/features/auth/components/user-menu";
@@ -17,7 +18,7 @@ interface HeaderProps {
   user: PublicUser | null;
 }
 
-export function Header({ variant, contactEmail, user }: HeaderProps) {
+export function Header({ contactEmail, user }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -26,7 +27,7 @@ export function Header({ variant, contactEmail, user }: HeaderProps) {
     setMounted(true);
 
     function onScroll() {
-      setScrolled(window.scrollY > 32);
+      setScrolled(window.scrollY > 16);
     }
 
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -34,31 +35,18 @@ export function Header({ variant, contactEmail, user }: HeaderProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // When scrolled, always use dark text regardless of variant
-  const isLight = !scrolled && variant === "white";
-  const textClassName = isLight ? "text-white" : "text-body-color";
-  const navClassName = isLight
-    ? "text-white/90 hover:text-white"
-    : "text-body-color/80 hover:text-primary-500";
-
   return (
     <>
       <header
         className={cn(
-          "fixed inset-x-0 top-0 z-30 transition-all duration-300",
-          scrolled
-            ? "h-[72px] border-b border-slate-200/60 bg-white/95 shadow-[0_2px_16px_rgba(0,0,0,0.06)] backdrop-blur-md"
-            : "h-28 bg-transparent"
+          "fixed inset-x-0 top-0 z-30 h-[72px] bg-white transition-shadow duration-200 ease-out",
+          scrolled ? "shadow-[0_4px_18px_rgba(15,23,42,0.06)]" : "shadow-none"
         )}
       >
-        <div className={cn("site-shell flex h-full items-center justify-between px-4 sm:px-6", textClassName)}>
+        <div className="site-shell flex h-full items-center justify-between px-4 sm:px-6">
           {/* Logo */}
           <Link href="/" aria-label="Inicio" className="flex-shrink-0">
-            <BrandLogo
-              variant={isLight ? "white" : "header"}
-              className={cn("transition-all duration-300", scrolled ? "w-[100px]" : "w-[96px] md:w-[108px]")}
-              priority
-            />
+            <BrandLogo variant="header" className="w-[100px] md:w-[112px]" priority />
           </Link>
 
           {/* Desktop nav */}
@@ -67,10 +55,7 @@ export function Header({ variant, contactEmail, user }: HeaderProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  "nav-underline text-[13.5px] font-semibold tracking-[0.01em] transition-colors xl:text-sm",
-                  navClassName
-                )}
+                className="nav-underline text-[13.5px] font-semibold tracking-[0.01em] text-body-color/80 transition-colors hover:text-primary-500 xl:text-sm"
               >
                 <span className="relative inline-block pb-[5px]">{item.label}</span>
               </Link>
@@ -80,16 +65,11 @@ export function Header({ variant, contactEmail, user }: HeaderProps) {
           {/* Desktop CTA */}
           <div className="hidden lg:block">
             {user ? (
-              <UserMenu user={user} variant={isLight ? "light" : "dark"} />
+              <UserMenu user={user} variant="dark" />
             ) : (
               <Link
                 href="/login"
-                className={cn(
-                  "inline-flex items-center justify-center rounded-[6px] px-5 py-2 text-sm font-bold transition-all duration-200",
-                  scrolled || !isLight
-                    ? "border border-primary-500 bg-transparent text-primary-500 hover:bg-primary-500 hover:text-white"
-                    : "border border-white/70 bg-white/10 text-white backdrop-blur-sm hover:bg-white hover:text-primary-500"
-                )}
+                className="inline-flex items-center justify-center rounded-[6px] border border-primary-500 bg-transparent px-5 py-2 text-sm font-bold text-primary-500 transition-all duration-200 hover:bg-primary-500 hover:text-white"
               >
                 Iniciar sesión
               </Link>
@@ -99,10 +79,7 @@ export function Header({ variant, contactEmail, user }: HeaderProps) {
           {/* Mobile burger */}
           <button
             type="button"
-            className={cn(
-              "group flex items-center gap-2 transition-colors type-menu-trigger lg:hidden",
-              navClassName
-            )}
+            className="group flex items-center gap-2 text-body-color/80 transition-colors hover:text-primary-500 type-menu-trigger lg:hidden"
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
             onClick={() => setMobileOpen((v) => !v)}
@@ -150,12 +127,12 @@ function MobileMenu({ open, onClose, contactEmail, user }: MobileMenuProps) {
       {/* Drawer panel */}
       <div
         className={cn(
-          "absolute inset-x-0 top-0 overflow-y-auto bg-white px-5 pb-10 pt-5 shadow-2xl transition-transform duration-300 ease-out",
+          "absolute inset-x-0 top-0 max-h-[100dvh] overflow-y-auto bg-white px-5 pb-10 pt-5 shadow-2xl transition-transform duration-300 ease-out",
           open ? "translate-y-0" : "-translate-y-full"
         )}
       >
         {/* Header row */}
-        <div className="flex items-center justify-between pb-5 border-b border-slate-100">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-5">
           <Link href="/" aria-label="Inicio" onClick={onClose}>
             <BrandLogo variant="header" className="w-[90px]" />
           </Link>
@@ -188,18 +165,10 @@ function MobileMenu({ open, onClose, contactEmail, user }: MobileMenuProps) {
           {/* Auth block */}
           {user ? <MobileUserBlock user={user} onClose={onClose} /> : <MobileAuthCtas onClose={onClose} />}
 
-          {/* Contact info */}
+          {/* Redes sociales con email + teléfono */}
           <div className="rounded-2xl bg-surface-soft p-5">
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.14em] text-primary-500">Contacto</p>
-            <div className="space-y-2 text-sm text-body-color">
-              <a href={`mailto:${contactEmail}`} className="block transition hover:text-primary-500">
-                {contactEmail}
-              </a>
-              <a href={`tel:${site.contact.phoneRaw}`} className="block transition hover:text-primary-500">
-                {site.contact.phone}
-              </a>
-            </div>
-            <ul className="mt-4 flex gap-2">
+            <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.14em] text-primary-500">Redes sociales</p>
+            <ul className="flex flex-wrap gap-2">
               {site.socials.map((social) => (
                 <li key={social.label}>
                   <a
@@ -207,12 +176,30 @@ function MobileMenu({ open, onClose, contactEmail, user }: MobileMenuProps) {
                     target="_blank"
                     rel="noreferrer"
                     aria-label={social.label}
-                    className="flex size-9 items-center justify-center rounded-lg bg-white text-slate-600 shadow-sm transition hover:bg-primary-500 hover:text-white"
+                    className="flex size-10 items-center justify-center rounded-lg bg-white text-slate-600 shadow-sm transition hover:bg-primary-500 hover:text-white"
                   >
-                    <SocialIcon type={social.icon} className="size-4" />
+                    <SocialIcon type={social.icon} className="size-[18px]" />
                   </a>
                 </li>
               ))}
+              <li>
+                <a
+                  href={`mailto:${contactEmail}`}
+                  aria-label="Correo"
+                  className="flex size-10 items-center justify-center rounded-lg bg-white text-slate-600 shadow-sm transition hover:bg-primary-500 hover:text-white"
+                >
+                  <Mail className="size-[18px]" strokeWidth={1.8} />
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`tel:${site.contact.phoneRaw}`}
+                  aria-label="Teléfono"
+                  className="flex size-10 items-center justify-center rounded-lg bg-white text-slate-600 shadow-sm transition hover:bg-primary-500 hover:text-white"
+                >
+                  <Phone className="size-[18px]" strokeWidth={1.8} />
+                </a>
+              </li>
             </ul>
           </div>
         </div>
