@@ -47,7 +47,7 @@ export function PmOverviewPanel() {
   return (
     <div className="space-y-6">
       {/* HEADER STATS */}
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         <OpsStatCard
           label="Proyectos activos"
           value={activeProjects.length}

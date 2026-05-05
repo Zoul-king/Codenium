@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { DashboardEmptyState } from "@/features/dashboard/components/primitives";
-import { getProjectClientEmail, getProjectPmEmail } from "@/features/dashboard/lib/recipients";
 import {
   getPrimaryUser,
   getProjectMessages,
@@ -63,22 +62,11 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
       await addProjectMessage(project.id, currentUser.id, role, messageText);
       setDraft("");
 
-      const recipientEmail =
-        role === "client"
-          ? getProjectPmEmail(state, project.id)
-          : getProjectClientEmail(state, project.id);
-
-      if (recipientEmail && counterpart) {
-        await sendDashboardNotification({
-          type: "project_message",
-          recipientEmail,
-          recipientName: counterpart.name,
-          projectName: project.name,
-          senderName: currentUser.name,
-          senderRole: role,
-          message: messageText
-        });
-      }
+      await sendDashboardNotification({
+        type: "project_message",
+        projectId: project.id,
+        message: messageText
+      });
     } catch (error) {
       toast.error("No pudimos enviar", {
         description: error instanceof Error ? error.message : undefined

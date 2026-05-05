@@ -20,20 +20,13 @@ export interface ApiActionResult {
 
 export interface DashboardProjectMessagePayload {
   type: "project_message";
-  recipientEmail: string;
-  recipientName: string;
-  projectName: string;
-  senderName: string;
-  senderRole: "client" | "pm";
+  projectId: string;
   message: string;
 }
 
 export interface DashboardChangeRequestPayload {
   type: "change_request";
-  recipientEmail: string;
-  recipientName: string;
-  requestedBy: string;
-  projectName: string;
+  projectId: string;
   title: string;
   detail: string;
   priority: string;
@@ -41,13 +34,10 @@ export interface DashboardChangeRequestPayload {
 
 export interface DashboardDeliverablePayload {
   type: "deliverable_notification";
-  recipientEmail: string;
-  recipientName: string;
-  projectName: string;
+  projectId: string;
   title: string;
   kind: string;
   fileName?: string;
-  registeredBy: string;
 }
 
 export interface DashboardQuoteAssignmentPayload {

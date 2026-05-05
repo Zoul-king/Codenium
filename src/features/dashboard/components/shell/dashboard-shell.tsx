@@ -17,7 +17,7 @@ import {
   Users
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -35,12 +35,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { CommandPalette, useCommandPaletteState } from "@/features/dashboard/components/shell/command-palette";
 import { DashboardChromeProvider } from "@/features/dashboard/components/primitives";
-import {
-  getPendingMessages,
-  getSelectedProject,
-  getVisibleProjects,
-  getVisibleQuotes
-} from "@/features/dashboard/lib/selectors";
+import { getPendingMessages } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { logout } from "@/features/auth/lib/session-store";
 import { dashboardNav } from "@/lib/mocks";
@@ -71,66 +66,34 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const commandPalette = useCommandPaletteState();
 
-  const visibleProjects = getVisibleProjects(state, role);
-  const visibleQuotes = getVisibleQuotes(state, role);
   const unreadMessages = getPendingMessages(state, role).length;
-  const selectedProject =
-    role === "client" || role === "pm" ? getSelectedProject(state, role) : undefined;
-  const activeItem = dashboardNav[role].find((item) => item.key === activeKey);
-
-  const summary = useMemo(() => {
-    if (role === "client") {
-      return {
-        title: panelLabelByRole[role],
-        subtitle: selectedProject?.name ?? "Selecciona un proyecto",
-        helper:
-          unreadMessages > 0
-            ? `${unreadMessages} mensajes pendientes`
-            : `${visibleProjects.length} proyectos visibles`
-      };
-    }
-
-    if (role === "pm") {
-      const activeCount = visibleProjects.filter((project) => project.status !== "done").length;
-
-      return {
-        title: panelLabelByRole[role],
-        subtitle: selectedProject?.name ?? "Selecciona un proyecto",
-        helper:
-          unreadMessages > 0
-            ? `${unreadMessages} conversaciones por revisar`
-            : `${activeCount} proyectos en curso`
-      };
-    }
-
-    return {
-      title: panelLabelByRole[role],
-      subtitle: `${visibleQuotes.length} cotizaciones`,
-      helper: `${state.users.length} usuarios`
-    };
-  }, [
-    role,
-    selectedProject?.name,
-    state.users.length,
-    unreadMessages,
-    visibleProjects,
-    visibleQuotes.length
-  ]);
+  const user = userByRole[role];
 
   async function handleLogout() {
     await logout();
     router.push("/");
   }
 
-  const user = userByRole[role];
-
   const sidebar = (
     <SidebarContent
       role={role}
       activeKey={activeKey}
-      summary={summary}
       unreadMessages={unreadMessages}
       onNavigate={() => setSidebarOpen(false)}
+      onOpenSearch={() => {
+        setSidebarOpen(false);
+        commandPalette.setOpen(true);
+      }}
+      onLogout={handleLogout}
+      user={user}
+      onProfile={() => {
+        setSidebarOpen(false);
+        router.push(`/dashboard/${role}/profile`);
+      }}
+      onHome={() => {
+        setSidebarOpen(false);
+        router.push("/");
+      }}
     />
   );
 
@@ -151,83 +114,19 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
             </SheetContent>
           </Sheet>
 
-          <main className="flex min-w-0 flex-col overflow-hidden">
-            {/* Topbar */}
-            <header className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 lg:px-8">
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  className="lg:hidden"
-                  onClick={() => setSidebarOpen(true)}
-                  aria-label="Abrir menú"
-                >
-                  <Menu className="size-4" />
-                </Button>
-                <div className="flex flex-col">
-                  <p className="text-xs font-medium text-slate-500">{panelLabelByRole[role]}</p>
-                  <p className="text-sm font-semibold text-slate-950">
-                    {activeItem?.label ?? "Dashboard"}
-                  </p>
-                </div>
-              </div>
+          <main className="relative flex min-w-0 flex-col overflow-hidden">
+            {/* Mobile-only floating menu trigger (replaces the removed topbar) */}
+            <Button
+              variant="outline"
+              size="icon-sm"
+              className="absolute left-3 top-3 z-20 size-9 border-slate-200 bg-white shadow-sm lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Abrir menú"
+            >
+              <Menu className="size-4" />
+            </Button>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="cmd-trigger hidden md:inline-flex"
-                  onClick={() => commandPalette.setOpen(true)}
-                >
-                  <Search className="size-3.5" />
-                  Buscar
-                  <span className="cmd-kbd ml-2">⌘K</span>
-                </button>
-
-                <NotificationsBell unreadMessages={unreadMessages} />
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="flex items-center gap-2 rounded-[12px] border border-slate-200 bg-white p-1 pr-3 transition hover:border-slate-300"
-                    >
-                      <Avatar className="size-7">
-                        <AvatarFallback className="bg-[var(--role-soft,#eff6fb)] text-xs font-semibold text-[var(--role-strong,#224a78)]">
-                          {user.initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="hidden text-xs font-medium text-slate-700 sm:inline">
-                        {user.name}
-                      </span>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-slate-950">{user.name}</span>
-                        <span className="text-xs text-slate-500">{user.email}</span>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => router.push(`/dashboard/${role}/profile`)}>
-                      <UserRound className="size-4" />
-                      Mi perfil
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push("/")}>
-                      <Home className="size-4" />
-                      Volver al inicio
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} variant="destructive">
-                      <LogOut className="size-4" />
-                      Cerrar sesión
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </header>
-
-            <ScrollArea className="flex-1">
+            <ScrollArea className="min-h-0 flex-1">
               <div className="px-4 py-6 lg:px-8 lg:py-8">{children}</div>
             </ScrollArea>
           </main>
@@ -242,34 +141,56 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
 interface SidebarContentProps {
   role: Role;
   activeKey: string;
-  summary: { title: string; subtitle: string; helper: string };
   unreadMessages: number;
   onNavigate: () => void;
+  onOpenSearch: () => void;
+  onLogout: () => void;
+  onProfile: () => void;
+  onHome: () => void;
+  user: { name: string; initials: string; email: string };
 }
 
-function SidebarContent({ role, activeKey, summary, unreadMessages, onNavigate }: SidebarContentProps) {
+function SidebarContent({
+  role,
+  activeKey,
+  unreadMessages,
+  onNavigate,
+  onOpenSearch,
+  onLogout,
+  onProfile,
+  onHome,
+  user
+}: SidebarContentProps) {
   return (
     <>
       <div className="border-b border-slate-200 px-5 py-5">
-        <div className="flex items-center gap-3">
-          <span className="grid size-9 place-items-center rounded-[12px] bg-[var(--role-strong,#224a78)] text-sm font-bold text-white">
-            C
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-slate-950">Codenium</p>
-            <p className="text-[11px] font-medium text-slate-500">{summary.title}</p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-[12px] bg-[var(--role-strong,#224a78)] text-sm font-bold text-white">
+              C
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold text-slate-950">Codenium</p>
+              <p className="truncate text-[11px] font-medium text-slate-500">{panelLabelByRole[role]}</p>
+            </div>
           </div>
+          <NotificationsBell unreadMessages={unreadMessages} />
         </div>
-        <div className="mt-4 rounded-[16px] border border-slate-200 bg-[var(--role-soft,#f8fafc)] p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--role-strong,#224a78)]">
-            Contexto
-          </p>
-          <p className="mt-1 truncate text-sm font-semibold text-slate-950">{summary.subtitle}</p>
-          <p className="mt-1 text-[11px] font-medium text-slate-500">{summary.helper}</p>
-        </div>
+
+        <button
+          type="button"
+          onClick={onOpenSearch}
+          className="mt-4 flex w-full items-center gap-2 rounded-[12px] border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+        >
+          <Search className="size-3.5" />
+          Buscar
+          <span className="ml-auto inline-flex items-center gap-0.5 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+            ⌘K
+          </span>
+        </button>
       </div>
 
-      <ScrollArea className="flex-1 px-3 py-4">
+      <ScrollArea className="min-h-0 flex-1 px-3 py-4">
         <nav className="space-y-1">
           {dashboardNav[role].map((item) => {
             const Icon = getNavIcon(item.key);
@@ -308,21 +229,47 @@ function SidebarContent({ role, activeKey, summary, unreadMessages, onNavigate }
         </nav>
       </ScrollArea>
 
-      <div className="border-t border-slate-200 px-5 py-4">
-        <Link
-          href={`/dashboard/${role}/profile`}
-          className="flex items-center gap-3 rounded-[12px] border border-transparent px-2 py-2 transition hover:border-slate-200 hover:bg-slate-50"
-        >
-          <Avatar className="size-8">
-            <AvatarFallback className="bg-[var(--role-soft,#eff6fb)] text-xs font-semibold text-[var(--role-strong,#224a78)]">
-              {userByRole[role].initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-950">{userByRole[role].name}</p>
-            <p className="truncate text-[11px] text-slate-500">{userByRole[role].email}</p>
-          </div>
-        </Link>
+      <div className="border-t border-slate-200 px-3 py-3">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex w-full items-center gap-3 rounded-[12px] border border-transparent px-2 py-2 text-left transition hover:border-slate-200 hover:bg-slate-50"
+            >
+              <Avatar className="size-8">
+                <AvatarFallback className="bg-[var(--role-soft,#eff6fb)] text-xs font-semibold text-[var(--role-strong,#224a78)]">
+                  {user.initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-slate-950">{user.name}</p>
+                <p className="truncate text-[11px] text-slate-500">{user.email}</p>
+              </div>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="top" className="w-56">
+            <DropdownMenuLabel>
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold text-slate-950">{user.name}</span>
+                <span className="text-xs text-slate-500">{user.email}</span>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onProfile}>
+              <UserRound className="size-4" />
+              Mi perfil
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onHome}>
+              <Home className="size-4" />
+              Volver al inicio
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onLogout} variant="destructive">
+              <LogOut className="size-4" />
+              Cerrar sesión
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </>
   );
@@ -332,7 +279,7 @@ function NotificationsBell({ unreadMessages }: { unreadMessages: number }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon-sm" className="relative" aria-label="Notificaciones">
+        <Button variant="ghost" size="icon-sm" className="relative shrink-0" aria-label="Notificaciones">
           <Bell className="size-4" />
           {unreadMessages > 0 ? (
             <span className="absolute right-1 top-1 inline-flex size-1.5 rounded-full bg-error-500" />

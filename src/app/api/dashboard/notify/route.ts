@@ -10,7 +10,72 @@ import {
   sendProjectAssignmentEmail,
   sendQuoteStatusEmail
 } from "@/server/email";
-import { getCurrentSession } from "@/lib/auth/session";
+import { getCurrentSession, type PublicUser } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+
+type NotificationType = DashboardNotificationPayload["type"];
+
+const ALLOWED_ROLES_BY_TYPE: Record<NotificationType, PublicUser["role"][]> = {
+  project_message: ["client", "pm", "admin"],
+  change_request: ["client", "admin"],
+  deliverable_notification: ["pm", "admin"],
+  quote_assignment: ["admin"],
+  pm_account_created: ["admin"],
+  quote_status_update: ["admin"],
+  meeting_scheduled: ["pm", "admin"]
+};
+
+interface ProjectContext {
+  id: string;
+  name: string;
+  client: { id: string; name: string; email: string };
+  pm: { id: string; name: string; email: string } | null;
+}
+
+async function loadProjectContextOrFail(projectId: string, session: { user: PublicUser }): Promise<ProjectContext> {
+  const project = await db.project.findUnique({
+    where: { id: projectId },
+    include: {
+      client: { select: { id: true, firstName: true, lastName: true, email: true } },
+      pm: { select: { id: true, firstName: true, lastName: true, email: true } }
+    }
+  });
+
+  if (!project) {
+    throw new HttpError(404, "Proyecto no encontrado.");
+  }
+
+  const isAdmin = session.user.role === "admin";
+  const isProjectClient = session.user.role === "client" && project.clientId === session.user.id;
+  const isProjectPm = session.user.role === "pm" && project.pmId === session.user.id;
+
+  if (!isAdmin && !isProjectClient && !isProjectPm) {
+    throw new HttpError(403, "Acceso restringido a este proyecto.");
+  }
+
+  return {
+    id: project.id,
+    name: project.name,
+    client: {
+      id: project.client.id,
+      name: `${project.client.firstName} ${project.client.lastName}`.trim(),
+      email: project.client.email
+    },
+    pm: project.pm
+      ? {
+          id: project.pm.id,
+          name: `${project.pm.firstName} ${project.pm.lastName}`.trim(),
+          email: project.pm.email
+        }
+      : null
+  };
+}
+
+class HttpError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
 
 export async function POST(request: Request) {
   const session = await getCurrentSession();
@@ -19,24 +84,75 @@ export async function POST(request: Request) {
     return NextResponse.json<ApiActionResult>({ ok: false, message: "No autorizado." }, { status: 401 });
   }
 
-  // client puede enviar notificaciones desde su propio dashboard (mensajes, documentos, hitos)
-  if (!["admin", "pm", "client"].includes(session.user.role)) {
-    return NextResponse.json<ApiActionResult>({ ok: false, message: "Acceso restringido." }, { status: 403 });
-  }
-
   try {
     const payload = validateDashboardNotificationPayload((await request.json()) as Partial<DashboardNotificationPayload>);
 
+    const allowedRoles = ALLOWED_ROLES_BY_TYPE[payload.type];
+    if (!allowedRoles?.includes(session.user.role)) {
+      return NextResponse.json<ApiActionResult>(
+        { ok: false, message: "Acceso restringido para este tipo de notificación." },
+        { status: 403 }
+      );
+    }
+
     switch (payload.type) {
-      case "project_message":
-        await sendDashboardMessageEmail(payload);
+      case "project_message": {
+        const project = await loadProjectContextOrFail(payload.projectId, session);
+        const senderRole = session.user.role === "admin" ? "pm" : session.user.role;
+
+        if (senderRole !== "client" && senderRole !== "pm") {
+          throw new HttpError(403, "Solo cliente o PM pueden enviar mensajes de proyecto.");
+        }
+
+        const recipient = senderRole === "client" ? project.pm : project.client;
+        if (!recipient) {
+          throw new HttpError(400, "El proyecto no tiene contraparte asignada.");
+        }
+
+        await sendDashboardMessageEmail({
+          recipientEmail: recipient.email,
+          recipientName: recipient.name,
+          projectName: project.name,
+          senderName: session.user.name,
+          senderRole,
+          message: payload.message
+        });
         break;
-      case "change_request":
-        await sendChangeRequestEmail(payload);
+      }
+
+      case "change_request": {
+        const project = await loadProjectContextOrFail(payload.projectId, session);
+        if (!project.pm) {
+          throw new HttpError(400, "El proyecto aún no tiene PM asignado.");
+        }
+
+        await sendChangeRequestEmail({
+          recipientEmail: project.pm.email,
+          recipientName: project.pm.name,
+          requestedBy: session.user.name,
+          projectName: project.name,
+          title: payload.title,
+          detail: payload.detail,
+          priority: payload.priority
+        });
         break;
-      case "deliverable_notification":
-        await sendDeliverableNotificationEmail(payload);
+      }
+
+      case "deliverable_notification": {
+        const project = await loadProjectContextOrFail(payload.projectId, session);
+
+        await sendDeliverableNotificationEmail({
+          recipientEmail: project.client.email,
+          recipientName: project.client.name,
+          projectName: project.name,
+          title: payload.title,
+          kind: payload.kind,
+          fileName: payload.fileName,
+          registeredBy: session.user.name
+        });
         break;
+      }
+
       case "quote_assignment":
         await Promise.all([
           sendProjectAssignmentEmail({
@@ -59,12 +175,15 @@ export async function POST(request: Request) {
           })
         ]);
         break;
+
       case "pm_account_created":
         await sendPmAccountCreatedEmail({ pmEmail: payload.pmEmail, pmName: payload.pmName });
         break;
+
       case "quote_status_update":
         await sendQuoteStatusEmail(payload);
         break;
+
       case "meeting_scheduled":
         await sendMeetingScheduledEmail({
           recipientEmail: payload.recipientEmail,
@@ -78,6 +197,7 @@ export async function POST(request: Request) {
           hostName: payload.hostName
         });
         break;
+
       default:
         throw new Error("Tipo de notificacion no soportado.");
     }
@@ -87,6 +207,10 @@ export async function POST(request: Request) {
       message: "Notificacion enviada correctamente."
     });
   } catch (error) {
+    if (error instanceof HttpError) {
+      return NextResponse.json<ApiActionResult>({ ok: false, message: error.message }, { status: error.status });
+    }
+
     return NextResponse.json<ApiActionResult>(
       {
         ok: false,
@@ -102,20 +226,13 @@ function validateDashboardNotificationPayload(payload: Partial<DashboardNotifica
     case "project_message":
       return {
         type: "project_message",
-        recipientEmail: requireEmail(payload.recipientEmail, "recipientEmail"),
-        recipientName: requireText(payload.recipientName, "recipientName"),
-        projectName: requireText(payload.projectName, "projectName"),
-        senderName: requireText(payload.senderName, "senderName"),
-        senderRole: payload.senderRole === "client" || payload.senderRole === "pm" ? payload.senderRole : invalidField("senderRole"),
+        projectId: requireText(payload.projectId, "projectId"),
         message: requireText(payload.message, "message")
       };
     case "change_request":
       return {
         type: "change_request",
-        recipientEmail: requireEmail(payload.recipientEmail, "recipientEmail"),
-        recipientName: requireText(payload.recipientName, "recipientName"),
-        requestedBy: requireText(payload.requestedBy, "requestedBy"),
-        projectName: requireText(payload.projectName, "projectName"),
+        projectId: requireText(payload.projectId, "projectId"),
         title: requireText(payload.title, "title"),
         detail: requireText(payload.detail, "detail"),
         priority: requireText(payload.priority, "priority")
@@ -123,13 +240,10 @@ function validateDashboardNotificationPayload(payload: Partial<DashboardNotifica
     case "deliverable_notification":
       return {
         type: "deliverable_notification",
-        recipientEmail: requireEmail(payload.recipientEmail, "recipientEmail"),
-        recipientName: requireText(payload.recipientName, "recipientName"),
-        projectName: requireText(payload.projectName, "projectName"),
+        projectId: requireText(payload.projectId, "projectId"),
         title: requireText(payload.title, "title"),
         kind: requireText(payload.kind, "kind"),
-        fileName: optionalText(payload.fileName),
-        registeredBy: requireText(payload.registeredBy, "registeredBy")
+        fileName: optionalText(payload.fileName)
       };
     case "quote_assignment":
       return {

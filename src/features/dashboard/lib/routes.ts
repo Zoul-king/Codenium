@@ -8,6 +8,7 @@ export function resolveRole(role: string): Role | null {
 }
 
 export function isValidDashboardSection(role: Role, section: string) {
+  if (section === "profile") return true;
   return dashboardNav[role].some((item) => item.key === section);
 }
 

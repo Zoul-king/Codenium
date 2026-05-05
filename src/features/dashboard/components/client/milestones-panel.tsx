@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextField, TextAreaField } from "@/components/common/form-field";
 import { DashboardEmptyState } from "@/features/dashboard/components/primitives";
-import { getProjectPmEmail } from "@/features/dashboard/lib/recipients";
 import {
   getProjectChangeRequests,
   getProjectMilestones,
@@ -227,21 +226,13 @@ function NewChangeRequestDialog({
     });
 
     try {
-      const recipientEmail = getProjectPmEmail(state, project.id);
-      const pmName = state.users.find((u) => u.id === project.pmId)?.name ?? "PM asignado";
-
-      if (recipientEmail) {
-        await sendDashboardNotification({
-          type: "change_request",
-          recipientEmail,
-          recipientName: pmName,
-          requestedBy: project.clientName,
-          projectName: project.name,
-          title: title.trim(),
-          detail: composedDetail,
-          priority
-        });
-      }
+      await sendDashboardNotification({
+        type: "change_request",
+        projectId: project.id,
+        title: title.trim(),
+        detail: composedDetail,
+        priority
+      });
 
       toast.success("Cambio solicitado", {
         description: "Tu PM recibirá una notificación."

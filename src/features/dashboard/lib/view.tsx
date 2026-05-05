@@ -39,6 +39,7 @@ export function renderDashboardSection(role: Role, section: string) {
     if (section === "users") return <AdminTeamPanel />;
     if (section === "payments") return <AdminPaymentsPanel />;
     if (section === "deliverables") return <AdminDeliverablesPanel />;
+    if (section === "profile") return <ProfilePanel role="admin" />;
   }
 
   return null;

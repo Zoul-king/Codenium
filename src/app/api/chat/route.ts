@@ -62,11 +62,34 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "No autorizado." }, { status: 401 });
       }
 
+      const content = body.message.trim();
+
+      if (!content) {
+        return NextResponse.json({ error: "El mensaje no puede estar vacío." }, { status: 400 });
+      }
+
+      const project = await db.project.findUnique({
+        where: { id: body.projectId },
+        select: { id: true, clientId: true, pmId: true }
+      });
+
+      if (!project) {
+        return NextResponse.json({ error: "Proyecto no encontrado." }, { status: 404 });
+      }
+
+      const isAdmin = session.user.role === "admin";
+      const isProjectClient = session.user.role === "client" && project.clientId === session.user.id;
+      const isProjectPm = session.user.role === "pm" && project.pmId === session.user.id;
+
+      if (!isAdmin && !isProjectClient && !isProjectPm) {
+        return NextResponse.json({ error: "Acceso restringido." }, { status: 403 });
+      }
+
       const created = await db.message.create({
         data: {
-          projectId: body.projectId,
+          projectId: project.id,
           senderId: session.user.id, // nunca del body
-          content: body.message.trim()
+          content
         },
         include: {
           sender: true,

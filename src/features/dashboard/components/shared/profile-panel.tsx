@@ -15,14 +15,20 @@ import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store"
 import type { Role } from "@/lib/types/domain";
 
 interface ProfilePanelProps {
-  role: Extract<Role, "client" | "pm">;
+  role: Role;
 }
+
+const roleLabel: Record<Role, string> = {
+  client: "Cliente",
+  pm: "Project manager",
+  admin: "Administración"
+};
 
 export function ProfilePanel({ role }: ProfilePanelProps) {
   const { state } = useDashboardWorkspace();
   const user = getPrimaryUser(state, role);
-  const project = getSelectedOrPrimaryProject(state, role);
-  const counterpart = getUserById(state, role === "client" ? project?.pmId : project?.clientId);
+  const project = role !== "admin" ? getSelectedOrPrimaryProject(state, role) : undefined;
+  const counterpart = getUserById(state, role === "client" ? project?.pmId : role === "pm" ? project?.clientId : undefined);
 
   if (!user) {
     return <DashboardEmptyState title="Sin usuario" body="No hay perfil para este rol." />;
@@ -57,7 +63,7 @@ export function ProfilePanel({ role }: ProfilePanelProps) {
             </div>
             <p className="mt-1 text-sm text-slate-600">{user.title}</p>
             <p className="mt-3 text-xs uppercase tracking-[0.18em] text-[var(--role-strong,#224a78)]">
-              Rol · {role === "client" ? "Cliente" : "Project manager"}
+              Rol · {roleLabel[role]}
             </p>
           </div>
         </div>
@@ -74,9 +80,30 @@ export function ProfilePanel({ role }: ProfilePanelProps) {
         </section>
 
         <section className="rounded-[var(--radius-card)] border border-slate-200 bg-white p-6 shadow-[var(--shadow-card)]">
-          <h2 className="text-base font-semibold text-slate-950">Relación operativa</h2>
+          <h2 className="text-base font-semibold text-slate-950">
+            {role === "admin" ? "Cobertura del equipo" : "Relación operativa"}
+          </h2>
           <Separator className="my-4" />
-          {project ? (
+          {role === "admin" ? (
+            <>
+              <ProfileRow
+                icon={<Briefcase className="size-4" />}
+                label="Proyectos en plataforma"
+                value={`${state.projects.length}`}
+              />
+              <ProfileRow
+                icon={<UserSquare className="size-4" />}
+                label="Usuarios registrados"
+                value={`${state.users.length}`}
+              />
+              <ProfileRow
+                icon={<Building2 className="size-4" />}
+                label="Cotizaciones"
+                value={`${state.quotes.length}`}
+                last
+              />
+            </>
+          ) : project ? (
             <>
               <ProfileRow icon={<Briefcase className="size-4" />} label="Proyecto activo" value={project.name} />
               <ProfileRow

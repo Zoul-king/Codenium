@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TextField } from "@/components/common/form-field";
 import { DashboardEmptyState } from "@/features/dashboard/components/primitives";
-import { getProjectClientEmail } from "@/features/dashboard/lib/recipients";
 import { getProjectDocuments, getSelectedOrPrimaryProject } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { sendDashboardNotification } from "@/lib/api/client";
@@ -170,19 +169,13 @@ function RegisterDocumentDialog({
     });
 
     try {
-      const recipientEmail = getProjectClientEmail(state, project.id);
-      if (recipientEmail) {
-        await sendDashboardNotification({
-          type: "deliverable_notification",
-          recipientEmail,
-          recipientName: project.clientName,
-          projectName: project.name,
-          title: title.trim(),
-          kind,
-          fileName,
-          registeredBy: state.users.find((u) => u.id === project.pmId)?.name ?? "PM asignado"
-        });
-      }
+      await sendDashboardNotification({
+        type: "deliverable_notification",
+        projectId: project.id,
+        title: title.trim(),
+        kind,
+        fileName
+      });
       toast.success("Entregable registrado", { description: "El cliente recibirá una notificación." });
       setOpen(false);
       setTitle("");
