@@ -26,6 +26,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (user.status !== "ACTIVE") {
+      return NextResponse.json(
+        { error: "Esta cuenta no está activa. Contacta al equipo de Codenium." },
+        { status: 403 }
+      );
+    }
+
     if (!isHashed(user.passwordHash)) {
       const upgraded = await hashPassword(password);
       await db.user.update({

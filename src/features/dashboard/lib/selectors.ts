@@ -12,9 +12,9 @@ import type {
 } from "@/lib/types/domain";
 
 const mockUserByRole: Record<Role, string> = {
-  client: "user-client-1",
-  pm: "user-pm-1",
-  admin: "user-admin-1"
+  client: "user-cliente-manuel",
+  pm: "user-pm-manuel",
+  admin: "user-admin-manuel"
 };
 
 export function getPrimaryUser(state: DashboardWorkspaceState, role: Role): UserRecord | undefined {

@@ -1,23 +1,26 @@
 import type { AuthAccountRecord } from "@/lib/types/domain";
 
-// Replace these credentials with a real identity provider/Auth.js later.
+// Las credenciales reales viven en la base de datos (tabla User con bcrypt).
+// Este arreglo se conserva solo como referencia para las cuentas de prueba
+// activas (Manuel) y por compatibilidad con utilidades legadas que aún lo
+// importan; el endpoint /api/auth/login no lo consulta.
 export const mockAuthAccounts: AuthAccountRecord[] = [
   {
-    userId: "user-client-1",
-    email: "client@codenium.com",
-    password: "123provisional",
+    userId: "user-cliente-manuel",
+    email: "gzcm.manuel+cliente@gmail.com",
+    password: "12345678",
     role: "client"
   },
   {
-    userId: "user-pm-1",
-    email: "pm@codenium.com",
-    password: "123provisional",
+    userId: "user-pm-manuel",
+    email: "gzcm.manuel+pm@gmail.com",
+    password: "12345678",
     role: "pm"
   },
   {
-    userId: "user-admin-1",
-    email: "admin@codenium.com",
-    password: "123provisional",
+    userId: "user-admin-manuel",
+    email: "gzcm.manuel+admin@gmail.com",
+    password: "12345678",
     role: "admin"
   }
 ];

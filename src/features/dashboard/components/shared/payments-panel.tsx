@@ -4,6 +4,7 @@ import { CheckCircle2, Clock, CreditCard, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDashboardChrome, DashboardEmptyState } from "@/features/dashboard/components/primitives";
 import {
   getMilestonePayment,
@@ -111,16 +112,19 @@ export function PaymentsPanel() {
                       </div>
                     </div>
                     {paymentState.canPay && isClient ? (
-                      <Button
-                        className="btn-role"
-                        onClick={() => {
-                          markPaymentAsPaid(payment.id);
-                          toast.success("¡Gracias! Marcamos tu pago como realizado.");
-                        }}
-                      >
-                        <CheckCircle2 className="size-4" />
-                        Confirmar pago
-                      </Button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <MercadoPagoButton paymentId={payment.id} amount={payment.amount} />
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            markPaymentAsPaid(payment.id);
+                            toast.success("¡Gracias! Marcamos tu pago como realizado.");
+                          }}
+                        >
+                          <CheckCircle2 className="size-4" />
+                          Confirmar pago manual
+                        </Button>
+                      </div>
                     ) : null}
                   </div>
                 ) : (
@@ -155,6 +159,51 @@ function PaymentBadge({
       <Icon className="size-3" />
       {label}
     </span>
+  );
+}
+
+function MercadoPagoButton({ paymentId, amount }: { paymentId: string; amount: number }) {
+  // La integración con Mercado Pago está estructurada pero aún no operativa.
+  // El botón se mantiene visible y deshabilitado: muestra un tooltip y, si se
+  // fuerza un click, llama al stub /api/payments/mercadopago para confirmar la
+  // ruta del lado del servidor.
+  async function handleClick() {
+    try {
+      await fetch("/api/payments/mercadopago", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentId, amount })
+      });
+    } catch {
+      // ignorar — la UI ya indica que está próximamente
+    }
+    toast.info("Mercado Pago aún no está habilitado", {
+      description: "La integración estará disponible próximamente."
+    });
+  }
+
+  return (
+    <TooltipProvider delayDuration={150}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span>
+            <Button
+              type="button"
+              className="bg-[#00B1EA] text-white hover:bg-[#0090c2] disabled:opacity-70"
+              disabled
+              aria-disabled="true"
+              onClick={handleClick}
+            >
+              <CreditCard className="size-4" />
+              Pagar con Mercado Pago
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          Próximamente · integración en preparación
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 

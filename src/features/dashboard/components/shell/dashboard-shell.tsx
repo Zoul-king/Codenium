@@ -35,7 +35,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { CommandPalette, useCommandPaletteState } from "@/features/dashboard/components/shell/command-palette";
 import { DashboardChromeProvider } from "@/features/dashboard/components/primitives";
-import { getPendingMessages } from "@/features/dashboard/lib/selectors";
+import { getPendingMessages, getPrimaryUser } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { logout } from "@/features/auth/lib/session-store";
 import { dashboardNav } from "@/lib/mocks";
@@ -54,11 +54,23 @@ const panelLabelByRole: Record<Role, string> = {
   admin: "Administración"
 };
 
-const userByRole: Record<Role, { name: string; initials: string; email: string }> = {
-  client: { name: "Carolina Rivera", initials: "CR", email: "client@codenium.com" },
-  pm: { name: "Mateo Fuentes", initials: "MF", email: "pm@codenium.com" },
-  admin: { name: "Equipo Codenium", initials: "EC", email: "admin@codenium.com" }
+const fallbackUserByRole: Record<Role, { name: string; initials: string; email: string }> = {
+  client: { name: "Cuenta cliente", initials: "C", email: "" },
+  pm: { name: "Project Manager", initials: "PM", email: "" },
+  admin: { name: "Administración", initials: "A", email: "" }
 };
+
+function deriveInitials(name: string): string {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((part) => part[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "?"
+  );
+}
 
 export function DashboardShell({ role, activeKey, children }: DashboardShellProps) {
   const router = useRouter();
@@ -67,7 +79,14 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
   const commandPalette = useCommandPaletteState();
 
   const unreadMessages = getPendingMessages(state, role).length;
-  const user = userByRole[role];
+  const sessionUser = getPrimaryUser(state, role);
+  const user = sessionUser
+    ? {
+        name: sessionUser.name,
+        initials: deriveInitials(sessionUser.name),
+        email: sessionUser.email
+      }
+    : fallbackUserByRole[role];
 
   async function handleLogout() {
     await logout();

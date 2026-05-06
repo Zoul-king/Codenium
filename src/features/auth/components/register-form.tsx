@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
@@ -17,8 +17,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AuthMessage } from "@/features/auth/components/auth-fields";
 import { getDashboardRoute } from "@/features/auth/lib/auth-service";
+import { DEFAULT_LADA, ladaCodes } from "@/features/auth/lib/lada-codes";
 import { resolveAuthRedirect } from "@/features/auth/lib/redirect";
 import { cn } from "@/lib/utils";
 
@@ -49,6 +51,7 @@ export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) 
   const searchParams = useSearchParams();
   const redirectParam = searchParams.get("redirect");
   const [isPending, startTransition] = useTransition();
+  const [lada, setLada] = useState<string>(DEFAULT_LADA);
 
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
@@ -66,10 +69,11 @@ export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) 
   async function onSubmit(values: RegisterValues) {
     form.clearErrors("root");
     try {
+      const fullPhone = `${lada} ${values.phone}`.trim();
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values)
+        body: JSON.stringify({ ...values, phone: fullPhone })
       });
       const result = await response.json();
 
@@ -119,7 +123,33 @@ export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) 
           <FormField control={form.control} name="phone" render={({ field }) => (
             <FormItem>
               <FormLabel>Teléfono</FormLabel>
-              <FormControl><Input placeholder="+52 …" {...field} /></FormControl>
+              <FormControl>
+                <div className="flex items-stretch gap-2">
+                  <Select value={lada} onValueChange={setLada}>
+                    <SelectTrigger
+                      aria-label="Código de país"
+                      className="h-10 w-[110px] shrink-0"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {ladaCodes.map((item) => (
+                        <SelectItem key={item.code} value={item.code}>
+                          <span className="mr-2">{item.flag}</span>
+                          <span className="font-mono">{item.code}</span>
+                          <span className="ml-2 text-slate-500">{item.country}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="tel"
+                    inputMode="tel"
+                    placeholder="55 1234 5678"
+                    {...field}
+                  />
+                </div>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )} />
