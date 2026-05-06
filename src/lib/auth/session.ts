@@ -66,10 +66,22 @@ export async function getCurrentSession() {
     return null;
   }
 
-  const session = await db.session.findUnique({
-    where: { token },
-    include: { user: true }
-  });
+  let session;
+  try {
+    session = await db.session.findUnique({
+      where: { token },
+      include: { user: true }
+    });
+  } catch (error) {
+    // Si la base de datos no responde (cold start de Neon, red caída, etc.)
+    // no rompemos la página: tratamos al usuario como anónimo en este render.
+    // Las acciones que requieran auth real fallarán con un mensaje amable.
+    console.warn(
+      "[session] no se pudo consultar la sesión, render anónimo:",
+      error instanceof Error ? error.message.split("\n")[0] : error
+    );
+    return null;
+  }
 
   if (!session) {
     return null;

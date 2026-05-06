@@ -14,6 +14,8 @@ import {
 
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/password";
+import { isTransientDbError } from "@/lib/db/retry";
+import { getCurrentSession } from "@/lib/auth/session";
 import type { ApiActionResult, PublicLeadPayload } from "@/server/email/types";
 import {
   sendContactConfirmationToLead,
@@ -21,6 +23,8 @@ import {
   sendQuoteConfirmationToLead,
   sendQuoteNotificationToCompany
 } from "@/server/email";
+
+class PublicValidationError extends Error {}
 
 // Rate limit simple en memoria: máx 3 envíos por IP cada 10 minutos
 const submissionTracker = new Map<string, { count: number; resetAt: number }>();
@@ -52,65 +56,116 @@ export async function POST(request: Request) {
     );
   }
 
+  let lead: PublicLeadPayload;
   try {
     const payload = (await request.json()) as Partial<PublicLeadPayload>;
-    const lead = validatePublicLead(payload);
+    lead = validatePublicLead(payload);
+  } catch (error) {
+    return NextResponse.json<ApiActionResult>(
+      {
+        ok: false,
+        message:
+          error instanceof PublicValidationError
+            ? error.message
+            : "No pudimos leer los datos del formulario."
+      },
+      { status: 400 }
+    );
+  }
 
-    // 1) Persistir la solicitud en la base de datos para que el Admin la vea
-    //    en su dashboard. Para /quote creamos una Quote real (con un User
-    //    sintético inactivo si el lead no tiene cuenta). Siempre dejamos un
-    //    ContactLead como traza de origen.
-    await persistPublicLead(lead);
+  // Si el formulario lo envía un usuario con sesión iniciada, asociamos la
+  // cotización a su cuenta directamente — así el cliente ve su proyecto en
+  // su dashboard cuando el admin lo apruebe (independiente del email tipeado).
+  const session = await getCurrentSession().catch(() => null);
+  const sessionUserId = session?.user.role === "client" ? session.user.id : null;
 
-    // 2) Notificar por correo (existing flow).
+  // 1) Persistir la solicitud en la base de datos para que el Admin la vea
+  //    en su dashboard. Si la base de datos no responde, no bloqueamos el envío
+  //    del correo: registramos el error y seguimos.
+  let persisted = true;
+  try {
+    await persistPublicLead(lead, sessionUserId);
+  } catch (error) {
+    persisted = false;
+    console.error("[forms] persistPublicLead failed", {
+      source: lead.source,
+      email: lead.email,
+      transient: isTransientDbError(error),
+      message: error instanceof Error ? error.message.split("\n")[0] : String(error)
+    });
+  }
+
+  // 2) Notificar por correo. El correo tampoco debe tumbar la respuesta al
+  //    usuario; si falla, lo registramos y devolvemos un mensaje claro.
+  let emailed = true;
+  try {
     if (lead.source === "quote") {
       await Promise.all([sendQuoteNotificationToCompany(lead), sendQuoteConfirmationToLead(lead)]);
     } else {
       await Promise.all([sendContactNotificationToCompany(lead), sendContactConfirmationToLead(lead)]);
     }
-
-    return NextResponse.json<ApiActionResult>({
-      ok: true,
-      message: "Tu solicitud fue enviada correctamente."
-    });
   } catch (error) {
+    emailed = false;
+    console.error("[forms] email send failed", {
+      source: lead.source,
+      email: lead.email,
+      message: error instanceof Error ? error.message.split("\n")[0] : String(error)
+    });
+  }
+
+  if (!persisted && !emailed) {
     return NextResponse.json<ApiActionResult>(
       {
         ok: false,
-        message: error instanceof Error ? error.message : "No pudimos enviar tu solicitud."
+        message:
+          "No pudimos procesar tu solicitud en este momento. Por favor intenta de nuevo en unos segundos."
       },
-      { status: 400 }
+      { status: 503 }
     );
   }
+
+  return NextResponse.json<ApiActionResult>({
+    ok: true,
+    message: persisted
+      ? "Tu solicitud fue enviada correctamente."
+      : "Recibimos tu solicitud. La estamos registrando, te contactaremos pronto."
+  });
 }
 
-async function persistPublicLead(lead: PublicLeadPayload) {
+async function persistPublicLead(lead: PublicLeadPayload, sessionUserId: string | null) {
   const fullName = `${lead.firstName} ${lead.lastName}`.trim();
   const hidden = lead.hiddenFields ?? {};
   const isQuote = lead.source === "quote";
 
-  // Reusa la cuenta del lead si ya existe (por correo); de lo contrario crea
-  // una cuenta inactiva con un hash aleatorio para que no se pueda usar para
-  // login (login además rechaza usuarios no ACTIVOS).
+  // Si hay sesión activa de cliente, ese es el dueño de la solicitud.
+  // Sino, reusa la cuenta por correo o crea una inactiva como respaldo.
   const emailKey = lead.email.toLowerCase();
-  const existing = await db.user.findUnique({ where: { email: emailKey } });
 
-  const placeholderPassword = randomBytes(32).toString("hex");
-  const placeholderHash = await hashPassword(placeholderPassword);
+  let user;
+  if (sessionUserId) {
+    user = await db.user.findUnique({ where: { id: sessionUserId } });
+  }
 
-  const user = existing
-    ? existing
-    : await db.user.create({
-        data: {
-          firstName: lead.firstName,
-          lastName: lead.lastName,
-          email: emailKey,
-          phone: lead.phone,
-          passwordHash: placeholderHash,
-          role: UserRole.CLIENT,
-          status: UserStatus.INACTIVE
-        }
-      });
+  if (!user) {
+    user = await db.user.findUnique({ where: { email: emailKey } });
+  }
+
+  if (!user) {
+    const placeholderPassword = randomBytes(32).toString("hex");
+    const placeholderHash = await hashPassword(placeholderPassword);
+
+    user = await db.user.create({
+      data: {
+        firstName: lead.firstName,
+        lastName: lead.lastName,
+        email: emailKey,
+        phone: lead.phone,
+        passwordHash: placeholderHash,
+        role: UserRole.CLIENT,
+        status: UserStatus.INACTIVE
+      }
+    });
+  }
 
   // Registrar el lead independientemente del origen.
   await db.contactLead.create({
@@ -211,7 +266,7 @@ function validatePublicLead(payload: Partial<PublicLeadPayload>): PublicLeadPayl
   const source = payload.source === "quote" ? "quote" : payload.source === "contact" ? "contact" : null;
 
   if (!source) {
-    throw new Error("No pudimos identificar el origen del formulario.");
+    throw new PublicValidationError("No pudimos identificar el origen del formulario.");
   }
 
   const firstName = payload.firstName?.trim() ?? "";
@@ -222,11 +277,11 @@ function validatePublicLead(payload: Partial<PublicLeadPayload>): PublicLeadPayl
   const originPath = payload.originPath?.trim() ?? source;
 
   if (!firstName || !lastName || !email || !phone || !message) {
-    throw new Error("Completa nombre, apellidos, correo, telefono y mensaje.");
+    throw new PublicValidationError("Completa nombre, apellidos, correo, telefono y mensaje.");
   }
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new Error("Escribe un correo valido.");
+    throw new PublicValidationError("Escribe un correo valido.");
   }
 
   return {
