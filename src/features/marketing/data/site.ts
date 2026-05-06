@@ -50,8 +50,8 @@ export const site: SiteConfig = {
   },
   assets: {
     brand: {
-      header: "/images/brand/codenium-header.svg",
-      footer: "/images/brand/codenium-footer.svg"
+      header: "/images/brand/logo-header.png",
+      footer: "/images/brand/logo-footer.png"
     },
     hero: {
       home: "/images/marketing/hero-home.webp",

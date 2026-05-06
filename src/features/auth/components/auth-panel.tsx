@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 
 import { LoginForm } from "@/features/auth/components/login-form";
@@ -50,7 +51,9 @@ export function AuthPanel({ mode, onSuccess, showSessionStatus = false }: AuthPa
         </div>
       </div>
 
-      {mode === "login" ? <LoginForm onSuccess={onSuccess} /> : <RegisterForm onSuccess={onSuccess} />}
+      <Suspense fallback={null}>
+        {mode === "login" ? <LoginForm onSuccess={onSuccess} /> : <RegisterForm onSuccess={onSuccess} />}
+      </Suspense>
 
       {showSessionStatus ? (
         <div className="mt-6 hidden sm:block">
