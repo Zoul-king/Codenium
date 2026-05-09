@@ -28,7 +28,7 @@ export function Hero({ hero }: HeroProps) {
               </Link>
             </div>
           </article>
-          <div className="hero-image hidden max-h-[432px] w-full max-w-[432px] md:block" data-animate="fadeInFromRight">
+          <div className="hero-image w-full max-w-[280px] sm:max-w-[360px] md:max-h-[432px] md:max-w-[432px]" data-animate="fadeInFromRight">
             <HeroArtwork />
           </div>
           <SquareBackground />

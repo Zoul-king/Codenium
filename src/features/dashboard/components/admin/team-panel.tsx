@@ -170,7 +170,7 @@ function UserTable({
 }) {
   return (
     <div className="rounded-[var(--radius-card-dense)] border border-slate-200 bg-white shadow-[var(--shadow-card-dense)]">
-      <Table>
+      <Table className="min-w-[640px]">
         <TableHeader>
           <TableRow>
             <TableHead>Usuario</TableHead>

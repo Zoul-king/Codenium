@@ -175,7 +175,7 @@ export function ContactForm({
                   }
                   onSubmit={form.handleSubmit(onSubmit)}
                 >
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
                     <FormField control={form.control} name="firstName" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Nombre *</FormLabel>
@@ -192,7 +192,7 @@ export function ContactForm({
                     )} />
                   </div>
 
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
                     <FormField control={form.control} name="email" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Correo electrónico *</FormLabel>

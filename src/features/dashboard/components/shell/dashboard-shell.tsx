@@ -138,7 +138,7 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
             <Button
               variant="outline"
               size="icon-sm"
-              className="absolute left-3 top-3 z-20 size-9 border-slate-200 bg-white shadow-sm lg:hidden"
+              className="absolute left-2 top-2 z-20 size-9 border-slate-200 bg-white shadow-sm sm:left-3 sm:top-3 lg:hidden"
               onClick={() => setSidebarOpen(true)}
               aria-label="Abrir menú"
             >

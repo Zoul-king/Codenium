@@ -48,7 +48,7 @@ export function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
           </p>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]" data-animate="fadeInFromBottom">
+        <div className="grid gap-4 sm:gap-6 xl:grid-cols-[0.92fr_1.08fr]" data-animate="fadeInFromBottom">
           <article className="portfolio-story-card">
             <div key={activeCard.name} className="portfolio-story-copy">
               <div className="flex items-start justify-between gap-4">
@@ -62,7 +62,7 @@ export function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
                   </div>
                 </div>
 
-                {activeCard.logo ? <Image src={activeCard.logo} alt={`${activeCard.name} logo`} width={144} height={48} className="h-10 w-auto shrink-0 object-contain lg:h-12" /> : null}
+                {activeCard.logo ? <Image src={activeCard.logo} alt={`${activeCard.name} logo`} width={144} height={48} className="h-8 w-auto max-w-[100px] shrink-0 object-contain sm:h-10 sm:max-w-[144px] lg:h-12" /> : null}
               </div>
 
               <div className="mt-8 flex flex-wrap gap-3">

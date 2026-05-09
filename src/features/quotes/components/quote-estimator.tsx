@@ -47,7 +47,7 @@ export function QuoteEstimator({ draft, onChange }: QuoteEstimatorProps) {
             onToggle={() => setOpenSection((current) => (current === section.key ? null : section.key))}
           >
             {section.key === "project" ? (
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {quoteProjectTypes.map((item) => {
                   const selected = draft.projectType === item.key;
 
@@ -88,7 +88,7 @@ export function QuoteEstimator({ draft, onChange }: QuoteEstimatorProps) {
             ) : null}
 
             {section.key === "timeline" ? (
-              <div className="grid gap-3 md:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {timelineOptions.map((option) => (
                   <button key={option.key} type="button" onClick={() => onChange({ ...draft, timelinePreference: option.key })} className={getOptionButtonClass(draft.timelinePreference === option.key)}>
                     <span className="block text-sm font-semibold">{option.label}</span>

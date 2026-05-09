@@ -28,7 +28,7 @@ export function Timeline({ steps }: TimelineProps) {
                 data-delay={String(index * 0.05)}
               >
                 <div className="flex items-start gap-5">
-                  <div className="relative h-[120px] w-[120px] shrink-0 rounded-full border border-slate-200 bg-slate-50 p-2 shadow-[0_12px_26px_rgba(15,23,42,0.07)] sm:h-[132px] sm:w-[132px]">
+                  <div className="relative h-[96px] w-[96px] shrink-0 rounded-full border border-slate-200 bg-slate-50 p-2 shadow-[0_12px_26px_rgba(15,23,42,0.07)] sm:h-[120px] sm:w-[120px] md:h-[132px] md:w-[132px]">
                     <Image src={site.assets.timeline[index]} alt={`Paso ${index + 1}`} width={138} height={138} className="h-full w-full rounded-full object-cover" />
                     <span className="absolute bottom-1 right-1 inline-grid size-[42px] place-content-center rounded-full bg-primary-500 text-sm font-bold text-white sm:size-[46px] sm:text-base">
                       {String(index + 1).padStart(2, "0")}

@@ -49,7 +49,7 @@ export function AdminOverviewPanel() {
   return (
     <div className="space-y-6">
       {/* KPI ROW */}
-      <div className="grid gap-3 grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
         <KpiCard label="Precotizaciones hoy" value={prequotesToday} delta="+12%" deltaTone="up" spark={sparkData} />
         <KpiCard label="Aceptadas hoy" value={acceptedToday} delta="+24%" deltaTone="up" spark={sparkAccepted} />
         <KpiCard label="Conversión" value={`${conversionRate}%`} delta="+5pts" deltaTone="up" spark={sparkConversion} />
@@ -86,7 +86,7 @@ export function AdminOverviewPanel() {
             </div>
 
             <TabsContent value="recent" className="m-0">
-              <Table>
+              <Table className="min-w-[560px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Cotización</TableHead>
@@ -125,7 +125,7 @@ export function AdminOverviewPanel() {
             </TabsContent>
 
             <TabsContent value="pipeline" className="m-0">
-              <Table>
+              <Table className="min-w-[600px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Proyecto</TableHead>
@@ -174,7 +174,7 @@ export function AdminOverviewPanel() {
             </TabsContent>
 
             <TabsContent value="risk" className="m-0">
-              <Table>
+              <Table className="min-w-[560px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Proyecto</TableHead>

@@ -81,7 +81,7 @@ export function Pricing({
                   type="button"
                   onClick={() => handleProfileChange(option.key)}
                   className={cn(
-                    "min-w-[172px] rounded-[8px] px-5 py-2 text-sm font-extrabold transition-all duration-300 lg:text-base",
+                    "min-w-[120px] sm:min-w-[172px] rounded-[8px] px-3 py-2 text-sm font-extrabold transition-all duration-300 sm:px-5 lg:text-base",
                     activeProfile === option.key ? "bg-primary-500 text-white shadow-[0_12px_24px_rgba(34,74,120,0.18)]" : "text-primary-500 hover:bg-primary-50"
                   )}
                   aria-pressed={activeProfile === option.key}
