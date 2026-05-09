@@ -122,6 +122,10 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
         nextUsers = upsertById(nextUsers, sessionUserRecord);
       }
 
+      let nextMilestones: ProjectMilestoneRecord[] = [];
+      let nextPayments: PaymentRecord[] = [];
+      let nextDocuments: ProjectDocumentRecord[] = [];
+
       try {
         const resQuotes = await fetch("/api/quotes");
 
@@ -129,10 +133,50 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           const quotes = await resQuotes.json();
           nextQuotes = quotes.map((quote: any) => mapApiQuote(quote, nextUsers));
           nextProjects = quotes.flatMap((quote: any) => (quote.project ? [mapApiProject(quote.project, quote)] : []));
+
+          const projectsRaw = quotes
+            .map((quote: any) => quote.project)
+            .filter((project: any) => project);
+
+          // Asegura que el PM y el cliente asignado al proyecto queden en
+          // `users` para que selectores como `getUserById` (chat, perfil)
+          // funcionen aunque /api/users esté restringido para clientes.
+          // No sobrescribimos a un usuario ya existente (p. ej. la cuenta
+          // autenticada cargada desde /api/auth/me con datos completos).
+          for (const project of projectsRaw) {
+            if (project.pm) {
+              const exists = nextUsers.some((u) => u.id === project.pm.id);
+              if (!exists) {
+                nextUsers = upsertById(nextUsers, mapApiUser({ ...project.pm, role: "PM" }));
+              }
+            }
+            if (project.client) {
+              const exists = nextUsers.some((u) => u.id === project.client.id);
+              if (!exists) {
+                nextUsers = upsertById(nextUsers, mapApiUser({ ...project.client, role: "CLIENT" }));
+              }
+            }
+          }
+
+          nextMilestones = projectsRaw.flatMap((project: any) =>
+            (project.milestones ?? []).map(mapApiMilestone)
+          );
+
+          const builtPayments = projectsRaw.flatMap((project: any) =>
+            (project.payments ?? []).map((payment: any) => mapApiPayment(payment))
+          );
+          nextPayments = linkPaymentsToMilestones(builtPayments, nextMilestones);
+
+          nextDocuments = projectsRaw.flatMap((project: any) =>
+            (project.documents ?? []).map(mapApiDocument)
+          );
         }
       } catch {
         nextQuotes = [];
         nextProjects = [];
+        nextMilestones = [];
+        nextPayments = [];
+        nextDocuments = [];
       }
 
       try {
@@ -154,9 +198,9 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           quotes: nextQuotes,
           projects: nextProjects,
           messages: nextMessages,
-          milestones: fallback.milestones,
-          payments: fallback.payments,
-          documents: fallback.documents,
+          milestones: nextMilestones.length > 0 ? nextMilestones : fallback.milestones,
+          payments: nextPayments.length > 0 ? nextPayments : fallback.payments,
+          documents: nextDocuments.length > 0 ? nextDocuments : fallback.documents,
           changeRequests: fallback.changeRequests,
           currentUserId,
           selectedProjectIds: {
@@ -610,4 +654,95 @@ function upsertById<T extends { id: string }>(items: T[], nextItem: T) {
   }
 
   return items.map((item) => (item.id === nextItem.id ? nextItem : item));
+}
+
+function mapMilestoneStatus(status: unknown): ProjectMilestoneRecord["status"] {
+  if (status === "COMPLETED") return "done";
+  if (status === "IN_PROGRESS") return "current";
+  return "next"; // PENDING, BLOCKED
+}
+
+function mapApiMilestone(milestone: any): ProjectMilestoneRecord {
+  const date = milestone.completedAt ?? milestone.dueDate ?? milestone.createdAt;
+  return {
+    id: milestone.id,
+    projectId: milestone.projectId,
+    title: milestone.title,
+    summary: milestone.description ?? "",
+    date: date ? String(date).split("T")[0] : TODAY,
+    status: mapMilestoneStatus(milestone.status)
+  };
+}
+
+function mapPaymentStatus(status: unknown): PaymentRecord["status"] {
+  if (status === "PAID") return "paid";
+  if (status === "PENDING" || status === "PARTIAL" || status === "OVERDUE") return "pending";
+  return "scheduled"; // CANCELLED or unknown
+}
+
+function mapApiPayment(payment: any): PaymentRecord {
+  const due = payment.dueDate ?? payment.paidAt ?? payment.createdAt;
+  return {
+    id: payment.id,
+    projectId: payment.projectId,
+    label: payment.concept ?? "Pago",
+    amount: payment.amount ?? 0,
+    dueDate: due ? String(due).split("T")[0] : TODAY,
+    provider: "Mercado Pago",
+    status: mapPaymentStatus(payment.status)
+  };
+}
+
+// Asocia cada pago a un hito en orden secuencial: el primer pago al primer
+// hito del proyecto, el segundo al segundo, etc. Esto permite que el panel de
+// pagos del cliente muestre estado bloqueado/desbloqueado por hito sin
+// requerir una FK explícita en la BD.
+function linkPaymentsToMilestones(
+  payments: PaymentRecord[],
+  milestones: ProjectMilestoneRecord[]
+): PaymentRecord[] {
+  const byProject = new Map<string, ProjectMilestoneRecord[]>();
+  for (const milestone of milestones) {
+    const list = byProject.get(milestone.projectId) ?? [];
+    list.push(milestone);
+    byProject.set(milestone.projectId, list);
+  }
+
+  const cursor = new Map<string, number>();
+  return payments.map((payment) => {
+    const projectMilestones = byProject.get(payment.projectId) ?? [];
+    const idx = cursor.get(payment.projectId) ?? 0;
+    const milestone = projectMilestones[idx];
+    cursor.set(payment.projectId, idx + 1);
+    return milestone ? { ...payment, milestoneId: milestone.id } : payment;
+  });
+}
+
+function mapDocumentKind(category: unknown): string {
+  switch (category) {
+    case "PROPOSAL":
+      return "Propuesta";
+    case "CONTRACT":
+      return "Contrato";
+    case "BRIEF":
+      return "Brief";
+    case "DELIVERABLE":
+      return "Entregable";
+    case "INVOICE":
+      return "Factura";
+    default:
+      return "Documento";
+  }
+}
+
+function mapApiDocument(document: any): ProjectDocumentRecord {
+  return {
+    id: document.id,
+    projectId: document.projectId,
+    title: document.name ?? "Documento",
+    kind: mapDocumentKind(document.category),
+    updatedAt: document.createdAt ? String(document.createdAt).split("T")[0] : TODAY,
+    href: document.fileUrl ?? "#",
+    audience: "client"
+  };
 }

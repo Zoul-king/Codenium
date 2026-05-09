@@ -24,7 +24,10 @@ export async function GET() {
         project: {
           include: {
             pm: { select: { id: true, firstName: true, lastName: true } },
-            client: { select: { id: true, firstName: true, lastName: true } }
+            client: { select: { id: true, firstName: true, lastName: true } },
+            milestones: { orderBy: { order: "asc" } },
+            payments: { orderBy: { createdAt: "asc" } },
+            documents: { orderBy: { createdAt: "desc" } }
           }
         }
       },
