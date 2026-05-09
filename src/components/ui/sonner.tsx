@@ -1,40 +1,48 @@
-"use client"
+"use client";
 
 import {
-  CircleCheckIcon,
-  InfoIcon,
-  Loader2Icon,
-  OctagonXIcon,
-  TriangleAlertIcon,
-} from "lucide-react"
-import { useTheme } from "next-themes"
-import { Toaster as Sonner, type ToasterProps } from "sonner"
+  CircleCheck,
+  Info,
+  Loader2,
+  OctagonAlert,
+  TriangleAlert
+} from "lucide-react";
+import { Toaster as Sonner, type ToasterProps } from "sonner";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
-
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
-      className="toaster group"
-      icons={{
-        success: <CircleCheckIcon className="size-4" />,
-        info: <InfoIcon className="size-4" />,
-        warning: <TriangleAlertIcon className="size-4" />,
-        error: <OctagonXIcon className="size-4" />,
-        loading: <Loader2Icon className="size-4 animate-spin" />,
+      theme="light"
+      className="codenium-toaster"
+      position="top-right"
+      offset={20}
+      visibleToasts={4}
+      gap={12}
+      toastOptions={{
+        classNames: {
+          toast:
+            "codenium-toast group flex w-full items-start gap-3 rounded-2xl border bg-white px-4 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.10)] backdrop-blur-sm",
+          title: "text-sm font-semibold leading-tight text-slate-950",
+          description: "mt-0.5 text-[13px] leading-snug text-slate-600",
+          icon: "shrink-0 mt-0.5",
+          closeButton:
+            "!left-auto !right-2 !top-2 !translate-x-0 !translate-y-0 !rounded-full !border-slate-200 !bg-white !text-slate-500 hover:!bg-slate-50",
+          actionButton:
+            "!bg-[#224a78] !text-white !rounded-lg !px-3 !py-1.5 !text-xs !font-semibold hover:!opacity-90",
+          cancelButton:
+            "!bg-slate-100 !text-slate-700 !rounded-lg !px-3 !py-1.5 !text-xs !font-semibold hover:!bg-slate-200"
+        }
       }}
-      style={
-        {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
-        } as React.CSSProperties
-      }
+      icons={{
+        success: <CircleCheck className="size-5 text-[#059669]" />,
+        info: <Info className="size-5 text-[#224a78]" />,
+        warning: <TriangleAlert className="size-5 text-[#d97706]" />,
+        error: <OctagonAlert className="size-5 text-[#dc2626]" />,
+        loading: <Loader2 className="size-5 animate-spin text-[#4f2f96]" />
+      }}
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };

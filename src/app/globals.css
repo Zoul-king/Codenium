@@ -204,6 +204,59 @@
   .kpi-delta-down { @apply inline-flex items-center gap-1 text-xs font-semibold text-error-600; }
   .kpi-delta-flat { @apply inline-flex items-center gap-1 text-xs font-semibold text-slate-500; }
 
+  /* Toasts (sonner) — alineados al modo claro de la marca */
+  .codenium-toast[data-type="success"] {
+    border-color: var(--color-success-100) !important;
+    background: linear-gradient(180deg, var(--color-success-50) 0%, #ffffff 65%) !important;
+  }
+  .codenium-toast[data-type="success"]::before {
+    background: var(--color-success-500);
+  }
+  .codenium-toast[data-type="info"],
+  .codenium-toast[data-type="default"] {
+    border-color: var(--color-primary-100) !important;
+    background: linear-gradient(180deg, var(--color-primary-50) 0%, #ffffff 65%) !important;
+  }
+  .codenium-toast[data-type="info"]::before,
+  .codenium-toast[data-type="default"]::before {
+    background: var(--color-primary-500);
+  }
+  .codenium-toast[data-type="warning"] {
+    border-color: var(--color-warning-100) !important;
+    background: linear-gradient(180deg, var(--color-warning-50) 0%, #ffffff 65%) !important;
+  }
+  .codenium-toast[data-type="warning"]::before {
+    background: var(--color-warning-500);
+  }
+  .codenium-toast[data-type="error"] {
+    border-color: var(--color-error-100) !important;
+    background: linear-gradient(180deg, var(--color-error-50) 0%, #ffffff 65%) !important;
+  }
+  .codenium-toast[data-type="error"]::before {
+    background: var(--color-error-500);
+  }
+  .codenium-toast[data-type="loading"] {
+    border-color: var(--color-role-admin-100) !important;
+    background: linear-gradient(180deg, var(--color-role-admin-50) 0%, #ffffff 65%) !important;
+  }
+  .codenium-toast[data-type="loading"]::before {
+    background: var(--color-accent-500);
+  }
+  .codenium-toast::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 2px 0 0 2px;
+  }
+  .codenium-toast {
+    position: relative;
+    overflow: hidden;
+    padding-left: 18px !important;
+  }
+
   /* Command palette trigger */
   .cmd-trigger {
     @apply inline-flex items-center gap-2 rounded-[12px] border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50;
