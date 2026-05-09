@@ -124,6 +124,14 @@ export async function POST(request: Request) {
     );
   }
 
+  if (!emailed) {
+    return NextResponse.json<ApiActionResult>({
+      ok: true,
+      message:
+        "Recibimos tu solicitud y la registramos, pero no pudimos enviar la confirmacion por correo. Te contactaremos pronto."
+    });
+  }
+
   return NextResponse.json<ApiActionResult>({
     ok: true,
     message: persisted

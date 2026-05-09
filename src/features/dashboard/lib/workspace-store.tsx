@@ -93,6 +93,7 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
       let nextProjects = [] as ProjectRecord[];
       let nextMessages = [] as MessageRecord[];
       let currentUserId: string | null = null;
+      let sessionUserRecord: UserRecord | null = null;
 
       // Carga el ID real del usuario autenticado para que los selectores
       // funcionen correctamente con cuentas de DB (no solo con mocks).
@@ -101,6 +102,9 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
         if (resMe.ok) {
           const me = await resMe.json();
           currentUserId = me.user?.id ?? null;
+          if (me.user?.id) {
+            sessionUserRecord = mapSessionUser(me.user);
+          }
         }
       } catch {
         // Si falla, los selectores caen al modo mock por defecto.
@@ -115,6 +119,13 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
         }
       } catch {
         nextUsers = fallback.users;
+      }
+
+      // Garantiza que la cuenta autenticada (cliente recién registrado, etc.)
+      // esté disponible en los selectores aunque /api/users no la haya devuelto
+      // (los clientes reciben 403 en ese endpoint).
+      if (sessionUserRecord) {
+        nextUsers = upsertById(nextUsers, sessionUserRecord);
       }
 
       try {
@@ -437,6 +448,28 @@ function mergeById<T extends { id: string }>(fallback: T[], incoming: T[]) {
   incoming.forEach((item) => merged.set(item.id, item));
 
   return Array.from(merged.values());
+}
+
+function mapSessionUser(user: any): UserRecord {
+  const role = String(user.role ?? "client").toLowerCase() as Role;
+  const firstName = user.firstName ?? "";
+  const lastName = user.lastName ?? "";
+  const status = String(user.status ?? "active").toLowerCase();
+
+  return {
+    id: user.id,
+    createdAt: user.createdAt ? String(user.createdAt).split("T")[0] : TODAY,
+    firstName,
+    lastName,
+    name: user.name ?? `${firstName} ${lastName}`.trim(),
+    email: user.email ?? "",
+    phone: user.phone ?? "",
+    company: user.company ?? undefined,
+    role,
+    title: role === "admin" ? "Administracion general" : role === "pm" ? "Project Manager" : "Cuenta cliente",
+    activeProjects: 0,
+    state: status === "active" ? "active" : status === "banned" ? "banned" : "inactive"
+  };
 }
 
 function mapApiUser(user: any): UserRecord {
