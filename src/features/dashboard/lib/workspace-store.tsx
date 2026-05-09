@@ -60,7 +60,8 @@ interface DashboardWorkspaceContextValue {
   selectProject: (role: Extract<Role, "client" | "pm">, projectId: string) => void;
   acceptQuote: (quoteId: string, pmId: string) => Promise<void>;
   setQuoteStatus: (quoteId: string, status: QuoteStatus) => Promise<void>;
-  setUserState: (userId: string, nextState: UserState) => void;
+  setUserState: (userId: string, nextState: UserState) => Promise<void>;
+  deleteUser: (userId: string) => Promise<void>;
   createPmAccount: (input: CreatePmAccountInput) => Promise<{ emailed: boolean }>;
   completeMilestone: (milestoneId: string) => void;
   saveMilestone: (input: UpsertMilestoneInput) => void;
@@ -223,10 +224,43 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           projects: quote.project ? upsertById(current.projects, mapApiProject(quote.project, quote)) : current.projects
         }));
       },
-      setUserState: (userId, nextState) => {
+      setUserState: async (userId, nextState) => {
+        const apiStatus =
+          nextState === "active" ? "active" : nextState === "banned" ? "suspended" : "inactive";
+
+        const response = await fetch(`/api/users/${userId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: apiStatus })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo actualizar el usuario.");
+        }
+
         setState((current) => ({
           ...current,
           users: current.users.map((user) => (user.id === userId ? { ...user, state: nextState } : user))
+        }));
+      },
+      deleteUser: async (userId) => {
+        const response = await fetch(`/api/users/${userId}`, { method: "DELETE" });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo eliminar la cuenta.");
+        }
+
+        setState((current) => ({
+          ...current,
+          users: current.users.filter((user) => user.id !== userId),
+          projects:
+            // Si el usuario eliminado era cliente sus proyectos también se borran;
+            // si era PM, sus proyectos quedan sin asignar.
+            current.projects
+              .filter((p) => p.clientId !== userId)
+              .map((p) => (p.pmId === userId ? { ...p, pmId: "" } : p))
         }));
       },
       createPmAccount: async (input) => {

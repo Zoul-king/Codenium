@@ -8,7 +8,8 @@ import {
   buildProjectAssignmentEmail,
   buildDeliverableNotificationEmail,
   buildQuoteStatusEmail,
-  buildMeetingScheduledEmail
+  buildMeetingScheduledEmail,
+  buildPasswordResetEmail
 } from "@/server/email/templates/dashboard-events";
 import {
   buildCompanyLeadEmail,
@@ -266,6 +267,31 @@ describe("buildCompanyLeadEmail (notificación interna)", () => {
     });
     expect(quote.subject.toLowerCase()).toContain("cotización");
     expect(contact.subject.toLowerCase()).toContain("contacto");
+  });
+});
+
+describe("buildPasswordResetEmail", () => {
+  const base = {
+    recipientName: "Functional TestQA",
+    resetUrl: "https://codenium.test/reset-password?token=abc123",
+    expiresInMinutes: 60
+  };
+
+  it("usa el asunto correcto de reset", () => {
+    const out = buildPasswordResetEmail(base);
+    expect(out.subject.toLowerCase()).toContain("restablece tu contraseña");
+  });
+
+  it("incluye el reset url en text y html", () => {
+    const out = buildPasswordResetEmail(base);
+    expect(out.text).toContain(base.resetUrl);
+    expect(out.html).toContain(base.resetUrl);
+  });
+
+  it("menciona la duración en minutos", () => {
+    const out = buildPasswordResetEmail({ ...base, expiresInMinutes: 30 });
+    expect(out.text).toContain("30 minutos");
+    expect(out.html).toContain("30 minutos");
   });
 });
 

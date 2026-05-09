@@ -182,9 +182,15 @@ export function RegisterForm({ onSuccess, submitClassName }: RegisterFormProps) 
 
         {form.formState.errors.root ? <AuthMessage tone="error">{form.formState.errors.root.message ?? ""}</AuthMessage> : null}
 
-        <Button type="submit" className={cn("primary-button w-fit", submitClassName)} disabled={isPending || form.formState.isSubmitting}>
-          {isPending || form.formState.isSubmitting ? "Creando cuenta…" : "Crear cuenta"}
-        </Button>
+        <div className="flex justify-center pt-2">
+          <Button
+            type="submit"
+            className={cn("primary-button w-full max-w-xs", submitClassName)}
+            disabled={isPending || form.formState.isSubmitting}
+          >
+            {isPending || form.formState.isSubmitting ? "Creando cuenta…" : "Crear cuenta"}
+          </Button>
+        </div>
       </form>
     </Form>
   );

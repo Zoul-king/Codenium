@@ -1,17 +1,26 @@
 "use client";
 
-import { CheckCircle2, MoreHorizontal, Plus, ShieldOff, UserPlus } from "lucide-react";
+import { CheckCircle2, MoreHorizontal, Pause, Plus, Trash2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,14 +31,50 @@ import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store"
 import type { UserRecord, UserState } from "@/lib/types/domain";
 
 export function AdminTeamPanel() {
-  const { state, setUserState } = useDashboardWorkspace();
+  const { state, setUserState, deleteUser } = useDashboardWorkspace();
   const clients = getClientUsers(state);
   const pms = getPmUsers(state);
 
-  function toggleState(user: UserRecord) {
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<UserRecord | null>(null);
+
+  async function toggleState(user: UserRecord) {
     const next: UserState = user.state === "active" ? "banned" : "active";
-    setUserState(user.id, next);
-    toast.success(next === "active" ? `${user.name} reactivado` : `${user.name} dado de baja`);
+    setPendingUserId(user.id);
+    try {
+      await setUserState(user.id, next);
+      toast.success(next === "active" ? `${user.name} reactivado` : `${user.name} suspendido`, {
+        description:
+          next === "active"
+            ? "El usuario ya puede volver a iniciar sesión."
+            : "El usuario quedó bloqueado para iniciar sesión hasta que lo reactives."
+      });
+    } catch (error) {
+      toast.error("No se pudo actualizar", {
+        description: error instanceof Error ? error.message : undefined
+      });
+    } finally {
+      setPendingUserId(null);
+    }
+  }
+
+  async function confirmDeleteAction() {
+    if (!confirmDelete) return;
+    const target = confirmDelete;
+    setPendingUserId(target.id);
+    try {
+      await deleteUser(target.id);
+      toast.success("Cuenta eliminada", {
+        description: `${target.name} fue eliminado de la plataforma.`
+      });
+      setConfirmDelete(null);
+    } catch (error) {
+      toast.error("No se pudo eliminar la cuenta", {
+        description: error instanceof Error ? error.message : undefined
+      });
+    } finally {
+      setPendingUserId(null);
+    }
   }
 
   return (
@@ -56,12 +101,54 @@ export function AdminTeamPanel() {
         </TabsList>
 
         <TabsContent value="pms" className="mt-6">
-          <UserTable users={pms} state={state} onToggle={toggleState} kind="pm" />
+          <UserTable
+            users={pms}
+            state={state}
+            onToggle={toggleState}
+            onDelete={(user) => setConfirmDelete(user)}
+            pendingUserId={pendingUserId}
+            kind="pm"
+          />
         </TabsContent>
         <TabsContent value="clients" className="mt-6">
-          <UserTable users={clients} state={state} onToggle={toggleState} kind="client" />
+          <UserTable
+            users={clients}
+            state={state}
+            onToggle={toggleState}
+            onDelete={(user) => setConfirmDelete(user)}
+            pendingUserId={pendingUserId}
+            kind="client"
+          />
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar cuenta</DialogTitle>
+            <DialogDescription>
+              Esta acción es <strong>permanente</strong>. La cuenta de{" "}
+              <strong>{confirmDelete?.name}</strong> y sus datos asociados se borrarán y no podrán
+              recuperarse.{" "}
+              {confirmDelete?.role === "client"
+                ? "Los proyectos activos del cliente se cancelarán."
+                : "Los proyectos asignados quedarán sin PM hasta reasignarlos."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteAction}
+              disabled={pendingUserId === confirmDelete?.id}
+            >
+              {pendingUserId === confirmDelete?.id ? "Eliminando…" : "Eliminar definitivamente"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -70,11 +157,15 @@ function UserTable({
   users,
   state,
   onToggle,
+  onDelete,
+  pendingUserId,
   kind
 }: {
   users: UserRecord[];
   state: ReturnType<typeof useDashboardWorkspace>["state"];
   onToggle: (user: UserRecord) => void;
+  onDelete: (user: UserRecord) => void;
+  pendingUserId: string | null;
   kind: "pm" | "client";
 }) {
   return (
@@ -92,6 +183,7 @@ function UserTable({
         <TableBody>
           {users.map((user) => {
             const initials = user.name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+            const busy = pendingUserId === user.id;
             return (
               <TableRow key={user.id}>
                 <TableCell>
@@ -125,16 +217,16 @@ function UserTable({
                       Activo
                     </span>
                   ) : (
-                    <span className="badge-status-error">
-                      <ShieldOff className="size-3" />
-                      Baneado
+                    <span className="badge-status-warning">
+                      <Pause className="size-3" />
+                      Suspendido
                     </span>
                   )}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon-sm">
+                      <Button variant="ghost" size="icon-sm" disabled={busy}>
                         <MoreHorizontal className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -145,8 +237,8 @@ function UserTable({
                       >
                         {user.state === "active" ? (
                           <>
-                            <ShieldOff className="size-4" />
-                            Banear
+                            <Pause className="size-4" />
+                            Suspender
                           </>
                         ) : (
                           <>
@@ -154,6 +246,11 @@ function UserTable({
                             Reactivar
                           </>
                         )}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => onDelete(user)} variant="destructive">
+                        <Trash2 className="size-4" />
+                        Eliminar cuenta
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

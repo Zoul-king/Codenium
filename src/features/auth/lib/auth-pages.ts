@@ -48,3 +48,19 @@ export const forgotPasswordPage: MarketingPageData = {
     image: site.assets.hero.contact
   }
 };
+
+export const resetPasswordPage: MarketingPageData = {
+  slug: "/reset-password",
+  headerVariant: "white",
+  meta: {
+    title: "Restablecer contraseña - Codenium",
+    description: "Define una nueva contraseña para tu cuenta de Codenium."
+  },
+  hero: {
+    kind: "image",
+    title: "Restablecer",
+    accent: "contraseña",
+    body: "Define una nueva contraseña y vuelve a entrar a tu cuenta.",
+    image: site.assets.hero.contact
+  }
+};

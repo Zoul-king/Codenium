@@ -1,9 +1,21 @@
 "use client";
 
-import { Briefcase, Building2, Mail, Phone, ShieldCheck, UserSquare } from "lucide-react";
+import { AlertTriangle, Briefcase, Building2, Mail, Phone, ShieldCheck, Trash2, UserSquare } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { DashboardEmptyState } from "@/features/dashboard/components/primitives";
 import {
@@ -129,7 +141,87 @@ export function ProfilePanel({ role }: ProfilePanelProps) {
           )}
         </section>
       </div>
+
+      {role === "client" ? <DeleteAccountSection userId={user.id} userName={user.name} /> : null}
     </div>
+  );
+}
+
+function DeleteAccountSection({ userId, userName }: { userId: string; userName: string }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/users/${userId}`, { method: "DELETE" });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error((err as { error?: string }).error ?? "No se pudo eliminar la cuenta.");
+      }
+      toast.success("Cuenta eliminada", {
+        description: "Tus datos fueron borrados de la plataforma. Esperamos verte de vuelta."
+      });
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      toast.error("No se pudo eliminar la cuenta", {
+        description: error instanceof Error ? error.message : undefined
+      });
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <section className="rounded-[var(--radius-card)] border border-error-100 bg-error-50/40 p-6 shadow-[var(--shadow-card)]">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="max-w-2xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-error-700">
+            Zona de riesgo
+          </p>
+          <h2 className="mt-1 text-lg font-bold text-slate-950">Eliminar mi cuenta</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Borra tu cuenta y todos los datos relacionados. Esta acción es permanente y no podrá
+            revertirse.
+          </p>
+        </div>
+        <Button variant="destructive" onClick={() => setOpen(true)}>
+          <Trash2 className="size-4" />
+          Eliminar mi cuenta
+        </Button>
+      </div>
+
+      <Dialog open={open} onOpenChange={(next) => (!deleting ? setOpen(next) : undefined)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-error-700">
+              <AlertTriangle className="size-5" />
+              Eliminar cuenta de {userName}
+            </DialogTitle>
+            <DialogDescription className="space-y-3 text-slate-700">
+              <span className="block">
+                Al eliminar tu cuenta lo haces de forma <strong>permanente</strong>. Tus datos
+                personales, mensajes y cotizaciones se borrarán y no podrán recuperarse.
+              </span>
+              <span className="block">
+                <strong>Tus proyectos activos terminarán su desarrollo</strong> y dejarán de estar
+                disponibles. Si tienes pagos o entregables pendientes, te recomendamos coordinarlo
+                con tu PM antes de continuar.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={deleting}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Eliminando…" : "Sí, eliminar mi cuenta"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </section>
   );
 }
 

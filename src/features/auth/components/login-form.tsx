@@ -104,12 +104,18 @@ export function LoginForm({ onSuccess, submitClassName }: LoginFormProps) {
 
         {form.formState.errors.root ? <AuthMessage tone="error">{form.formState.errors.root.message ?? ""}</AuthMessage> : null}
 
-        <Button type="submit" className={cn("primary-button w-fit", submitClassName)} disabled={isPending || form.formState.isSubmitting}>
-          {isPending || form.formState.isSubmitting ? "Entrando…" : "Iniciar sesión"}
-        </Button>
-
-        <div className="flex flex-col gap-2 text-sm text-body-color">
-          <Link href="/forgot-password" className="w-fit transition-colors hover:text-primary-500">
+        <div className="flex flex-col items-center gap-3 pt-2">
+          <Button
+            type="submit"
+            className={cn("primary-button w-full max-w-xs", submitClassName)}
+            disabled={isPending || form.formState.isSubmitting}
+          >
+            {isPending || form.formState.isSubmitting ? "Entrando…" : "Iniciar sesión"}
+          </Button>
+          <Link
+            href="/forgot-password"
+            className="text-xs text-slate-500 underline underline-offset-2 transition-colors hover:text-primary-500"
+          >
             Olvidé mi contraseña
           </Link>
         </div>

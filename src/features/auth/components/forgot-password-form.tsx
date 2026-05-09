@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { AuthMessage } from "@/features/auth/components/auth-fields";
-import { validateForgotPassword } from "@/features/auth/lib/auth-service";
 
 const schema = z.object({
   email: z.string().min(1, "Ingresa tu correo").email("Correo inválido")
@@ -26,20 +25,40 @@ type Values = z.infer<typeof schema>;
 
 export function ForgotPasswordForm() {
   const [feedback, setFeedback] = useState<{ success: boolean; message: string } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: { email: "" }
   });
 
-  function onSubmit(values: Values) {
-    const result = validateForgotPassword({ email: values.email });
+  async function onSubmit(values: Values) {
+    setSubmitting(true);
+    setFeedback(null);
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values)
+      });
+      const result = await response.json();
 
-    if (result.includes("válido") || result.includes("asociado")) {
-      setFeedback({ success: false, message: result });
-      return;
+      if (!response.ok) {
+        setFeedback({ success: false, message: result.message ?? "No pudimos procesar la solicitud." });
+        return;
+      }
+
+      setFeedback({
+        success: true,
+        message:
+          result.message ??
+          "Si la cuenta existe, te enviamos un enlace para restablecer tu contraseña."
+      });
+      form.reset();
+    } catch {
+      setFeedback({ success: false, message: "Ocurrió un error al procesar la solicitud." });
+    } finally {
+      setSubmitting(false);
     }
-
-    setFeedback({ success: true, message: result });
   }
 
   return (
@@ -59,11 +78,15 @@ export function ForgotPasswordForm() {
           )}
         />
 
-        {feedback ? <AuthMessage tone={feedback.success ? "success" : "error"}>{feedback.message}</AuthMessage> : null}
+        {feedback ? (
+          <AuthMessage tone={feedback.success ? "success" : "error"}>{feedback.message}</AuthMessage>
+        ) : null}
 
-        <Button type="submit" className="primary-button w-fit">
-          Continuar
-        </Button>
+        <div className="flex justify-center pt-2">
+          <Button type="submit" className="primary-button w-full max-w-xs" disabled={submitting}>
+            {submitting ? "Enviando…" : "Enviar enlace de recuperación"}
+          </Button>
+        </div>
       </form>
     </Form>
   );

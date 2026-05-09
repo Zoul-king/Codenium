@@ -9,6 +9,7 @@ import {
   buildDashboardMessageEmail,
   buildDeliverableNotificationEmail,
   buildMeetingScheduledEmail,
+  buildPasswordResetEmail,
   buildPmAccountCreatedEmail,
   buildProjectAssignmentEmail,
   buildQuoteStatusEmail
@@ -104,6 +105,26 @@ export async function sendProjectAssignmentEmail(input: {
   counterpartName: string;
 }) {
   const template = buildProjectAssignmentEmail(input);
+
+  return sendEmail({
+    to: input.recipientEmail,
+    subject: template.subject,
+    text: template.text,
+    html: template.html
+  });
+}
+
+export async function sendPasswordResetEmail(input: {
+  recipientEmail: string;
+  recipientName: string;
+  resetUrl: string;
+  expiresInMinutes: number;
+}) {
+  const template = buildPasswordResetEmail({
+    recipientName: input.recipientName,
+    resetUrl: input.resetUrl,
+    expiresInMinutes: input.expiresInMinutes
+  });
 
   return sendEmail({
     to: input.recipientEmail,

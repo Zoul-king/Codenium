@@ -245,6 +245,44 @@ export function buildClientWelcomeEmail(input: {
   return { subject, text, html };
 }
 
+// ─── RESTABLECER CONTRASEÑA ─────────────────────────────────────────────────
+
+export function buildPasswordResetEmail(input: {
+  recipientName: string;
+  resetUrl: string;
+  expiresInMinutes: number;
+}): TemplateResult {
+  const subject = "Restablece tu contraseña de Codenium";
+
+  const text = [
+    `Hola ${input.recipientName},`,
+    ``,
+    `Recibimos una solicitud para restablecer tu contraseña de Codenium.`,
+    ``,
+    `Abre este enlace para definir una nueva contraseña:`,
+    input.resetUrl,
+    ``,
+    `El enlace expira en ${input.expiresInMinutes} minutos.`,
+    ``,
+    `Si tú no hiciste esta solicitud, ignora este correo — tu contraseña actual sigue activa.`,
+    ``,
+    `Equipo Codenium`
+  ].join("\n");
+
+  const html = wrapEmailHtml(
+    "Restablece tu contraseña",
+    `
+      ${p(`Hola ${strong(input.recipientName)},`)}
+      ${p("Recibimos una solicitud para restablecer tu contraseña de Codenium. Usa el siguiente enlace para definir una nueva.")}
+      ${buildCtaButton("Restablecer contraseña", input.resetUrl)}
+      ${p(`El enlace expira en <strong>${input.expiresInMinutes} minutos</strong>. Si tú no hiciste esta solicitud, ignora este correo — tu contraseña actual sigue activa.`)}
+      <p style="margin:0;font-size:12px;color:#94a3b8;word-break:break-all;">${escapeHtml(input.resetUrl)}</p>
+    `
+  );
+
+  return { subject, text, html };
+}
+
 // ─── ENTREGABLE ─────────────────────────────────────────────────────────────
 
 export function buildDeliverableNotificationEmail(input: {
