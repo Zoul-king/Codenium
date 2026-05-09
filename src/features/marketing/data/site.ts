@@ -19,8 +19,7 @@ export const site: SiteConfig = {
     { label: "Planes y servicios", href: "/plans" },
     { label: "Cotizador", href: "/quote" },
     { label: "Portafolio", href: "/portfolio" },
-    { label: "Contacto", href: "/contact" },
-    { label: "Aviso de privacidad", href: "/privacy" }
+    { label: "Contacto", href: "/contact" }
   ],
   contact: {
     location: "Texcoco",

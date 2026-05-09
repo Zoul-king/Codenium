@@ -97,14 +97,8 @@ export function Footer({ contactEmail }: FooterProps) {
 
       {/* Bottom bar */}
       <div className="border-t border-white/[0.06]">
-        <div className="site-shell flex flex-col items-center justify-between gap-3 px-4 py-6 sm:flex-row sm:px-6">
+        <div className="site-shell flex items-center justify-center px-4 py-6 sm:px-6">
           <p className="text-[12px] text-slate-600">{site.footer.legal}</p>
-          <Link
-            href="/privacy"
-            className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600 transition hover:text-slate-400"
-          >
-            Aviso de privacidad
-          </Link>
         </div>
       </div>
     </footer>
