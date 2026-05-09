@@ -6,7 +6,6 @@ import {
   sendDashboardMessageEmail,
   sendDeliverableNotificationEmail,
   sendMeetingScheduledEmail,
-  sendPmAccountCreatedEmail,
   sendProjectAssignmentEmail,
   sendQuoteStatusEmail
 } from "@/server/email";
@@ -20,7 +19,6 @@ const ALLOWED_ROLES_BY_TYPE: Record<NotificationType, PublicUser["role"][]> = {
   change_request: ["client", "admin"],
   deliverable_notification: ["pm", "admin"],
   quote_assignment: ["admin"],
-  pm_account_created: ["admin"],
   quote_status_update: ["admin"],
   meeting_scheduled: ["pm", "admin"]
 };
@@ -176,10 +174,6 @@ export async function POST(request: Request) {
         ]);
         break;
 
-      case "pm_account_created":
-        await sendPmAccountCreatedEmail({ pmEmail: payload.pmEmail, pmName: payload.pmName });
-        break;
-
       case "quote_status_update":
         await sendQuoteStatusEmail(payload);
         break;
@@ -255,12 +249,6 @@ function validateDashboardNotificationPayload(payload: Partial<DashboardNotifica
         pmEmail: requireEmail(payload.pmEmail, "pmEmail"),
         pmName: requireText(payload.pmName, "pmName"),
         projectName: requireText(payload.projectName, "projectName")
-      };
-    case "pm_account_created":
-      return {
-        type: "pm_account_created",
-        pmEmail: requireEmail(payload.pmEmail, "pmEmail"),
-        pmName: requireText(payload.pmName, "pmName")
       };
     case "quote_status_update":
       return {

@@ -2,13 +2,6 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import {
-  mockChangeRequests,
-  mockDocuments,
-  mockMilestones,
-  mockPayments,
-  mockUsers
-} from "@/lib/mocks";
 import type {
   ChangeRequestRecord,
   MessageRecord,
@@ -68,7 +61,7 @@ interface DashboardWorkspaceContextValue {
   acceptQuote: (quoteId: string, pmId: string) => Promise<void>;
   setQuoteStatus: (quoteId: string, status: QuoteStatus) => Promise<void>;
   setUserState: (userId: string, nextState: UserState) => void;
-  createPmAccount: (input: CreatePmAccountInput) => Promise<void>;
+  createPmAccount: (input: CreatePmAccountInput) => Promise<{ emailed: boolean }>;
   completeMilestone: (milestoneId: string) => void;
   saveMilestone: (input: UpsertMilestoneInput) => void;
   addChangeRequest: (request: Omit<ChangeRequestRecord, "id" | "requestedAt" | "status">) => void;
@@ -254,6 +247,8 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           ...current,
           users: upsertById(current.users, mapApiUser(newUser))
         }));
+
+        return { emailed: newUser.emailed !== false };
       },
       completeMilestone: (milestoneId) => {
         setState((current) => {
@@ -428,14 +423,14 @@ export function useDashboardWorkspace() {
 
 function createFallbackWorkspaceState(): DashboardWorkspaceState {
   return {
-    users: [...mockUsers],
+    users: [],
     quotes: [],
     projects: [],
     messages: [],
-    milestones: [...mockMilestones],
-    payments: [...mockPayments],
-    documents: [...mockDocuments],
-    changeRequests: [...mockChangeRequests],
+    milestones: [],
+    payments: [],
+    documents: [],
+    changeRequests: [],
     selectedProjectIds: {},
     currentUserId: null
   };

@@ -4,6 +4,8 @@ import { UserRole, UserStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession, toPublicUser } from "@/lib/auth/session";
+import { sendClientWelcomeEmail } from "@/server/email";
+import { getAppUrl } from "@/server/email/config";
 
 export async function POST(request: Request) {
   try {
@@ -74,6 +76,23 @@ export async function POST(request: Request) {
     await createSession(user.id);
 
     const publicUser = toPublicUser(user);
+
+    // Correo de bienvenida para empezar la creación del proyecto.
+    // No bloquea el alta si el envío falla.
+    try {
+      const appUrl = getAppUrl().replace(/\/$/, "");
+      await sendClientWelcomeEmail({
+        clientEmail: publicUser.email,
+        clientName: publicUser.name,
+        dashboardUrl: `${appUrl}/dashboard/${publicUser.role}`,
+        quoteUrl: `${appUrl}/quote`
+      });
+    } catch (error) {
+      console.error("[register] no se pudo enviar el correo de bienvenida", {
+        clientEmail: publicUser.email,
+        message: error instanceof Error ? error.message : String(error)
+      });
+    }
 
     return NextResponse.json({
       userId: publicUser.id,

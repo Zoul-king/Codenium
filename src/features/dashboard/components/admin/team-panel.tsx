@@ -19,7 +19,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { TextField } from "@/components/common/form-field";
 import { getClientUsers, getPmStats, getPmUsers } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
-import { sendDashboardNotification } from "@/lib/api/client";
 import type { UserRecord, UserState } from "@/lib/types/domain";
 
 export function AdminTeamPanel() {
@@ -188,13 +187,16 @@ function CreatePmDialog() {
     }
     setSubmitting(true);
     try {
-      await createPmAccount(form);
-      await sendDashboardNotification({
-        type: "pm_account_created",
-        pmEmail: form.email,
-        pmName: `${form.firstName} ${form.lastName}`
-      });
-      toast.success("PM creado", { description: "Cuenta creada en la base de datos." });
+      const created = await createPmAccount(form);
+      if (created.emailed === false) {
+        toast.warning("PM creado, pero no enviamos el correo", {
+          description: "Avisa al PM por otro canal o reintenta el envío."
+        });
+      } else {
+        toast.success("PM creado", {
+          description: "Le enviamos sus credenciales al correo registrado."
+        });
+      }
       setOpen(false);
       setForm({ firstName: "", lastName: "", email: "", phone: "" });
     } catch (error) {

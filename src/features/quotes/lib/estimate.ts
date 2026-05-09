@@ -1,4 +1,4 @@
-import { quoteModules, quoteProjectTypes } from "@/lib/mocks";
+import { quoteModules, quoteProjectTypes } from "@/lib/config/catalogs";
 import type { QuoteDraft, QuoteEstimate, QuoteModuleKey } from "@/lib/types/domain";
 
 function sumModuleRange<T extends "price" | "monthly">(modules: QuoteModuleKey[], key: T) {

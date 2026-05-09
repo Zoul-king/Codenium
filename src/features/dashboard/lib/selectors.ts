@@ -11,23 +11,17 @@ import type {
   UserRecord
 } from "@/lib/types/domain";
 
-const mockUserByRole: Record<Role, string> = {
-  client: "user-cliente-manuel",
-  pm: "user-pm-manuel",
-  admin: "user-admin-manuel"
-};
-
 export function getPrimaryUser(state: DashboardWorkspaceState, role: Role): UserRecord | undefined {
-  // Cuando hay una sesión real (DB), busca por el ID del usuario autenticado.
-  // Si su rol coincide con el del dashboard que se está renderizando, lo usa.
-  // Sino, cae al ID mock para la demo.
-  if (state.currentUserId) {
-    const realUser = state.users.find((u) => u.id === state.currentUserId);
-    if (realUser && realUser.role === role) {
-      return realUser;
-    }
+  // Solo trabajamos con la sesión real (DB). Si el usuario autenticado no
+  // coincide con el rol del dashboard, devolvemos undefined y el panel
+  // muestra su estado vacío.
+  if (!state.currentUserId) {
+    return undefined;
   }
-  return state.users.find((user) => user.id === mockUserByRole[role]);
+
+  const realUser = state.users.find((u) => u.id === state.currentUserId);
+
+  return realUser && realUser.role === role ? realUser : undefined;
 }
 
 export function getUserById(state: DashboardWorkspaceState, userId?: string) {

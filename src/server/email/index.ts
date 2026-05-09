@@ -5,6 +5,7 @@ import { getCompanyInbox, getEmailConfig } from "@/server/email/config";
 import { sendEmail } from "@/server/email/send-email";
 import {
   buildChangeRequestEmail,
+  buildClientWelcomeEmail,
   buildDashboardMessageEmail,
   buildDeliverableNotificationEmail,
   buildMeetingScheduledEmail,
@@ -112,7 +113,32 @@ export async function sendProjectAssignmentEmail(input: {
   });
 }
 
-export async function sendPmAccountCreatedEmail(input: { pmEmail: string; pmName: string }) {
+export async function sendClientWelcomeEmail(input: {
+  clientEmail: string;
+  clientName: string;
+  dashboardUrl: string;
+  quoteUrl: string;
+}) {
+  const template = buildClientWelcomeEmail({
+    clientName: input.clientName,
+    dashboardUrl: input.dashboardUrl,
+    quoteUrl: input.quoteUrl
+  });
+
+  return sendEmail({
+    to: input.clientEmail,
+    subject: template.subject,
+    text: template.text,
+    html: template.html
+  });
+}
+
+export async function sendPmAccountCreatedEmail(input: {
+  pmEmail: string;
+  pmName: string;
+  tempPassword: string;
+  loginUrl: string;
+}) {
   const template = buildPmAccountCreatedEmail(input);
 
   return sendEmail({

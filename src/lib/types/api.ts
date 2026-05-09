@@ -3,7 +3,6 @@ export type {
   DashboardChangeRequestPayload,
   DashboardDeliverablePayload,
   DashboardNotificationPayload,
-  DashboardPmAccountCreatedPayload,
   DashboardProjectMessagePayload,
   DashboardQuoteAssignmentPayload,
   DashboardQuoteStatusPayload,

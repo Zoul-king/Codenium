@@ -1,4 +1,4 @@
-import { dashboardNav } from "@/lib/mocks";
+import { dashboardNav } from "@/lib/config/catalogs";
 import type { Role } from "@/lib/types/domain";
 
 export const validRoles: Role[] = ["client", "pm", "admin"];

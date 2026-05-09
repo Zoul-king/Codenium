@@ -1,4 +1,4 @@
-import { quoteInfrastructureOptions, quoteModules } from "@/lib/mocks";
+import { quoteInfrastructureOptions, quoteModules } from "@/lib/config/catalogs";
 
 export const quoteSections = [
   {

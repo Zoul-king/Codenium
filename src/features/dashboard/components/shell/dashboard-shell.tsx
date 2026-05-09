@@ -38,7 +38,7 @@ import { DashboardChromeProvider } from "@/features/dashboard/components/primiti
 import { getPendingMessages, getPrimaryUser } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { logout } from "@/features/auth/lib/session-store";
-import { dashboardNav } from "@/lib/mocks";
+import { dashboardNav } from "@/lib/config/catalogs";
 import type { Role } from "@/lib/types/domain";
 import { cn } from "@/lib/utils";
 

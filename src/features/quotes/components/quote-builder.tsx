@@ -9,7 +9,7 @@ import { QuoteEstimator } from "@/features/quotes/components/quote-estimator";
 import { QuoteSummaryCard } from "@/features/quotes/components/quote-summary-card";
 import { getInfrastructureLabel, getSelectedQuoteModules } from "@/features/quotes/lib/content";
 import { calculateQuoteEstimate, formatCurrency } from "@/features/quotes/lib/estimate";
-import { quoteProjectTypes } from "@/lib/mocks";
+import { quoteProjectTypes } from "@/lib/config/catalogs";
 import { readPlanProfilePreference, writePlanProfilePreference } from "@/features/marketing/lib/plan-profile-store";
 import { clearQuoteSelection, parseQuoteSelectionParams, readQuoteSelection, writeQuoteSelection, type QuoteSelection } from "@/features/quotes/lib/quote-selection";
 import type { QuoteDraft } from "@/lib/types/domain";

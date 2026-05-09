@@ -5,7 +5,7 @@ import { useState, type ReactNode } from "react";
 import { TextAreaField } from "@/components/common/form-field";
 import { quoteSections } from "@/features/quotes/lib/content";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
-import { quoteInfrastructureOptions, quoteModules, quoteProjectTypes } from "@/lib/mocks";
+import { quoteInfrastructureOptions, quoteModules, quoteProjectTypes } from "@/lib/config/catalogs";
 import { cn } from "@/lib/utils";
 import type { QuoteDraft, QuoteModuleKey, QuoteTimelinePreference } from "@/lib/types/domain";
 

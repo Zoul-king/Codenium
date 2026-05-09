@@ -51,12 +51,6 @@ export interface DashboardQuoteAssignmentPayload {
   projectName: string;
 }
 
-export interface DashboardPmAccountCreatedPayload {
-  type: "pm_account_created";
-  pmEmail: string;
-  pmName: string;
-}
-
 export interface DashboardQuoteStatusPayload {
   type: "quote_status_update";
   recipientEmail: string;
@@ -84,6 +78,5 @@ export type DashboardNotificationPayload =
   | DashboardChangeRequestPayload
   | DashboardDeliverablePayload
   | DashboardQuoteAssignmentPayload
-  | DashboardPmAccountCreatedPayload
   | DashboardQuoteStatusPayload
   | DashboardMeetingScheduledPayload;

@@ -26,7 +26,7 @@ import {
   CommandShortcut
 } from "@/components/ui/command";
 import { logout } from "@/features/auth/lib/session-store";
-import { dashboardNav } from "@/lib/mocks";
+import { dashboardNav } from "@/lib/config/catalogs";
 import type { Role } from "@/lib/types/domain";
 
 const SECTION_ICONS: Record<string, typeof Home> = {
