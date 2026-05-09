@@ -238,6 +238,30 @@ function normalizeDiscount(value: unknown, fallback: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
+export function applyPlanTextOverrides(
+  catalog: ManagedPlanCatalog,
+  overrides: Record<string, { title?: string; note?: string; customPriceLabel?: string; items?: string[] }>
+): ManagedPlanCatalog {
+  const apply = (plans: ManagedPlanRecord[]) =>
+    plans.map((plan) => {
+      const override = overrides[plan.id];
+      if (!override) return { ...plan, items: [...plan.items] };
+      return {
+        ...plan,
+        title: typeof override.title === "string" && override.title ? override.title : plan.title,
+        note: typeof override.note === "string" ? override.note || undefined : plan.note,
+        customPriceLabel:
+          typeof override.customPriceLabel === "string"
+            ? override.customPriceLabel || undefined
+            : plan.customPriceLabel,
+        items: Array.isArray(override.items) && override.items.length > 0
+          ? [...override.items]
+          : [...plan.items]
+      };
+    });
+  return { personal: apply(catalog.personal), business: apply(catalog.business) };
+}
+
 function toPlanItem(plan: ManagedPlanRecord): PlanItem {
   const discountMultiplier = 1 - plan.discountPercentage / 100;
   const nextSetup = plan.setupFee === null ? null : Math.max(0, Math.round(plan.setupFee * discountMultiplier));

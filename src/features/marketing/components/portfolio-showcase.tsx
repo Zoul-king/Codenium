@@ -99,7 +99,11 @@ export function PortfolioShowcase({ cards }: PortfolioShowcaseProps) {
                       relativeIndex > 2 ? "is-hidden" : null
                     )}
                   >
-                    <Image src={card.image} alt={card.name} fill sizes="(min-width: 1280px) 52vw, 100vw" className="object-cover" priority={index === 0} />
+                    {card.image ? (
+                      <Image src={card.image} alt={card.name} fill sizes="(min-width: 1280px) 52vw, 100vw" className="object-cover" priority={index === 0} unoptimized={card.image.startsWith("/uploads/")} />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300" />
+                    )}
                     <div className="portfolio-visual-overlay" />
                     <div className="portfolio-visual-meta">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/78">Proyecto activo</p>

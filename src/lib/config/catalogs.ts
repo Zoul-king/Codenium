@@ -120,7 +120,7 @@ export const dashboardNav: Record<Role, DashboardNavItem[]> = {
   ],
   admin: [
     { key: "metrics", label: "Metricas", href: "/dashboard/admin" },
-    { key: "plans", label: "Planes", href: "/dashboard/admin/plans" },
+    { key: "plans", label: "Editar elementos", href: "/dashboard/admin/plans" },
     { key: "quotes", label: "Cotizaciones", href: "/dashboard/admin/quotes" },
     { key: "users", label: "Usuarios", href: "/dashboard/admin/users" },
     { key: "payments", label: "Pagos", href: "/dashboard/admin/payments" },
