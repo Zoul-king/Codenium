@@ -22,7 +22,7 @@ export async function MarketingShell({ children, headerVariant, hideFooter = fal
     <div className="page-shell">
       <Header variant={headerVariant} contactEmail={contactEmail} user={session?.user ?? null} />
       <PageShell>
-        <main className="relative min-h-screen overflow-x-hidden">{children}</main>
+        <main className="relative min-h-screen overflow-x-clip">{children}</main>
       </PageShell>
       {hideFooter ? null : <Footer contactEmail={contactEmail} />}
       <WhatsAppButton />

@@ -29,7 +29,7 @@ export function useReveal() {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     if (reducedMotion.matches) {
-      elements.forEach((node) => node.classList.add("animate-in"));
+      elements.forEach((node) => node.setAttribute("data-revealed", "true"));
       return;
     }
 
@@ -42,7 +42,7 @@ export function useReveal() {
           const delay = Number(entry.target.getAttribute("data-delay") || 0);
           const variant = animationVariants[animationName] || animationVariants.fadeIn;
 
-          entry.target.classList.add("animate-in");
+          entry.target.setAttribute("data-revealed", "true");
 
           gsap.fromTo(
             entry.target,

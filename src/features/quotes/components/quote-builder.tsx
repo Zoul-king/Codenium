@@ -95,6 +95,10 @@ export function QuoteBuilder() {
 
             <QuoteEstimator draft={draft} onChange={setDraft} />
 
+            <div className="lg:hidden">
+              <QuoteSummaryCard draft={draft} estimate={estimate} selection={selection} />
+            </div>
+
             <div className="space-y-3">
               <span className="type-kicker-accent">Formulario</span>
               <h3 className="text-[24px] font-semibold tracking-[-0.04em] text-slate-950">Rellena tus datos</h3>
@@ -117,7 +121,9 @@ export function QuoteBuilder() {
             </section>
           </div>
 
-          <QuoteSummaryCard draft={draft} estimate={estimate} selection={selection} />
+          <div className="hidden quote-sticky lg:block">
+            <QuoteSummaryCard draft={draft} estimate={estimate} selection={selection} />
+          </div>
         </div>
       </div>
     </section>

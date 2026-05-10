@@ -18,16 +18,19 @@ export function QuoteSummaryCard({ draft, estimate, selection, compact = false }
   const timelineLabel = draft.timelinePreference === "1-4" ? "de 1 a 4 meses" : draft.timelinePreference === "5-7" ? "de 5 a 7 meses" : draft.timelinePreference === "8-12" ? "de 8 a 12 meses" : "Pendiente";
   const compactList = featureModules.length > 0 ? featureModules.map((item) => item.label).join(", ") : "Pendiente";
 
+  const hasEstimate = estimate.build.max > 0;
+
   return (
-    <aside className={compact ? "rounded-[24px] border border-slate-200 bg-slate-50 p-5" : "quote-sticky quote-panel"}>
-      <div className="dashboard-gridline">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-500">Resumen</p>
-        <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-body-color">
-          {estimate.build.max > 0 ? `${formatCurrency(estimate.build.min)} - ${formatCurrency(estimate.build.max)}` : "Pendiente"}
+    <aside className={compact ? "rounded-[20px] border border-slate-200 bg-slate-50 p-5" : "quote-summary"}>
+      <div className="quote-summary__header">
+        <span className="quote-summary__kicker">Resumen de la precotizacion</span>
+        <p className="quote-summary__price">
+          {hasEstimate ? `${formatCurrency(estimate.build.min)} - ${formatCurrency(estimate.build.max)}` : "Pendiente"}
         </p>
+        {hasEstimate ? <p className="quote-summary__currency">Pesos mexicanos · rango referencial</p> : null}
       </div>
 
-      <div className="mt-5 grid gap-4">
+      <div className="quote-summary__list">
         <SummaryRow label="Plan seleccionado" value={selection?.source === "plan" ? selection.label : "Pendiente"} />
         <SummaryRow label="Categoria" value={projectType?.label ?? "Pendiente"} />
         <SummaryRow label="Objetivo" value={draft.objective.trim() || "Pendiente"} />
@@ -43,9 +46,9 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   const isPending = value === "Pendiente";
 
   return (
-    <div className="grid gap-1 border-b border-slate-200 pb-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-body-color/45">{label}</p>
-      <p className={isPending ? "text-sm font-medium text-slate-500" : "text-sm font-semibold leading-6 text-body-color"}>{value}</p>
+    <div className="quote-summary__row">
+      <p className="quote-summary__label">{label}</p>
+      <p className={isPending ? "quote-summary__value quote-summary__value--pending" : "quote-summary__value"}>{value}</p>
     </div>
   );
 }
