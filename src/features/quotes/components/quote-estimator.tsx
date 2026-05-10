@@ -140,13 +140,18 @@ function QuoteSection({ title, description, isOpen, onToggle, children }: QuoteS
           <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-500">{title}</span>
           <span className="mt-1 block text-xs leading-5 text-body-color/70">{description}</span>
         </div>
-        <span className={cn("shrink-0 text-lg leading-none text-accent-500 transition-transform duration-150 ease-out", isOpen ? "rotate-45" : "rotate-0")} aria-hidden="true">
+        <span className={cn("shrink-0 text-lg leading-none text-accent-500 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]", isOpen ? "rotate-45" : "rotate-0")} aria-hidden="true">
           +
         </span>
       </button>
 
-      <div className={cn("overflow-hidden transition-all duration-150 ease-out", isOpen ? "mt-4 max-h-[1200px] opacity-100" : "mt-0 max-h-0 opacity-0")}>
-        <div>{children}</div>
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows,opacity,margin-top] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
+          isOpen ? "mt-4 grid-rows-[1fr] opacity-100" : "mt-0 grid-rows-[0fr] opacity-0"
+        )}
+      >
+        <div className="min-h-0 overflow-hidden">{children}</div>
       </div>
     </section>
   );
