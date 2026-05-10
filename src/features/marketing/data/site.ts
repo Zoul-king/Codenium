@@ -68,7 +68,7 @@ export const site: SiteConfig = {
       story: "/images/marketing/about-story.webp",
       company: "/images/marketing/company.webp"
     },
-    faq: "/images/marketing/faq.webp",
+    faq: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
     timeline: [
       "/images/marketing/timeline-1.webp",
       "/images/marketing/timeline-2.webp",
