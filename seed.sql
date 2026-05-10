@@ -1,2 +1,4 @@
-UPDATE "User" SET "role" = 'PM' WHERE "email" = 'pm@codenium.com';
-UPDATE "User" SET "role" = 'ADMIN' WHERE "email" = 'admin@codenium.com';
+-- Las cuentas de prueba (admin, PM, cliente) se crean y mantienen con
+-- scripts/reset-test-accounts.ts (npx tsx scripts/reset-test-accounts.ts).
+-- Este archivo se conserva como placeholder por si se requieren seeds SQL
+-- adicionales que no dependan del cliente Prisma.

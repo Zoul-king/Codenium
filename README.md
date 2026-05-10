@@ -11,11 +11,15 @@ Sitio corporativo construido con Next.js App Router, React y TypeScript. La base
 - Mocks centralizados para cotizaciones, proyectos, mensajes, usuarios y sesión.
 - Prisma preparado a nivel estructural, pero todavía sin integrarse a estas capas.
 
-## Credenciales provisionales
+## Cuentas de prueba
 
-- `client@codenium.com` / `123provisional`
-- `pm@codenium.com` / `123provisional`
-- `admin@codenium.com` / `123provisional`
+Las cuentas oficiales de prueba se gestionan con `scripts/reset-test-accounts.ts`:
+
+- `gzcm.manuel+admin@gmail.com` (ADMIN)
+- `gzcm.manuel+pm@gmail.com` (PM)
+- `gzcm.manuel+cliente@gmail.com` (CLIENT)
+
+La contraseña la define ese script. No deben existir otras cuentas hardcodeadas en el repo.
 
 ## Estructura real
 

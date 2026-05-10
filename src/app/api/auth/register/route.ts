@@ -51,7 +51,11 @@ export async function POST(request: Request) {
       where: { email }
     });
 
-    if (existingUser) {
+    // Bloqueamos solo cuentas ya activas. Las INACTIVE son placeholders creados
+    // por el cotizador / formulario de contacto cuando un invitado dejó sus
+    // datos: en ese caso activamos la cuenta y la vinculamos a la cotización
+    // que ya tenía asociada.
+    if (existingUser && existingUser.status === UserStatus.ACTIVE) {
       return NextResponse.json(
         { error: "Ya existe una cuenta con ese correo." },
         { status: 409 }
@@ -60,18 +64,31 @@ export async function POST(request: Request) {
 
     const passwordHash = await hashPassword(password);
 
-    const user = await db.user.create({
-      data: {
-        firstName,
-        lastName,
-        email,
-        phone: phone || null,
-        company: company || null,
-        passwordHash,
-        role: UserRole.CLIENT,
-        status: UserStatus.ACTIVE
-      }
-    });
+    const user = existingUser
+      ? await db.user.update({
+          where: { id: existingUser.id },
+          data: {
+            firstName,
+            lastName,
+            phone: phone || existingUser.phone,
+            company: company || existingUser.company,
+            passwordHash,
+            role: UserRole.CLIENT,
+            status: UserStatus.ACTIVE
+          }
+        })
+      : await db.user.create({
+          data: {
+            firstName,
+            lastName,
+            email,
+            phone: phone || null,
+            company: company || null,
+            passwordHash,
+            role: UserRole.CLIENT,
+            status: UserStatus.ACTIVE
+          }
+        });
 
     await createSession(user.id);
 

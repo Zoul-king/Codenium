@@ -1030,8 +1030,10 @@ específico para no inflar el barrel.
 Esta carpeta hoy sigue sosteniendo mucho comportamiento.
 
 #### `auth.ts`
-Cuentas mock para auth demo (`client@codenium.com`, `pm@codenium.com`,
-`admin@codenium.com`).
+Cuentas mock para auth demo. Las cuentas reales de prueba (admin, PM,
+cliente) viven en `scripts/reset-test-accounts.ts` con los correos
+`gzcm.manuel+admin@gmail.com`, `gzcm.manuel+pm@gmail.com` y
+`gzcm.manuel+cliente@gmail.com`.
 
 #### `catalogs.ts`
 Catálogos clave del sistema:

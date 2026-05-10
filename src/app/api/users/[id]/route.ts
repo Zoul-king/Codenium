@@ -3,6 +3,7 @@ import { UserStatus } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { deleteUserDeep } from "@/lib/auth/delete-user";
+import { isProtectedEmail } from "@/lib/auth/protected-accounts";
 import { destroyCurrentSession, getCurrentSession } from "@/lib/auth/session";
 
 interface Context {
@@ -49,6 +50,18 @@ export async function PATCH(request: Request, ctx: Context) {
   }
 
   try {
+    const current = await db.user.findUnique({
+      where: { id },
+      select: { email: true }
+    });
+
+    if (current && isProtectedEmail(current.email) && nextStatus !== UserStatus.ACTIVE) {
+      return NextResponse.json(
+        { error: "Esta cuenta es parte del entorno de pruebas y debe permanecer activa." },
+        { status: 403 }
+      );
+    }
+
     const user = await db.user.update({
       where: { id },
       data: { status: nextStatus },
@@ -109,11 +122,18 @@ export async function DELETE(_request: Request, ctx: Context) {
   try {
     const target = await db.user.findUnique({
       where: { id },
-      select: { id: true, role: true }
+      select: { id: true, role: true, email: true }
     });
 
     if (!target) {
       return NextResponse.json({ error: "Usuario no encontrado." }, { status: 404 });
+    }
+
+    if (isProtectedEmail(target.email)) {
+      return NextResponse.json(
+        { error: "Esta cuenta es parte del entorno de pruebas y no puede eliminarse." },
+        { status: 403 }
+      );
     }
 
     // Borrado profundo: limpia dependencias que no cascadean por esquema.
