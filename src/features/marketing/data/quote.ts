@@ -1,4 +1,3 @@
-import { site } from "@/features/marketing/data/site";
 import type { MarketingPageData } from "@/features/marketing/types";
 
 export const quotePage: MarketingPageData = {
@@ -13,6 +12,6 @@ export const quotePage: MarketingPageData = {
     title: "Estimado",
     accent: "inicial",
     body: "Define categoria, objetivo, tiempo y capacidades para revisar un rango orientativo antes de continuar.",
-    image: site.assets.hero.plans
+    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1600&q=80"
   }
 };

@@ -12,7 +12,7 @@ export const portfolioPage: MarketingPageData = {
     kind: "image",
     title: "Portfolio",
     body: "Casos donde convertimos procesos complejos en productos mas claros, utiles y sostenibles.",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80"
+    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80"
   }
 };
 
