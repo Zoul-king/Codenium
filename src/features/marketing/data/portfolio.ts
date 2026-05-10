@@ -24,7 +24,7 @@ export const portfolioCards: PortfolioCard[] = [
     tags: ["Monitoreo", "Reportes", "Tiempo real"],
     image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80",
     logo: site.assets.logos.sittycia,
-    href: "https://www.axolotlcode.tech/portfolio/sittycia"
+    href: "https://sittycia.com/"
   },
   {
     name: "ValHui",
@@ -33,7 +33,7 @@ export const portfolioCards: PortfolioCard[] = [
     tags: ["Sitio web", "Leads", "Inmobiliario"],
     image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1600&q=80",
     logo: site.assets.logos.valhui,
-    href: "https://www.axolotlcode.tech/portfolio/valhui"
+    href: "https://valhui.com/"
   },
   {
     name: "Chess IQ",
@@ -42,7 +42,7 @@ export const portfolioCards: PortfolioCard[] = [
     tags: ["Cobranza", "Operacion", "Datos"],
     image: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80",
     logo: site.assets.logos.chessIq,
-    href: "https://www.axolotlcode.tech/portfolio/chess-iq"
+    href: "https://chessiq.app/"
   },
   {
     name: "Nutrition Lab",
@@ -51,7 +51,7 @@ export const portfolioCards: PortfolioCard[] = [
     tags: ["Contenido", "Educacion", "Video"],
     image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1600&q=80",
     logo: site.assets.logos.nutritionLab,
-    href: "https://www.axolotlcode.tech/portfolio/nutrition-lab"
+    href: "https://nutrition-lab.mx/"
   },
   {
     name: "Larezza",
@@ -60,7 +60,7 @@ export const portfolioCards: PortfolioCard[] = [
     tags: ["Landing", "Marca", "Conversion"],
     image: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80",
     logo: site.assets.logos.larezza,
-    href: "https://www.axolotlcode.tech/portfolio/larezza"
+    href: "https://larezza.mx/"
   },
   {
     name: "Master Clean",
@@ -69,7 +69,7 @@ export const portfolioCards: PortfolioCard[] = [
     tags: ["Servicios", "Empresas", "Captacion"],
     image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80",
     logo: site.assets.logos.masterClean,
-    href: "https://www.axolotlcode.tech/portfolio/master-clean"
+    href: "https://masterclean.mx/"
   },
   {
     name: "Aurumtage",
@@ -78,7 +78,7 @@ export const portfolioCards: PortfolioCard[] = [
     tags: ["Fintech", "Pagos", "Integraciones"],
     image: "https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1600&q=80",
     logo: site.assets.logos.aurumtage,
-    href: "https://www.axolotlcode.tech/portfolio/aurumtage"
+    href: "https://aurumtage.com/"
   },
   {
     name: "Disver Uniformes",
@@ -87,6 +87,6 @@ export const portfolioCards: PortfolioCard[] = [
     tags: ["Ecommerce", "Catalogo", "Pedidos"],
     image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1600&q=80",
     logo: site.assets.logos.disver,
-    href: "https://www.axolotlcode.tech/portfolio/disver-uniformes"
+    href: "https://disveruniformes.com.mx/"
   }
 ];
