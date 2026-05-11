@@ -5,6 +5,7 @@ import { getCompanyInbox, getEmailConfig } from "@/server/email/config";
 import { sendEmail } from "@/server/email/send-email";
 import {
   buildChangeRequestEmail,
+  buildClientAccountCreatedByAdminEmail,
   buildClientWelcomeEmail,
   buildDashboardMessageEmail,
   buildDeliverableNotificationEmail,
@@ -164,6 +165,22 @@ export async function sendPmAccountCreatedEmail(input: {
 
   return sendEmail({
     to: input.pmEmail,
+    subject: template.subject,
+    text: template.text,
+    html: template.html
+  });
+}
+
+export async function sendClientAccountCreatedByAdminEmail(input: {
+  clientEmail: string;
+  clientName: string;
+  tempPassword: string;
+  loginUrl: string;
+}) {
+  const template = buildClientAccountCreatedByAdminEmail(input);
+
+  return sendEmail({
+    to: input.clientEmail,
     subject: template.subject,
     text: template.text,
     html: template.html

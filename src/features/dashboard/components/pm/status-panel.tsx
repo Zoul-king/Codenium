@@ -73,23 +73,29 @@ export function PmStatusPanel() {
     setSheetOpen(true);
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!form.title.trim() || !form.summary.trim() || !form.date) {
       toast.error("Faltan datos", { description: "Necesitamos título, descripción y fecha." });
       return;
     }
-    saveMilestone({
-      id: editingId ?? undefined,
-      projectId: formProjectId,
-      title: form.title.trim(),
-      summary: form.summary.trim(),
-      date: form.date,
-      status: form.status
-    });
-    toast.success(editingId ? "Hito actualizado" : "Hito creado");
-    setSheetOpen(false);
-    setEditingId(null);
-    setForm(EMPTY_FORM);
+    try {
+      await saveMilestone({
+        id: editingId ?? undefined,
+        projectId: formProjectId,
+        title: form.title.trim(),
+        summary: form.summary.trim(),
+        date: form.date,
+        status: form.status
+      });
+      toast.success(editingId ? "Hito actualizado" : "Hito creado");
+      setSheetOpen(false);
+      setEditingId(null);
+      setForm(EMPTY_FORM);
+    } catch (error) {
+      toast.error("No se pudo guardar el hito", {
+        description: error instanceof Error ? error.message : undefined
+      });
+    }
   }
 
   if (!project) {
@@ -191,9 +197,15 @@ export function PmStatusPanel() {
                       <DropdownMenuContent align="end">
                         {m.status !== "done" ? (
                           <DropdownMenuItem
-                            onClick={() => {
-                              completeMilestone(m.id);
-                              toast.success("Hito completado");
+                            onClick={async () => {
+                              try {
+                                await completeMilestone(m.id);
+                                toast.success("Hito completado");
+                              } catch (error) {
+                                toast.error("No se pudo completar el hito", {
+                                  description: error instanceof Error ? error.message : undefined
+                                });
+                              }
                             }}
                           >
                             <CheckCircle2 className="size-4" />

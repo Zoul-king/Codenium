@@ -4,7 +4,10 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/password";
 import { getCurrentSession } from "@/lib/auth/session";
-import { sendPmAccountCreatedEmail } from "@/server/email";
+import {
+  sendClientAccountCreatedByAdminEmail,
+  sendPmAccountCreatedEmail
+} from "@/server/email";
 import { getAppUrl } from "@/server/email/config";
 
 export async function GET() {
@@ -55,6 +58,9 @@ export async function POST(request: Request) {
     const lastName = String(body.lastName ?? "").trim();
     const email = String(body.email ?? "").trim().toLowerCase();
     const phone = String(body.phone ?? "").trim();
+    const company = String(body.company ?? "").trim();
+    const rawRole = String(body.role ?? "PM").trim().toUpperCase();
+    const role: "PM" | "CLIENT" = rawRole === "CLIENT" ? "CLIENT" : "PM";
 
     if (!firstName || !lastName || !email) {
       return NextResponse.json({ error: "Nombre, apellido y correo son obligatorios." }, { status: 400 });
@@ -69,41 +75,71 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Ya existe una cuenta con ese correo." }, { status: 409 });
     }
 
-    // Contraseña temporal — el PM la cambia desde su perfil al primer acceso.
+    // Contraseña temporal — el usuario la cambia desde su perfil al primer acceso.
     const tempPassword = "Codenium" + randomBytes(4).toString("hex").toUpperCase();
     const passwordHash = await hashPassword(tempPassword);
 
     const user = await db.user.create({
-      data: { firstName, lastName, email, phone: phone || null, passwordHash, role: "PM", status: "ACTIVE" },
-      select: { id: true, firstName: true, lastName: true, email: true, phone: true, company: true, role: true, status: true, createdAt: true }
+      data: {
+        firstName,
+        lastName,
+        email,
+        phone: phone || null,
+        company: company || null,
+        passwordHash,
+        role,
+        status: "ACTIVE"
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        company: true,
+        role: true,
+        status: true,
+        createdAt: true
+      }
     });
 
-    // Enviamos las credenciales directamente al PM. Si el correo falla
-    // dejamos la cuenta creada y avisamos al admin para que reenvíe.
+    // Enviamos las credenciales por correo. Si falla, dejamos la cuenta creada
+    // y avisamos al admin para que reenvíe manualmente.
     let emailed = true;
     let emailError: string | null = null;
     try {
       const appUrl = getAppUrl().replace(/\/$/, "");
-      await sendPmAccountCreatedEmail({
-        pmEmail: user.email,
-        pmName: `${user.firstName} ${user.lastName}`.trim(),
-        tempPassword,
-        loginUrl: `${appUrl}/login`
-      });
+      const fullName = `${user.firstName} ${user.lastName}`.trim();
+      if (role === "CLIENT") {
+        await sendClientAccountCreatedByAdminEmail({
+          clientEmail: user.email,
+          clientName: fullName,
+          tempPassword,
+          loginUrl: `${appUrl}/login`
+        });
+      } else {
+        await sendPmAccountCreatedEmail({
+          pmEmail: user.email,
+          pmName: fullName,
+          tempPassword,
+          loginUrl: `${appUrl}/login`
+        });
+      }
     } catch (error) {
       emailed = false;
       emailError = error instanceof Error ? error.message : "error desconocido";
-      console.error("[users] no se pudo enviar el correo al PM", {
-        pmEmail: user.email,
+      console.error("[users] no se pudo enviar el correo al usuario", {
+        email: user.email,
+        role,
         error: emailError
       });
     }
 
     return NextResponse.json({ ...user, emailed, emailError }, { status: 201 });
   } catch (error) {
-    console.error("[users] no se pudo crear el PM", {
+    console.error("[users] no se pudo crear la cuenta", {
       error: error instanceof Error ? error.message.split("\n")[0] : String(error)
     });
-    return NextResponse.json({ error: "No se pudo crear el PM." }, { status: 500 });
+    return NextResponse.json({ error: "No se pudo crear la cuenta." }, { status: 500 });
   }
 }

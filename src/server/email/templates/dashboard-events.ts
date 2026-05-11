@@ -199,6 +199,48 @@ export function buildPmAccountCreatedEmail(input: {
   return { subject, text, html };
 }
 
+// ─── CUENTA CLIENTE CREADA POR EL ADMIN ─────────────────────────────────────
+
+export function buildClientAccountCreatedByAdminEmail(input: {
+  clientName: string;
+  clientEmail: string;
+  tempPassword: string;
+  loginUrl: string;
+}): TemplateResult {
+  const subject = "Tu cuenta de Codenium está lista";
+
+  const text = [
+    `Hola ${input.clientName},`,
+    ``,
+    `El equipo de Codenium creó una cuenta para ti. Desde ahí podrás seguir tus cotizaciones, proyectos y hablar con tu Project Manager.`,
+    ``,
+    `Credenciales de acceso:`,
+    `  Correo: ${input.clientEmail}`,
+    `  Contraseña temporal: ${input.tempPassword}`,
+    ``,
+    `Inicia sesión en ${input.loginUrl} y, de preferencia, cambia la contraseña desde tu perfil al primer acceso.`,
+    ``,
+    `Equipo Codenium`
+  ].join("\n");
+
+  const html = wrapEmailHtml(
+    "Tu cuenta de Codenium está lista",
+    `
+      ${p(`Hola ${strong(input.clientName)},`)}
+      ${p("Creamos una cuenta para ti dentro de la plataforma de Codenium. Desde el dashboard podrás dar seguimiento a cotizaciones, proyectos, hitos y comunicación con tu Project Manager.")}
+      <div style="background:#eff6fb;border:1px solid #bedcee;border-radius:10px;padding:20px;margin:20px 0;">
+        <p style="margin:0 0 10px;font-size:14px;color:#1d4674;font-weight:600;">Credenciales de acceso</p>
+        <p style="margin:4px 0;font-size:14px;color:#374151;">Correo: ${strong(input.clientEmail)}</p>
+        <p style="margin:4px 0;font-size:14px;color:#374151;">Contraseña temporal: ${strong(input.tempPassword)}</p>
+        <p style="margin:10px 0 0;font-size:12px;color:#6b7280;">De preferencia, cámbiala desde tu perfil al primer acceso.</p>
+      </div>
+      ${buildCtaButton("Entrar a mi dashboard", input.loginUrl)}
+    `
+  );
+
+  return { subject, text, html };
+}
+
 // ─── CUENTA CLIENTE CREADA ──────────────────────────────────────────────────
 
 export function buildClientWelcomeEmail(input: {

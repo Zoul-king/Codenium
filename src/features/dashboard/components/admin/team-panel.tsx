@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, MoreHorizontal, Pause, Plus, Trash2, UserPlus } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -34,6 +34,19 @@ export function AdminTeamPanel() {
   const { state, setUserState, deleteUser } = useDashboardWorkspace();
   const clients = getClientUsers(state);
   const pms = getPmUsers(state);
+
+  const teamStats = useMemo(() => {
+    // "Activo" = tiene al menos un proyecto en curso (no done).
+    const inProgressProjects = state.projects.filter((p) => p.status !== "done");
+    const activePmIds = new Set(inProgressProjects.map((p) => p.pmId).filter(Boolean));
+    const activeClientIds = new Set(inProgressProjects.map((p) => p.clientId));
+    return {
+      pmsTotal: pms.length,
+      pmsActive: pms.filter((u) => activePmIds.has(u.id)).length,
+      clientsTotal: clients.length,
+      clientsActive: clients.filter((u) => activeClientIds.has(u.id)).length
+    };
+  }, [pms, clients, state.projects]);
 
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<UserRecord | null>(null);
@@ -79,25 +92,23 @@ export function AdminTeamPanel() {
 
   return (
     <div className="space-y-6">
-      <header className="rounded-[var(--radius-card)] border border-slate-200 bg-white p-6 shadow-[var(--shadow-card)]">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#3f237a)]">
-              Equipo
-            </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-slate-950">Usuarios y PMs</h1>
-            <p className="mt-1 text-sm text-slate-600">
-              {clients.length} clientes · {pms.length} project managers
-            </p>
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <TeamStatChip label="PMs" value={teamStats.pmsTotal} />
+          <TeamStatChip label="PMs activos" value={teamStats.pmsActive} tone="success" />
+          <TeamStatChip label="Clientes" value={teamStats.clientsTotal} />
+          <TeamStatChip label="Clientes activos" value={teamStats.clientsActive} tone="success" />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <CreateClientDialog />
           <CreatePmDialog />
         </div>
-      </header>
+      </div>
 
       <Tabs defaultValue="pms">
         <TabsList variant="line" className="bg-transparent">
-          <TabsTrigger value="pms">PMs ({pms.length})</TabsTrigger>
-          <TabsTrigger value="clients">Clientes ({clients.length})</TabsTrigger>
+          <TabsTrigger value="pms">PMs</TabsTrigger>
+          <TabsTrigger value="clients">Clientes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pms" className="mt-6">
@@ -341,6 +352,99 @@ function CreatePmDialog() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function CreateClientDialog() {
+  const { createClientAccount } = useDashboardWorkspace();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", company: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit() {
+    if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim()) {
+      toast.error("Faltan datos", { description: "Nombre, apellido y correo son obligatorios." });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const created = await createClientAccount(form);
+      if (created.emailed === false) {
+        toast.warning("Cliente creado, pero no enviamos el correo", {
+          description: "Comparte sus credenciales por otro canal o reintenta el envío."
+        });
+      } else {
+        toast.success("Cliente creado", {
+          description: "Le enviamos sus credenciales al correo registrado."
+        });
+      }
+      setOpen(false);
+      setForm({ firstName: "", lastName: "", email: "", phone: "", company: "" });
+    } catch (error) {
+      toast.error("No se pudo crear el cliente", {
+        description: error instanceof Error ? error.message : undefined
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">
+          <Plus className="size-4" />
+          Nuevo cliente
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            <span className="inline-flex items-center gap-2">
+              <UserPlus className="size-5 text-[var(--role-strong,#3f237a)]" />
+              Crear cuenta de cliente
+            </span>
+          </DialogTitle>
+          <DialogDescription>
+            Le enviaremos un correo con sus credenciales y la sugerencia de cambiar la contraseña al primer acceso.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4">
+          <div className="grid grid-cols-2 gap-3">
+            <TextField label="Nombre" placeholder="Juan" value={form.firstName} onChange={(v) => setForm((c) => ({ ...c, firstName: v }))} />
+            <TextField label="Apellidos" placeholder="Pérez" value={form.lastName} onChange={(v) => setForm((c) => ({ ...c, lastName: v }))} />
+          </div>
+          <TextField label="Correo" placeholder="cliente@empresa.com" value={form.email} onChange={(v) => setForm((c) => ({ ...c, email: v }))} />
+          <TextField label="Teléfono" placeholder="+52 …" value={form.phone} onChange={(v) => setForm((c) => ({ ...c, phone: v }))} />
+          <TextField label="Empresa (opcional)" placeholder="Acme SA de CV" value={form.company} onChange={(v) => setForm((c) => ({ ...c, company: v }))} />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button className="btn-role" onClick={handleSubmit} disabled={submitting}>
+            {submitting ? "Creando…" : "Crear cliente"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function TeamStatChip({
+  label,
+  value,
+  tone = "neutral"
+}: {
+  label: string;
+  value: number;
+  tone?: "neutral" | "success";
+}) {
+  const toneCls =
+    tone === "success" ? "bg-success-50 text-success-700" : "bg-slate-100 text-slate-700";
+  return (
+    <span className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-base font-medium ${toneCls}`}>
+      <span className="font-semibold">{value}</span>
+      <span className="text-sm opacity-80">{label}</span>
+    </span>
   );
 }
 

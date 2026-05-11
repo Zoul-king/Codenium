@@ -38,6 +38,23 @@ interface CreatePmAccountInput {
   phone: string;
 }
 
+interface CreateClientAccountInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  company?: string;
+}
+
+interface CreateProjectDirectInput {
+  clientId: string;
+  pmId?: string;
+  name: string;
+  description?: string;
+  dueDate?: string;
+  budget?: number;
+}
+
 interface AddProjectDocumentInput {
   projectId: string;
   title: string;
@@ -63,8 +80,10 @@ interface DashboardWorkspaceContextValue {
   setUserState: (userId: string, nextState: UserState) => Promise<void>;
   deleteUser: (userId: string) => Promise<void>;
   createPmAccount: (input: CreatePmAccountInput) => Promise<{ emailed: boolean }>;
-  completeMilestone: (milestoneId: string) => void;
-  saveMilestone: (input: UpsertMilestoneInput) => void;
+  createClientAccount: (input: CreateClientAccountInput) => Promise<{ emailed: boolean }>;
+  createProjectDirect: (input: CreateProjectDirectInput) => Promise<void>;
+  completeMilestone: (milestoneId: string) => Promise<void>;
+  saveMilestone: (input: UpsertMilestoneInput) => Promise<void>;
   addChangeRequest: (request: Omit<ChangeRequestRecord, "id" | "requestedAt" | "status">) => void;
   addProjectMessage: (projectId: string, senderId: string, role: Role, preview: string) => Promise<void>;
   markPaymentAsPaid: (paymentId: string) => void;
@@ -311,7 +330,7 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
         const response = await fetch("/api/users", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(input)
+          body: JSON.stringify({ ...input, role: "PM" })
         });
 
         if (!response.ok) {
@@ -328,22 +347,74 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
 
         return { emailed: newUser.emailed !== false };
       },
-      completeMilestone: (milestoneId) => {
+      createClientAccount: async (input) => {
+        const response = await fetch("/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...input, role: "CLIENT" })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo crear el cliente.");
+        }
+
+        const newUser = await response.json();
+
+        setState((current) => ({
+          ...current,
+          users: upsertById(current.users, mapApiUser(newUser))
+        }));
+
+        return { emailed: newUser.emailed !== false };
+      },
+      createProjectDirect: async (input) => {
+        const response = await fetch("/api/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input)
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo crear el proyecto.");
+        }
+
+        const project = await response.json();
+        const quote = project.quote;
+
+        setState((current) => {
+          const nextQuote = mapApiQuote({ ...quote, project }, current.users);
+          const nextProject = mapApiProject(project, quote);
+          return {
+            ...current,
+            quotes: upsertById(current.quotes, nextQuote),
+            projects: upsertById(current.projects, nextProject)
+          };
+        });
+      },
+      completeMilestone: async (milestoneId) => {
+        const response = await fetch("/api/milestones", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: milestoneId, status: "done" })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo completar el hito.");
+        }
+
         setState((current) => {
           const milestone = current.milestones.find((item) => item.id === milestoneId);
+          if (!milestone) return current;
 
-          if (!milestone) {
-            return current;
-          }
-
-          // Calcula los hitos actualizados primero para contar correctamente
           const updatedMilestones = current.milestones.map((item) => {
             if (item.id === milestoneId) return { ...item, status: "done" as const };
             if (item.projectId === milestone.projectId && item.status === "next") return { ...item, status: "current" as const };
             return item;
           });
 
-          // Progreso = done / total (no +18 fijo)
           const projectMilestones = updatedMilestones.filter((m) => m.projectId === milestone.projectId);
           const doneCount = projectMilestones.filter((m) => m.status === "done").length;
           const newProgress = projectMilestones.length > 0
@@ -366,45 +437,49 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           };
         });
       },
-      saveMilestone: (input) => {
+      saveMilestone: async (input) => {
+        const isUpdate = Boolean(input.id);
+        const response = await fetch("/api/milestones", {
+          method: isUpdate ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: input.id,
+            projectId: input.projectId,
+            title: input.title,
+            summary: input.summary,
+            date: input.date,
+            status: input.status
+          })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo guardar el hito.");
+        }
+
+        const persisted = await response.json();
+        const record = mapApiMilestone(persisted);
+
         setState((current) => {
-          if (input.id) {
+          if (isUpdate) {
             return {
               ...current,
-              milestones: current.milestones.map((milestone) =>
-                milestone.id === input.id
-                  ? {
-                      ...milestone,
-                      projectId: input.projectId,
-                      title: input.title,
-                      summary: input.summary,
-                      date: input.date,
-                      status: input.status
-                    }
-                  : milestone
-              )
+              milestones: current.milestones.map((m) => (m.id === record.id ? record : m))
             };
           }
 
-          const projectPayments = current.payments.filter((payment) => payment.projectId === input.projectId);
+          const projectPayments = current.payments.filter((p) => p.projectId === record.projectId);
           const nextScheduledPayment = projectPayments.find(
-            (payment) => payment.status === "scheduled" && !current.milestones.some((milestone) => milestone.unlocksPaymentId === payment.id)
+            (p) => p.status === "scheduled" && !current.milestones.some((m) => m.unlocksPaymentId === p.id)
           );
+
+          const next: ProjectMilestoneRecord = nextScheduledPayment
+            ? { ...record, unlocksPaymentId: nextScheduledPayment.id }
+            : record;
 
           return {
             ...current,
-            milestones: [
-              ...current.milestones,
-              {
-                id: `milestone-${current.milestones.length + 1}`,
-                projectId: input.projectId,
-                title: input.title,
-                summary: input.summary,
-                date: input.date,
-                status: input.status,
-                unlocksPaymentId: nextScheduledPayment?.id
-              }
-            ]
+            milestones: [...current.milestones, next]
           };
         });
       },
@@ -566,12 +641,16 @@ function mapApiQuote(quote: any, users: UserRecord[]): QuoteRecord {
   const client = users.find((user) => user.id === quote.clientId) ?? (quote.client ? mapApiUser(quote.client) : undefined);
   const normalizedStatus = normalizeQuoteStatus(quote.status);
   const createdAt = String(quote.createdAt).split("T")[0];
+  // Si el cliente eligió un plan tarifado (BASIC/INTERMEDIATE/PREMIUM) la
+  // cotización es de "plan"; ONE_TIME es la marca por defecto del flujo de
+  // servicios/cotizador libre.
+  const intakeSource: "plan" | "service" = quote.planTier && quote.planTier !== "ONE_TIME" ? "plan" : "service";
 
   return {
     id: quote.id,
     code: quote.folio ?? `Q-${quote.id}`,
     title: quote.title ?? "Proyecto sin titulo",
-    intakeSource: "plan",
+    intakeSource,
     selectionLabel: quote.title ?? "Proyecto sin titulo",
     quoteKind: normalizedStatus === "accepted" ? "formal" : "prequote",
     role: "client",

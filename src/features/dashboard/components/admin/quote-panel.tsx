@@ -1,11 +1,20 @@
 "use client";
 
-import { CheckCircle2, Filter, MoreHorizontal, Search, UserCheck, X } from "lucide-react";
+import { CheckCircle2, Filter, MoreHorizontal, Plus, UserCheck, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,9 +25,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TextField, TextAreaField } from "@/components/common/form-field";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
+  getClientUsers,
   getPmStats,
   getPmUsers,
   getUserById,
@@ -33,7 +45,6 @@ import { formatLongDate, formatShortDate, getQuoteStatusLabel } from "@/lib/util
 const STATUS_FILTERS: { value: QuoteStatus | "all"; label: string }[] = [
   { value: "all", label: "Todos" },
   { value: "pending", label: "Pendientes" },
-  { value: "reviewed", label: "Revisadas" },
   { value: "accepted", label: "Aceptadas" },
   { value: "rejected", label: "Rechazadas" }
 ];
@@ -43,20 +54,34 @@ export function AdminQuotePanel() {
   const pmUsers = getPmUsers(state);
   const quotes = getVisibleQuotes(state, "admin");
 
-  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<QuoteStatus | "all">("all");
+  const [kindFilter, setKindFilter] = useState<"all" | "plan" | "service">("all");
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
   const [pmAssignment, setPmAssignment] = useState("");
 
+  const stats = useMemo(() => {
+    let plan = 0;
+    let service = 0;
+    let accepted = 0;
+    let rejected = 0;
+    let pending = 0;
+    for (const q of quotes) {
+      if (q.intakeSource === "plan") plan++;
+      else if (q.intakeSource === "service") service++;
+      if (q.status === "accepted") accepted++;
+      else if (q.status === "rejected") rejected++;
+      else if (q.status === "pending") pending++;
+    }
+    return { total: quotes.length, plan, service, accepted, rejected, pending };
+  }, [quotes]);
+
   const filtered = useMemo(() => {
     return quotes.filter((q) => {
+      if (kindFilter !== "all" && q.intakeSource !== kindFilter) return false;
       if (statusFilter !== "all" && q.status !== statusFilter) return false;
-      if (search && ![q.title, q.code, q.clientName].some((s) => s.toLowerCase().includes(search.toLowerCase()))) {
-        return false;
-      }
       return true;
     });
-  }, [quotes, search, statusFilter]);
+  }, [quotes, statusFilter, kindFilter]);
 
   const selectedQuote = quotes.find((q) => q.id === selectedQuoteId) ?? null;
 
@@ -120,44 +145,43 @@ export function AdminQuotePanel() {
 
   return (
     <div className="space-y-6">
-      <header className="rounded-[var(--radius-card)] border border-slate-200 bg-white p-6 shadow-[var(--shadow-card)]">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#3f237a)]">
-              Pipeline comercial
-            </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-slate-950">Cotizaciones</h1>
-            <p className="mt-1 text-sm text-slate-600">{quotes.length} en total · administra estado y asignación de PM</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-              <Input
-                placeholder="Buscar…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-9 w-[200px] pl-9"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Filter className="size-4 text-slate-500" />
-              <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
-                <SelectTrigger className="h-9 w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_FILTERS.map((f) => (
-                    <SelectItem key={f.value} value={f.value}>
-                      {f.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <StatChip label="Total" value={stats.total} />
+          <StatChip label="Planes" value={stats.plan} />
+          <StatChip label="Servicios" value={stats.service} />
+          <StatChip label="Pendientes" value={stats.pending} tone="warning" />
+          <StatChip label="Aceptadas" value={stats.accepted} tone="success" />
+          <StatChip label="Rechazadas" value={stats.rejected} tone="error" />
         </div>
-      </header>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Filter className="size-4 text-slate-500" />
+            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
+              <SelectTrigger className="h-9 w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_FILTERS.map((f) => (
+                  <SelectItem key={f.value} value={f.value}>
+                    {f.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <CreateProjectDialog />
+        </div>
+      </div>
+
+      <Tabs value={kindFilter} onValueChange={(v) => setKindFilter(v as "all" | "plan" | "service")}>
+        <TabsList variant="line" className="bg-transparent">
+          <TabsTrigger value="all">Todas</TabsTrigger>
+          <TabsTrigger value="plan">Planes</TabsTrigger>
+          <TabsTrigger value="service">Servicios</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <div className="rounded-[var(--radius-card-dense)] border border-slate-200 bg-white shadow-[var(--shadow-card-dense)]">
         <Table>
@@ -184,7 +208,7 @@ export function AdminQuotePanel() {
                 <TableCell className="text-sm text-slate-700">{quote.clientName}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className="text-[10px] uppercase">
-                    {quote.quoteKind === "prequote" ? "Pre" : "Formal"}
+                    {quote.intakeSource === "plan" ? "Plan" : "Servicio"}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-sm text-slate-700">
@@ -209,9 +233,6 @@ export function AdminQuotePanel() {
                         Asignar PM y aceptar
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => notifyStatus(quote, "reviewed")}>
-                        Marcar revisada
-                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => notifyStatus(quote, "rejected")} variant="destructive">
                         Rechazar
                       </DropdownMenuItem>
@@ -284,9 +305,6 @@ export function AdminQuotePanel() {
               </div>
 
               <SheetFooter>
-                <Button variant="outline" onClick={() => notifyStatus(selectedQuote, "reviewed")}>
-                  Marcar revisada
-                </Button>
                 <Button
                   variant="outline"
                   onClick={() => notifyStatus(selectedQuote, "rejected")}
@@ -317,6 +335,31 @@ function Cell({ label, value }: { label: string; value: string }) {
   );
 }
 
+function StatChip({
+  label,
+  value,
+  tone = "neutral"
+}: {
+  label: string;
+  value: number;
+  tone?: "neutral" | "success" | "warning" | "error";
+}) {
+  const toneCls =
+    tone === "success"
+      ? "bg-success-50 text-success-700"
+      : tone === "warning"
+        ? "bg-warning-50 text-warning-700"
+        : tone === "error"
+          ? "bg-error-50 text-error-700"
+          : "bg-slate-100 text-slate-700";
+  return (
+    <span className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-base font-medium ${toneCls}`}>
+      <span className="font-semibold">{value}</span>
+      <span className="text-sm opacity-80">{label}</span>
+    </span>
+  );
+}
+
 function QuoteStatusBadge({ status }: { status: QuoteStatus }) {
   const cls = {
     pending: "badge-status-warning",
@@ -325,4 +368,145 @@ function QuoteStatusBadge({ status }: { status: QuoteStatus }) {
     rejected: "badge-status-error"
   }[status];
   return <span className={cls}>{getQuoteStatusLabel(status)}</span>;
+}
+
+function CreateProjectDialog() {
+  const { state, createProjectDirect } = useDashboardWorkspace();
+  const clients = getClientUsers(state);
+  const pms = getPmUsers(state);
+
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    clientId: "",
+    pmId: "",
+    name: "",
+    description: "",
+    dueDate: "",
+    budget: ""
+  });
+
+  async function handleSubmit() {
+    if (!form.clientId || !form.name.trim() || !form.pmId) {
+      toast.error("Faltan datos", { description: "Cliente, nombre del proyecto y PM son obligatorios." });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const budgetNumber = form.budget.trim() ? Number(form.budget) : undefined;
+      await createProjectDirect({
+        clientId: form.clientId,
+        pmId: form.pmId,
+        name: form.name.trim(),
+        description: form.description.trim() || undefined,
+        dueDate: form.dueDate || undefined,
+        budget: Number.isFinite(budgetNumber) ? (budgetNumber as number) : undefined
+      });
+      toast.success("Proyecto creado", {
+        description: "Se notificó al cliente y al PM asignado."
+      });
+      setOpen(false);
+      setForm({ clientId: "", pmId: "", name: "", description: "", dueDate: "", budget: "" });
+    } catch (error) {
+      toast.error("No se pudo crear el proyecto", {
+        description: error instanceof Error ? error.message : undefined
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="btn-role">
+          <Plus className="size-4" />
+          Nuevo proyecto
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Crear proyecto sin cotización previa</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <Label>Cliente</Label>
+            <Select value={form.clientId} onValueChange={(v) => setForm((c) => ({ ...c, clientId: v }))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un cliente" />
+              </SelectTrigger>
+              <SelectContent>
+                {clients.length === 0 ? (
+                  <div className="px-2 py-1.5 text-xs text-slate-500">Aún no hay clientes registrados.</div>
+                ) : (
+                  clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name} · {client.email}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          <TextField
+            label="Nombre del proyecto"
+            placeholder="Ej. Plataforma de reservas Acme"
+            value={form.name}
+            onChange={(v) => setForm((c) => ({ ...c, name: v }))}
+          />
+          <TextAreaField
+            label="Descripción"
+            placeholder="Resumen del alcance, contexto y entregables."
+            rows={3}
+            value={form.description}
+            onChange={(v) => setForm((c) => ({ ...c, description: v }))}
+          />
+          <div className="space-y-2">
+            <Label>Asignar PM</Label>
+            <Select value={form.pmId} onValueChange={(v) => setForm((c) => ({ ...c, pmId: v }))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un PM" />
+              </SelectTrigger>
+              <SelectContent>
+                {pms.length === 0 ? (
+                  <div className="px-2 py-1.5 text-xs text-slate-500">Aún no hay PMs registrados.</div>
+                ) : (
+                  pms.map((pm) => {
+                    const pmStats = getPmStats(state, pm.id);
+                    return (
+                      <SelectItem key={pm.id} value={pm.id}>
+                        {pm.name} · {pmStats.activeProjects} activos
+                      </SelectItem>
+                    );
+                  })
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>Fecha de entrega</Label>
+              <Input type="date" value={form.dueDate} onChange={(e) => setForm((c) => ({ ...c, dueDate: e.target.value }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>Presupuesto (MXN)</Label>
+              <Input
+                type="number"
+                min={0}
+                placeholder="0"
+                value={form.budget}
+                onChange={(e) => setForm((c) => ({ ...c, budget: e.target.value }))}
+              />
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button className="btn-role" onClick={handleSubmit} disabled={submitting}>
+            {submitting ? "Creando…" : "Crear proyecto"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }

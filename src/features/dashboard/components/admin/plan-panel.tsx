@@ -65,22 +65,6 @@ export function AdminPlanPanel() {
 
   return (
     <div className="space-y-6">
-      <header className="rounded-[var(--radius-card)] border border-slate-200 bg-white p-6 shadow-[var(--shadow-card)]">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#3f237a)]">
-              Catálogo
-            </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-slate-950">
-              Editar elementos
-            </h1>
-            <p className="mt-1 text-sm text-slate-600">
-              Administra planes, servicios, clientes y proyectos · cambios se publican al guardar.
-            </p>
-          </div>
-        </div>
-      </header>
-
       <Tabs value={section} onValueChange={(v) => setSection(v as Section)}>
         <TabsList variant="line" className="bg-transparent">
           <TabsTrigger value="plans">Planes</TabsTrigger>

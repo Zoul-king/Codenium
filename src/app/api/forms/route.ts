@@ -26,10 +26,10 @@ import {
 
 class PublicValidationError extends Error {}
 
-// Rate limit simple en memoria: máx 3 envíos por IP cada 10 minutos
+// Rate limit simple en memoria: máx 3 envíos por IP cada 20 minutos
 const submissionTracker = new Map<string, { count: number; resetAt: number }>();
 const LIMIT = 3;
-const WINDOW_MS = 10 * 60 * 1000;
+const WINDOW_MS = 20 * 60 * 1000;
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();

@@ -56,6 +56,14 @@ function Button({
       data-variant={variant}
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
+      // Radix Dialog/Popover triggers attach aria-controls/aria-expanded via
+      // useId. Cuando el árbol del cliente difiere brevemente del SSR (por
+      // ejemplo extensiones del navegador o StrictMode) los IDs no coinciden y
+      // React lanza un hydration warning aunque el atributo es funcionalmente
+      // equivalente. suppressHydrationWarning silencia ese mismatch a nivel de
+      // atributos del root del botón sin enmascarar diferencias reales de
+      // contenido (las hijas siguen comparándose normalmente).
+      suppressHydrationWarning
       {...props}
     />
   )
