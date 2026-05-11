@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="44" failures="0" errors="0" time="1.1663875">
+    <testsuite name="tests/auth-service.test.ts" timestamp="2026-05-10T11:50:49.530Z" hostname="DESKTOP-UPKL19F" tests="4" failures="0" errors="0" skipped="0" time="0.0091547">
+        <testcase classname="tests/auth-service.test.ts" name="validateForgotPassword &gt; rechaza correo vacío" time="0.0037064">
+        </testcase>
+        <testcase classname="tests/auth-service.test.ts" name="validateForgotPassword &gt; rechaza correo sin arroba" time="0.0005562">
+        </testcase>
+        <testcase classname="tests/auth-service.test.ts" name="validateForgotPassword &gt; acepta correo válido y devuelve mensaje con el correo" time="0.0008396">
+        </testcase>
+        <testcase classname="tests/auth-service.test.ts" name="getDashboardRoute &gt; mapea cada rol a la ruta correcta" time="0.0006152">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/email-templates.test.ts" timestamp="2026-05-10T11:50:49.543Z" hostname="DESKTOP-UPKL19F" tests="19" failures="0" errors="0" skipped="0" time="0.0209167">
+        <testcase classname="tests/email-templates.test.ts" name="buildClientWelcomeEmail &gt; uses the welcome subject for new clients" time="0.0037657">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildClientWelcomeEmail &gt; greets the client by name in text and html" time="0.0006813">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildClientWelcomeEmail &gt; links to the cotizador and the dashboard" time="0.0006989">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildClientWelcomeEmail &gt; escapes HTML in the client name" time="0.0006617">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildPmAccountCreatedEmail &gt; uses the team welcome subject" time="0.0007005">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildPmAccountCreatedEmail &gt; includes credentials and login url" time="0.000817">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildDashboardMessageEmail &gt; renders sender, project and message" time="0.0008907">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildDashboardMessageEmail &gt; escapes HTML in the message body" time="0.0006329">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildChangeRequestEmail &gt; translates priority codes to labels" time="0.0014226">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildProjectAssignmentEmail &gt; includes quote code, project name and counterpart" time="0.0009044">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildDeliverableNotificationEmail &gt; omits the file line when fileName is missing" time="0.0007786">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildQuoteStatusEmail &gt; uses a different subject when status is rejected" time="0.0008591">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildMeetingScheduledEmail &gt; includes date, time and host" time="0.0006786">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildMeetingScheduledEmail &gt; only renders meetingLink when provided" time="0.0003989">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildCompanyLeadEmail (notificación interna) &gt; uses different subjects for quote vs contact" time="0.0007942">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildPasswordResetEmail &gt; usa el asunto correcto de reset" time="0.0005018">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildPasswordResetEmail &gt; incluye el reset url en text y html" time="0.0003084">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildPasswordResetEmail &gt; menciona la duración en minutos" time="0.0002764">
+        </testcase>
+        <testcase classname="tests/email-templates.test.ts" name="buildLeadConfirmationEmail (confirmación al cliente) &gt; greets by first name only" time="0.0005901">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/password.test.ts" timestamp="2026-05-10T11:50:49.550Z" hostname="DESKTOP-UPKL19F" tests="4" failures="0" errors="0" skipped="0" time="1.1025729">
+        <testcase classname="tests/password.test.ts" name="hashPassword + verifyPassword &gt; hashea con prefijo bcrypt y verifica la contraseña" time="1.0970801">
+        </testcase>
+        <testcase classname="tests/password.test.ts" name="hashPassword + verifyPassword &gt; rechaza hash vacío" time="0.0006157">
+        </testcase>
+        <testcase classname="tests/password.test.ts" name="hashPassword + verifyPassword &gt; acepta legacy plaintext una sola vez" time="0.0006095">
+        </testcase>
+        <testcase classname="tests/password.test.ts" name="hashPassword + verifyPassword &gt; isHashed detecta los prefijos bcrypt válidos" time="0.0004877">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/selectors.test.ts" timestamp="2026-05-10T11:50:49.552Z" hostname="DESKTOP-UPKL19F" tests="11" failures="0" errors="0" skipped="0" time="0.0213678">
+        <testcase classname="tests/selectors.test.ts" name="getPrimaryUser &gt; regresa undefined si no hay sesión" time="0.0044382">
+        </testcase>
+        <testcase classname="tests/selectors.test.ts" name="getPrimaryUser &gt; regresa el usuario sólo si su rol coincide con el dashboard" time="0.0011185">
+        </testcase>
+        <testcase classname="tests/selectors.test.ts" name="getPrimaryUser &gt; ignora datos mock — sólo devuelve la sesión real" time="0.0005965">
+        </testcase>
+        <testcase classname="tests/selectors.test.ts" name="getUserById &gt; encuentra al usuario por id" time="0.0007286">
+        </testcase>
+        <testcase classname="tests/selectors.test.ts" name="getUserById &gt; regresa undefined si no existe" time="0.0007094">
+        </testcase>
+        <testcase classname="tests/selectors.test.ts" name="getVisibleProjects &gt; admin ve todos los proyectos" time="0.0029343">
+        </testcase>
+        <testcase classname="tests/selectors.test.ts" name="getVisibleProjects &gt; cliente sólo ve los proyectos donde es clientId" time="0.0021885">
+        </testcase>
+        <testcase classname="tests/selectors.test.ts" name="getVisibleProjects &gt; cliente no autenticado no ve nada" time="0.0007253">
+        </testcase>
+        <testcase classname="tests/selectors.test.ts" name="getVisibleQuotes &gt; admin ve todas las cotizaciones" time="0.0009463">
+        </testcase>
+        <testcase classname="tests/selectors.test.ts" name="getVisibleQuotes &gt; pm sólo ve cotizaciones asignadas" time="0.0010251">
+        </testcase>
+        <testcase classname="tests/selectors.test.ts" name="getPmStats &gt; cuenta proyectos activos vs cerrados" time="0.000778">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/shared-helpers.test.ts" timestamp="2026-05-10T11:50:49.556Z" hostname="DESKTOP-UPKL19F" tests="6" failures="0" errors="0" skipped="0" time="0.0123754">
+        <testcase classname="tests/shared-helpers.test.ts" name="escapeHtml &gt; escapa &amp;, &lt;, &gt;, comillas y apóstrofes" time="0.0041956">
+        </testcase>
+        <testcase classname="tests/shared-helpers.test.ts" name="formatKeyValueText &gt; ignora valores vacíos" time="0.0007596">
+        </testcase>
+        <testcase classname="tests/shared-helpers.test.ts" name="formatKeyValueHtml &gt; genera filas &lt;tr&gt; sólo para valores con contenido" time="0.0012113">
+        </testcase>
+        <testcase classname="tests/shared-helpers.test.ts" name="buildCtaButton &gt; incluye href escapado y label" time="0.0005932">
+        </testcase>
+        <testcase classname="tests/shared-helpers.test.ts" name="wrapEmailHtml &gt; incluye el título escapado y el branding Codenium" time="0.0007493">
+        </testcase>
+        <testcase classname="tests/shared-helpers.test.ts" name="wrapEmailHtml &gt; acepta color de acento personalizado" time="0.000517">
+        </testcase>
+    </testsuite>
+</testsuites>

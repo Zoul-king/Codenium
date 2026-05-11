@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"/>
+<title>Evidencia de pruebas unitarias — Codenium</title>
+<style>
+  :root{color-scheme:dark}
+  body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0b0d10;color:#e6e7ea;margin:0;padding:32px}
+  h1{margin:0 0 4px;font-size:22px}
+  .sub{color:#9aa0a6;margin-bottom:24px;font-size:13px}
+  .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:24px}
+  .card{background:#13171c;border:1px solid #232932;border-radius:10px;padding:14px}
+  .card .k{font-size:12px;color:#9aa0a6;text-transform:uppercase;letter-spacing:.05em}
+  .card .v{font-size:24px;font-weight:600;margin-top:4px}
+  .ok{color:#3ddc84}.bad{color:#ff6b6b}
+  table{width:100%;border-collapse:collapse;background:#13171c;border:1px solid #232932;border-radius:10px;overflow:hidden;font-size:13px}
+  th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #1c2128;vertical-align:top}
+  th{background:#171c22;color:#9aa0a6;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+  tr:last-child td{border-bottom:none}
+  td.num{text-align:right;color:#9aa0a6;font-variant-numeric:tabular-nums}
+  td.status.passed{color:#3ddc84;font-weight:600}
+  td.status.failed{color:#ff6b6b;font-weight:600}
+  code{background:#1c2128;padding:2px 6px;border-radius:4px;font-size:12px}
+  footer{margin-top:24px;color:#6c7280;font-size:11px}
+</style></head><body>
+<h1>Evidencia de pruebas unitarias — Codenium</h1>
+<div class="sub">Framework: Vitest v4.1.5 · Reporter: JSON + JUnit + verbose · Generado 2026-05-10T11:51:19.099Z</div>
+
+<div class="cards">
+  <div class="card"><div class="k">Archivos de prueba</div><div class="v">5</div></div>
+  <div class="card"><div class="k">Total de pruebas</div><div class="v">44</div></div>
+  <div class="card"><div class="k">Pasaron</div><div class="v ok">44</div></div>
+  <div class="card"><div class="k">Fallaron</div><div class="v ok">0</div></div>
+</div>
+
+<table>
+  <thead><tr><th>Archivo</th><th>Suite</th><th>Caso de prueba</th><th>Resultado</th><th>Tiempo</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>auth-service.test.ts</code></td>
+    <td>validateForgotPassword</td>
+    <td>rechaza correo vacío</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">3.7064000000000306 ms</td>
+  </tr>
+  <tr>
+    <td><code>auth-service.test.ts</code></td>
+    <td>validateForgotPassword</td>
+    <td>rechaza correo sin arroba</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.5561999999999898 ms</td>
+  </tr>
+  <tr>
+    <td><code>auth-service.test.ts</code></td>
+    <td>validateForgotPassword</td>
+    <td>acepta correo válido y devuelve mensaje con el correo</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.8396000000000186 ms</td>
+  </tr>
+  <tr>
+    <td><code>auth-service.test.ts</code></td>
+    <td>getDashboardRoute</td>
+    <td>mapea cada rol a la ruta correcta</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.6151999999999589 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildClientWelcomeEmail</td>
+    <td>uses the welcome subject for new clients</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">3.7656999999999243 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildClientWelcomeEmail</td>
+    <td>greets the client by name in text and html</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.6812999999999647 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildClientWelcomeEmail</td>
+    <td>links to the cotizador and the dashboard</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.6988999999999805 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildClientWelcomeEmail</td>
+    <td>escapes HTML in the client name</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.6616999999999962 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildPmAccountCreatedEmail</td>
+    <td>uses the team welcome subject</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.70049999999992 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildPmAccountCreatedEmail</td>
+    <td>includes credentials and login url</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.8170000000000073 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildDashboardMessageEmail</td>
+    <td>renders sender, project and message</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.890700000000038 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildDashboardMessageEmail</td>
+    <td>escapes HTML in the message body</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.6329000000000633 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildChangeRequestEmail</td>
+    <td>translates priority codes to labels</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">1.4225999999999885 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildProjectAssignmentEmail</td>
+    <td>includes quote code, project name and counterpart</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.9044000000000096 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildDeliverableNotificationEmail</td>
+    <td>omits the file line when fileName is missing</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.7785999999999831 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildQuoteStatusEmail</td>
+    <td>uses a different subject when status is rejected</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.8591000000000122 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildMeetingScheduledEmail</td>
+    <td>includes date, time and host</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.6785999999999603 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildMeetingScheduledEmail</td>
+    <td>only renders meetingLink when provided</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.398900000000026 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildCompanyLeadEmail (notificación interna)</td>
+    <td>uses different subjects for quote vs contact</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.7941999999999325 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildPasswordResetEmail</td>
+    <td>usa el asunto correcto de reset</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.5018000000000029 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildPasswordResetEmail</td>
+    <td>incluye el reset url en text y html</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.308400000000006 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildPasswordResetEmail</td>
+    <td>menciona la duración en minutos</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.2764000000000806 ms</td>
+  </tr>
+  <tr>
+    <td><code>email-templates.test.ts</code></td>
+    <td>buildLeadConfirmationEmail (confirmación al cliente)</td>
+    <td>greets by first name only</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.5901000000000067 ms</td>
+  </tr>
+  <tr>
+    <td><code>password.test.ts</code></td>
+    <td>hashPassword + verifyPassword</td>
+    <td>hashea con prefijo bcrypt y verifica la contraseña</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">1097.0801 ms</td>
+  </tr>
+  <tr>
+    <td><code>password.test.ts</code></td>
+    <td>hashPassword + verifyPassword</td>
+    <td>rechaza hash vacío</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.6157000000000608 ms</td>
+  </tr>
+  <tr>
+    <td><code>password.test.ts</code></td>
+    <td>hashPassword + verifyPassword</td>
+    <td>acepta legacy plaintext una sola vez</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.6095000000000255 ms</td>
+  </tr>
+  <tr>
+    <td><code>password.test.ts</code></td>
+    <td>hashPassword + verifyPassword</td>
+    <td>isHashed detecta los prefijos bcrypt válidos</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.4876999999999043 ms</td>
+  </tr>
+  <tr>
+    <td><code>selectors.test.ts</code></td>
+    <td>getPrimaryUser</td>
+    <td>regresa undefined si no hay sesión</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">4.438200000000052 ms</td>
+  </tr>
+  <tr>
+    <td><code>selectors.test.ts</code></td>
+    <td>getPrimaryUser</td>
+    <td>regresa el usuario sólo si su rol coincide con el dashboard</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">1.1184999999999263 ms</td>
+  </tr>
+  <tr>
+    <td><code>selectors.test.ts</code></td>
+    <td>getPrimaryUser</td>
+    <td>ignora datos mock — sólo devuelve la sesión real</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.5965000000001055 ms</td>
+  </tr>
+  <tr>
+    <td><code>selectors.test.ts</code></td>
+    <td>getUserById</td>
+    <td>encuentra al usuario por id</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.7286000000000286 ms</td>
+  </tr>
+  <tr>
+    <td><code>selectors.test.ts</code></td>
+    <td>getUserById</td>
+    <td>regresa undefined si no existe</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.7093999999999596 ms</td>
+  </tr>
+  <tr>
+    <td><code>selectors.test.ts</code></td>
+    <td>getVisibleProjects</td>
+    <td>admin ve todos los proyectos</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">2.9343000000000075 ms</td>
+  </tr>
+  <tr>
+    <td><code>selectors.test.ts</code></td>
+    <td>getVisibleProjects</td>
+    <td>cliente sólo ve los proyectos donde es clientId</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">2.1884999999999764 ms</td>
+  </tr>
+  <tr>
+    <td><code>selectors.test.ts</code></td>
+    <td>getVisibleProjects</td>
+    <td>cliente no autenticado no ve nada</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.7252999999999474 ms</td>
+  </tr>
+  <tr>
+    <td><code>selectors.test.ts</code></td>
+    <td>getVisibleQuotes</td>
+    <td>admin ve todas las cotizaciones</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.9463000000000648 ms</td>
+  </tr>
+  <tr>
+    <td><code>selectors.test.ts</code></td>
+    <td>getVisibleQuotes</td>
+    <td>pm sólo ve cotizaciones asignadas</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">1.0250999999999522 ms</td>
+  </tr>
+  <tr>
+    <td><code>selectors.test.ts</code></td>
+    <td>getPmStats</td>
+    <td>cuenta proyectos activos vs cerrados</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.77800000000002 ms</td>
+  </tr>
+  <tr>
+    <td><code>shared-helpers.test.ts</code></td>
+    <td>escapeHtml</td>
+    <td>escapa &, <, >, comillas y apóstrofes</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">4.195600000000013 ms</td>
+  </tr>
+  <tr>
+    <td><code>shared-helpers.test.ts</code></td>
+    <td>formatKeyValueText</td>
+    <td>ignora valores vacíos</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.7595999999999776 ms</td>
+  </tr>
+  <tr>
+    <td><code>shared-helpers.test.ts</code></td>
+    <td>formatKeyValueHtml</td>
+    <td>genera filas <tr> sólo para valores con contenido</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">1.2112999999999374 ms</td>
+  </tr>
+  <tr>
+    <td><code>shared-helpers.test.ts</code></td>
+    <td>buildCtaButton</td>
+    <td>incluye href escapado y label</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.5932000000000244 ms</td>
+  </tr>
+  <tr>
+    <td><code>shared-helpers.test.ts</code></td>
+    <td>wrapEmailHtml</td>
+    <td>incluye el título escapado y el branding Codenium</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.7492999999999483 ms</td>
+  </tr>
+  <tr>
+    <td><code>shared-helpers.test.ts</code></td>
+    <td>wrapEmailHtml</td>
+    <td>acepta color de acento personalizado</td>
+    <td class="status passed">✓ PASS</td>
+    <td class="num">0.5169999999999391 ms</td>
+  </tr></tbody>
+</table>
+
+<footer>
+  Inicio: 2026-05-10T11:50:47.628Z · Duración acumulada de archivos: 1150.220458984375 ms ·
+  Comando: <code>npx vitest run --reporter=verbose --reporter=json --reporter=junit</code> ·
+  Estado global: <strong class="ok">SUCCESS</strong>
+</footer>
+</body></html>
