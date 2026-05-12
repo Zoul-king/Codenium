@@ -51,7 +51,7 @@ export type MilestoneStatus = "done" | "current" | "next";
 
 export type PaymentStatus = "paid" | "pending" | "scheduled";
 export type UserState = "active" | "inactive" | "banned";
-export type ChangeRequestStatus = "new" | "in_review" | "planned" | "done";
+export type ChangeRequestStatus = "new" | "in_review" | "planned" | "done" | "rejected";
 
 export interface EstimateRange {
   min: number;

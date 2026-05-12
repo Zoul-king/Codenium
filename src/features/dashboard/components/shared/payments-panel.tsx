@@ -47,30 +47,18 @@ export function PaymentsPanel() {
 
   return (
     <div className="space-y-6">
-      <header className={isClient ? "warm-card" : "rounded-[var(--radius-card)] border border-slate-200 bg-white p-6 shadow-[var(--shadow-card)]"}>
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#224a78)]">
-              Pagos del proyecto
-            </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-slate-950">{project.name}</h1>
-            <p className="mt-1 text-sm text-slate-600">
-              Cada pago se desbloquea cuando su hito está completado.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 text-right">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Pendiente</p>
-              <p className="mt-1 text-xl font-bold text-warning-700">{formatCurrency(totalDue)}</p>
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Pagado</p>
-              <p className="mt-1 text-xl font-bold text-success-700">{formatCurrency(totalPaid)}</p>
-            </div>
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-card)] border border-slate-200 bg-white px-5 py-3 shadow-[var(--shadow-card)]">
+        <div className="flex items-baseline gap-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#224a78)]">
+            Pagos
+          </p>
+          <h1 className="text-lg font-semibold tracking-[-0.02em] text-slate-950">{project.name}</h1>
         </div>
-      </header>
+        <div className="flex flex-wrap items-center gap-2">
+          <PaymentStatChip label="Pendiente" value={formatCurrency(totalDue)} tone="warning" />
+          <PaymentStatChip label="Pagado" value={formatCurrency(totalPaid)} tone="success" />
+        </div>
+      </div>
 
       {milestones.length === 0 ? (
         <DashboardEmptyState
@@ -204,6 +192,29 @@ function MercadoPagoButton({ paymentId, amount }: { paymentId: string; amount: n
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
+  );
+}
+
+function PaymentStatChip({
+  label,
+  value,
+  tone = "neutral"
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "warning" | "success";
+}) {
+  const toneCls =
+    tone === "success"
+      ? "bg-success-50 text-success-700"
+      : tone === "warning"
+        ? "bg-warning-50 text-warning-700"
+        : "bg-slate-100 text-slate-700";
+  return (
+    <span className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-base font-medium ${toneCls}`}>
+      <span className="font-semibold">{value}</span>
+      <span className="text-sm opacity-80">{label}</span>
+    </span>
   );
 }
 

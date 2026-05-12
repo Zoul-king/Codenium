@@ -50,6 +50,64 @@ export async function GET(req: Request) {
   }
 }
 
+// Marca como leídos todos los mensajes recibidos por el usuario actual en un
+// proyecto (mensajes que él NO envió). Devuelve cuántos se actualizaron y los
+// mensajes refrescados para que el cliente sincronice su estado local.
+export async function PATCH(req: Request) {
+  const session = await getCurrentSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+  }
+
+  let body: { projectId?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Cuerpo inválido." }, { status: 400 });
+  }
+
+  const projectId = typeof body.projectId === "string" ? body.projectId.trim() : "";
+  if (!projectId) {
+    return NextResponse.json({ error: "Falta projectId." }, { status: 400 });
+  }
+
+  const project = await db.project.findUnique({
+    where: { id: projectId },
+    select: { id: true, clientId: true, pmId: true }
+  });
+
+  if (!project) {
+    return NextResponse.json({ error: "Proyecto no encontrado." }, { status: 404 });
+  }
+
+  const isAdmin = session.user.role === "admin";
+  const isProjectClient = session.user.role === "client" && project.clientId === session.user.id;
+  const isProjectPm = session.user.role === "pm" && project.pmId === session.user.id;
+
+  if (!isAdmin && !isProjectClient && !isProjectPm) {
+    return NextResponse.json({ error: "Acceso restringido." }, { status: 403 });
+  }
+
+  try {
+    const result = await db.message.updateMany({
+      where: {
+        projectId: project.id,
+        isRead: false,
+        NOT: { senderId: session.user.id }
+      },
+      data: { isRead: true }
+    });
+
+    return NextResponse.json({ ok: true, updated: result.count });
+  } catch (error) {
+    console.error("[chat PATCH]", {
+      error: error instanceof Error ? error.message.split("\n")[0] : String(error)
+    });
+    return NextResponse.json({ error: "No se pudo marcar como leído." }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();

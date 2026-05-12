@@ -26,36 +26,54 @@ import {
 
 class PublicValidationError extends Error {}
 
-// Rate limit simple en memoria: máx 3 envíos por IP cada 20 minutos
+// Rate limit en memoria. La clave es (ip + email normalizado) para que:
+//   - Un mismo usuario pueda enviar varias solicitudes (hasta LIMIT en la ventana).
+//   - Distintas personas que comparten IP (oficina, café, NAT móvil) no se
+//     bloqueen entre sí: cada combinación ip+email tiene su propio cupo.
+//   - Sigue habiendo un techo por IP (IP_HARD_LIMIT) para frenar abuso masivo
+//     desde una sola IP, independiente del correo usado.
 const submissionTracker = new Map<string, { count: number; resetAt: number }>();
+const ipHardTracker = new Map<string, { count: number; resetAt: number }>();
 const LIMIT = 3;
+const IP_HARD_LIMIT = 20;
 const WINDOW_MS = 20 * 60 * 1000;
 
-function checkRateLimit(ip: string): boolean {
+function bumpBucket(
+  store: Map<string, { count: number; resetAt: number }>,
+  key: string,
+  limit: number
+): boolean {
   const now = Date.now();
-  const entry = submissionTracker.get(ip);
+  const entry = store.get(key);
 
   if (!entry || entry.resetAt < now) {
-    submissionTracker.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    store.set(key, { count: 1, resetAt: now + WINDOW_MS });
     return true;
   }
 
-  if (entry.count >= LIMIT) return false;
+  if (entry.count >= limit) return false;
 
   entry.count++;
+  return true;
+}
+
+function checkRateLimit(ip: string, email: string): boolean {
+  const emailKey = email.trim().toLowerCase();
+  // El cupo por (ip, email) es el "principal". Si ya se agotó, rechazamos
+  // sin tocar el contador global por IP para no penalizar a otros usuarios.
+  if (!bumpBucket(submissionTracker, `${ip}|${emailKey}`, LIMIT)) return false;
+  // Techo por IP: si una sola IP intenta inundar con muchos correos distintos,
+  // termina chocando aquí.
+  if (!bumpBucket(ipHardTracker, ip, IP_HARD_LIMIT)) return false;
   return true;
 }
 
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
 
-  if (!checkRateLimit(ip)) {
-    return NextResponse.json<ApiActionResult>(
-      { ok: false, message: "Demasiados intentos. Intenta en unos minutos." },
-      { status: 429 }
-    );
-  }
-
+  // Parseamos primero para poder rate-limit por (ip, email): así una misma IP
+  // (oficina, NAT, café) puede albergar varios usuarios sin bloquearse entre
+  // sí, y un mismo usuario sigue limitado a LIMIT por ventana.
   let lead: PublicLeadPayload;
   try {
     const payload = (await request.json()) as Partial<PublicLeadPayload>;
@@ -70,6 +88,13 @@ export async function POST(request: Request) {
             : "No pudimos leer los datos del formulario."
       },
       { status: 400 }
+    );
+  }
+
+  if (!checkRateLimit(ip, lead.email)) {
+    return NextResponse.json<ApiActionResult>(
+      { ok: false, message: "Demasiados intentos. Intenta en unos minutos." },
+      { status: 429 }
     );
   }
 

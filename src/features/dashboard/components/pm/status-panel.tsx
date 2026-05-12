@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, Circle, Clock, MoreHorizontal, Pencil, Plus, Save, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -28,8 +28,8 @@ import {
 } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
-import type { ProjectMilestoneRecord } from "@/lib/types/domain";
-import { formatLongDate, formatShortDate } from "@/lib/utils/presenters";
+import type { ChangeRequestRecord, ProjectMilestoneRecord } from "@/lib/types/domain";
+import { formatShortDate } from "@/lib/utils/presenters";
 import { cn } from "@/lib/utils";
 
 type MilestoneStatus = "done" | "current" | "next";
@@ -42,9 +42,54 @@ const EMPTY_FORM = {
 };
 
 export function PmStatusPanel() {
-  const { state, completeMilestone, saveMilestone } = useDashboardWorkspace();
-  const project = getSelectedOrPrimaryProject(state, "pm");
+  const { state, completeMilestone, saveMilestone, selectProject, refreshChangeRequests } = useDashboardWorkspace();
+
+  // Refresca las solicitudes del cliente periódicamente / al volver al tab
+  // para que el PM las vea sin tener que recargar la página.
+  useEffect(() => {
+    refreshChangeRequests();
+    const interval = window.setInterval(refreshChangeRequests, 15000);
+    const onFocus = () => refreshChangeRequests();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, [refreshChangeRequests]);
   const projects = getVisibleProjects(state, "pm");
+
+  // El PM ve solo los clientes de los proyectos que tiene asignados.
+  const clientsForPm = useMemo(() => {
+    const byId = new Map<string, { id: string; name: string }>();
+    for (const p of projects) {
+      if (!byId.has(p.clientId)) byId.set(p.clientId, { id: p.clientId, name: p.clientName });
+    }
+    return Array.from(byId.values());
+  }, [projects]);
+
+  const autoProject = getSelectedOrPrimaryProject(state, "pm");
+  const [selectedClientId, setSelectedClientId] = useState<string>(autoProject?.clientId ?? "");
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(autoProject?.id ?? "");
+
+  const projectsForClient = useMemo(
+    () => projects.filter((p) => p.clientId === selectedClientId),
+    [projects, selectedClientId]
+  );
+
+  const project = projects.find((p) => p.id === selectedProjectId);
+
+  function handleSelectClient(clientId: string) {
+    setSelectedClientId(clientId);
+    setSelectedProjectId("");
+  }
+
+  function handleSelectProject(projectId: string) {
+    setSelectedProjectId(projectId);
+    selectProject("pm", projectId);
+  }
+
   const milestones = useMemo(
     () =>
       getProjectMilestones(state, project?.id)
@@ -98,35 +143,67 @@ export function PmStatusPanel() {
     }
   }
 
-  if (!project) {
-    return (
-      <DashboardEmptyState
-        title="Selecciona un proyecto"
-        body="La gestión de hitos depende del proyecto activo en la sección Proyectos."
-      />
-    );
-  }
-
   return (
     <div className="space-y-6">
-      <header className="rounded-[var(--radius-card)] border border-slate-200 bg-white p-6 shadow-[var(--shadow-card)]">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#4f9792)]">
-              Status board
-            </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-slate-950">{project.name}</h1>
-            <p className="mt-2 text-sm text-slate-600">
-              Cliente: {project.clientName} · {milestones.length} hitos · entrega {formatLongDate(project.dueDate)}
-            </p>
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-card)] border border-slate-200 bg-white p-5 shadow-[var(--shadow-card)]">
+        <div className="flex flex-1 flex-wrap items-center gap-x-6 gap-y-3">
+          <div className="flex flex-1 min-w-[220px] items-center gap-3">
+            <Label className="whitespace-nowrap">Cliente</Label>
+            <Select value={selectedClientId} onValueChange={handleSelectClient}>
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Selecciona un cliente" />
+              </SelectTrigger>
+              <SelectContent>
+                {clientsForPm.length === 0 ? (
+                  <div className="px-2 py-1.5 text-xs text-slate-500">Aún no tienes proyectos asignados.</div>
+                ) : (
+                  clientsForPm.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
           </div>
+          <div className="flex flex-1 min-w-[260px] items-center gap-3">
+            <Label className="whitespace-nowrap">Nombre del Proyecto</Label>
+            <Select
+              value={selectedProjectId}
+              onValueChange={handleSelectProject}
+              disabled={!selectedClientId}
+            >
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder={selectedClientId ? "Selecciona un proyecto" : "Primero elige un cliente"} />
+              </SelectTrigger>
+              <SelectContent>
+                {projectsForClient.length === 0 ? (
+                  <div className="px-2 py-1.5 text-xs text-slate-500">Sin proyectos para este cliente.</div>
+                ) : (
+                  projectsForClient.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        {project ? (
           <Button className="btn-role" onClick={openCreate}>
             <Plus className="size-4" />
             Nuevo hito
           </Button>
-        </div>
-      </header>
+        ) : null}
+      </div>
 
+      {!project ? (
+        <DashboardEmptyState
+          title="Selecciona un cliente y un proyecto"
+          body="Una vez elegidos verás los hitos, su estado y las solicitudes de cambio."
+        />
+      ) : (
       <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <section className="space-y-3">
           {milestones.length === 0 ? (
@@ -226,39 +303,10 @@ export function PmStatusPanel() {
         </section>
 
         <aside className="space-y-3">
-          <div className="rounded-[var(--radius-card-dense)] border border-slate-200 bg-white p-5 shadow-[var(--shadow-card-dense)]">
-            <div className="flex items-center justify-between">
-              <p className="kpi-label">Cambios del cliente</p>
-              <Badge variant="secondary" className="bg-slate-100 text-slate-700">
-                {changes.length}
-              </Badge>
-            </div>
-            {changes.length === 0 ? (
-              <p className="mt-3 text-sm text-slate-500">Sin solicitudes pendientes.</p>
-            ) : (
-              <ul className="mt-3 space-y-2">
-                {changes.map((c) => {
-                  const tone =
-                    c.priority === "high"
-                      ? "badge-status-error"
-                      : c.priority === "medium"
-                        ? "badge-status-warning"
-                        : "badge-status-info";
-                  return (
-                    <li key={c.id} className="rounded-[12px] border border-slate-200 p-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-xs font-semibold text-slate-950">{c.title}</p>
-                        <span className={tone}>{c.priority}</span>
-                      </div>
-                      <p className="mt-1 line-clamp-2 text-[11px] text-slate-600">{c.detail}</p>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
+          <ChangeRequestsBoard changes={changes} />
         </aside>
       </div>
+      )}
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent className="w-full sm:max-w-md">
@@ -337,4 +385,152 @@ export function PmStatusPanel() {
       </Sheet>
     </div>
   );
+}
+
+function ChangeRequestsBoard({ changes }: { changes: ChangeRequestRecord[] }) {
+  const { updateChangeRequestStatus } = useDashboardWorkspace();
+  const [pendingId, setPendingId] = useState<string | null>(null);
+
+  async function setStatus(id: string, status: ChangeRequestRecord["status"]) {
+    setPendingId(id);
+    try {
+      await updateChangeRequestStatus(id, status);
+      const labels: Record<typeof status, string> = {
+        new: "marcado como nuevo",
+        in_review: "marcado en progreso",
+        planned: "aceptado",
+        done: "marcado como implementado",
+        rejected: "rechazado"
+      } as Record<typeof status, string>;
+      toast.success(`Cambio ${labels[status]}`);
+    } catch (error) {
+      toast.error("No se pudo actualizar el cambio", {
+        description: error instanceof Error ? error.message : undefined
+      });
+    } finally {
+      setPendingId(null);
+    }
+  }
+
+  return (
+    <div className="rounded-[var(--radius-card-dense)] border border-slate-200 bg-white p-5 shadow-[var(--shadow-card-dense)]">
+      <div className="flex items-center justify-between">
+        <p className="kpi-label">Cambios del cliente</p>
+        <Badge variant="secondary" className="bg-slate-100 text-slate-700">
+          {changes.length}
+        </Badge>
+      </div>
+      {changes.length === 0 ? (
+        <p className="mt-3 text-sm text-slate-500">Sin solicitudes pendientes.</p>
+      ) : (
+        <ul className="mt-3 space-y-3">
+          {changes.map((c) => {
+            const priorityTone =
+              c.priority === "high"
+                ? "badge-status-error"
+                : c.priority === "medium"
+                  ? "badge-status-warning"
+                  : "badge-status-info";
+            const statusLabel = changeStatusLabel(c.status);
+            const isBusy = pendingId === c.id;
+            return (
+              <li key={c.id} className="rounded-[12px] border border-slate-200 p-3">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-xs font-semibold text-slate-950">{c.title}</p>
+                  <span className={priorityTone}>{c.priority}</span>
+                </div>
+                <p className="mt-1 line-clamp-3 text-[11px] text-slate-600">{c.detail}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
+                  <span className={changeStatusBadgeClass(c.status)}>{statusLabel}</span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {c.status === "new" ? (
+                    <>
+                      <Button
+                        size="xs"
+                        className="btn-role"
+                        disabled={isBusy}
+                        onClick={() => setStatus(c.id, "planned")}
+                      >
+                        Aceptar
+                      </Button>
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        className="border-error-500/40 text-error-700 hover:bg-error-50"
+                        disabled={isBusy}
+                        onClick={() => setStatus(c.id, "rejected")}
+                      >
+                        Rechazar
+                      </Button>
+                    </>
+                  ) : null}
+                  {c.status === "planned" ? (
+                    <Button
+                      size="xs"
+                      className="btn-role"
+                      disabled={isBusy}
+                      onClick={() => setStatus(c.id, "in_review")}
+                    >
+                      Iniciar trabajo
+                    </Button>
+                  ) : null}
+                  {c.status === "in_review" ? (
+                    <Button
+                      size="xs"
+                      className="btn-role"
+                      disabled={isBusy}
+                      onClick={() => setStatus(c.id, "done")}
+                    >
+                      Marcar implementado
+                    </Button>
+                  ) : null}
+                  {(c.status === "rejected" || c.status === "done") ? (
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      disabled={isBusy}
+                      onClick={() => setStatus(c.id, "new")}
+                    >
+                      Reabrir
+                    </Button>
+                  ) : null}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function changeStatusLabel(status: ChangeRequestRecord["status"]): string {
+  switch (status) {
+    case "new":
+      return "Pendiente";
+    case "in_review":
+      return "En progreso";
+    case "planned":
+      return "Aceptado";
+    case "done":
+      return "Implementado";
+    case "rejected":
+      return "Rechazado";
+  }
+}
+
+function changeStatusBadgeClass(status: ChangeRequestRecord["status"]): string {
+  switch (status) {
+    case "new":
+      return "badge-status-warning";
+    case "in_review":
+      return "badge-status-info";
+    case "planned":
+      return "badge-status-success";
+    case "done":
+      return "badge-status-neutral";
+    case "rejected":
+      return "badge-status-error";
+  }
 }

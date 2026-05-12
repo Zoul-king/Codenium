@@ -138,6 +138,21 @@ export async function PATCH(request: Request) {
 
   try {
     const milestone = await db.milestone.update({ where: { id }, data });
+
+    // Cuando cambia el estado, recalculamos y persistimos el progreso del
+    // proyecto para que el porcentaje sea consistente entre sesiones (cliente,
+    // PM y admin) sin depender del estado local del store.
+    if (body.status) {
+      const siblings = await db.milestone.findMany({
+        where: { projectId: existing.projectId },
+        select: { status: true }
+      });
+      const total = siblings.length;
+      const done = siblings.filter((m) => m.status === PrismaMilestoneStatus.COMPLETED).length;
+      const progress = total > 0 ? Math.round((done / total) * 100) : 0;
+      await db.project.update({ where: { id: existing.projectId }, data: { progress } });
+    }
+
     return NextResponse.json(milestone);
   } catch (error) {
     console.error("[milestones PATCH]", {

@@ -1,7 +1,7 @@
 "use client";
 
-import { ExternalLink, FileText, Filter, Plus, Search, Upload } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Code2, ExternalLink, FileText, Filter, Pencil, Plus, Search, Upload } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,10 @@ import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store"
 import { sendDashboardNotification } from "@/lib/api/client";
 import type { Role } from "@/lib/types/domain";
 import { formatLongDate, formatShortDate } from "@/lib/utils/presenters";
+
+interface ProjectRepoInfo {
+  repositoryUrl: string | null;
+}
 
 interface ClientDocumentsPanelProps {
   role?: Extract<Role, "client" | "pm">;
@@ -56,20 +60,20 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
 
   return (
     <div className="space-y-6">
-      <header className={role === "client" ? "warm-card" : "rounded-[var(--radius-card)] border border-slate-200 bg-white p-6 shadow-[var(--shadow-card)]"}>
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#224a78)]">
-              Entregables
-            </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-slate-950">{project.name}</h1>
-            <p className="mt-2 text-sm text-slate-600">
-              {documents.length} {documents.length === 1 ? "documento" : "documentos"} disponibles · proyecto {project.clientName}
-            </p>
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-card)] border border-slate-200 bg-white px-5 py-3 shadow-[var(--shadow-card)]">
+        <div className="flex items-baseline gap-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--role-strong,#224a78)]">
+            Entregables
+          </p>
+          <h1 className="text-lg font-semibold tracking-[-0.02em] text-slate-950">{project.name}</h1>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <DocumentsStatChip label="Documentos" value={documents.length} />
           {role === "pm" ? <RegisterDocumentDialog project={project} /> : null}
         </div>
-      </header>
+      </div>
+
+      <RepositoryBlock projectId={project.id} role={role} />
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 rounded-[var(--radius-card-dense)] border border-slate-200 bg-white p-3 shadow-[var(--shadow-card-dense)]">
@@ -137,6 +141,148 @@ export function ClientDocumentsPanel({ role = "client" }: ClientDocumentsPanelPr
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function DocumentsStatChip({ label, value }: { label: string; value: number }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-base font-medium text-slate-700">
+      <span className="font-semibold">{value}</span>
+      <span className="text-sm opacity-80">{label}</span>
+    </span>
+  );
+}
+
+function RepositoryBlock({ projectId, role }: { projectId: string; role: Extract<Role, "client" | "pm"> }) {
+  const [info, setInfo] = useState<ProjectRepoInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch(`/api/projects/${projectId}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("No se pudo cargar el repositorio."))))
+      .then((data: ProjectRepoInfo) => {
+        if (!cancelled) {
+          setInfo({ repositoryUrl: data.repositoryUrl ?? null });
+          setDraft(data.repositoryUrl ?? "");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setInfo({ repositoryUrl: null });
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  async function handleSave() {
+    const trimmed = draft.trim();
+    if (trimmed && !/^https?:\/\//i.test(trimmed)) {
+      toast.error("URL inválida", { description: "Usa una URL que empiece con http(s)://" });
+      return;
+    }
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ repositoryUrl: trimmed || null })
+      });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error((err as { error?: string }).error ?? "No se pudo guardar el repositorio.");
+      }
+      const data = (await response.json()) as ProjectRepoInfo;
+      setInfo({ repositoryUrl: data.repositoryUrl ?? null });
+      toast.success("Repositorio actualizado");
+      setDialogOpen(false);
+    } catch (error) {
+      toast.error("No se pudo guardar", {
+        description: error instanceof Error ? error.message : undefined
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="rounded-[var(--radius-card-dense)] border border-slate-200 bg-white p-4 text-xs text-slate-500 shadow-[var(--shadow-card-dense)]">
+        Cargando repositorio…
+      </div>
+    );
+  }
+
+  const repoUrl = info?.repositoryUrl ?? null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-[var(--radius-card-dense)] border border-slate-200 bg-white p-4 shadow-[var(--shadow-card-dense)]">
+      <span className="grid size-10 place-items-center rounded-[12px] bg-[var(--role-soft,#eff6fb)] text-[var(--role-strong,#224a78)]">
+        <Code2 className="size-5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+          Repositorio del proyecto
+        </p>
+        {repoUrl ? (
+          <a
+            href={repoUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-1 inline-flex items-center gap-1 break-all text-sm font-semibold text-[var(--role-strong,#224a78)] hover:underline"
+          >
+            {repoUrl}
+            <ExternalLink className="size-3.5 shrink-0" />
+          </a>
+        ) : (
+          <p className="mt-1 text-sm text-slate-500">
+            {role === "pm"
+              ? "Agrega la URL del repositorio para compartirla con el cliente."
+              : "Tu PM aún no ha compartido el enlace de invitación al repositorio."}
+          </p>
+        )}
+      </div>
+      {role === "pm" ? (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Pencil className="size-3.5" />
+              {repoUrl ? "Editar" : "Agregar URL"}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>URL del repositorio</DialogTitle>
+              <DialogDescription>
+                Pega la URL de invitación o del repo (GitHub, GitLab, Bitbucket…). El cliente la verá
+                en su sección de entregables.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label>URL</Label>
+              <Input
+                placeholder="https://github.com/org/proyecto"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+              <Button className="btn-role" onClick={handleSave} disabled={saving}>
+                {saving ? "Guardando…" : "Guardar"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </div>
   );
 }

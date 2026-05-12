@@ -27,7 +27,7 @@ interface ProjectChatPanelProps {
 }
 
 export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
-  const { state, addProjectMessage, selectProject } = useDashboardWorkspace();
+  const { state, addProjectMessage, selectProject, markProjectMessagesAsRead } = useDashboardWorkspace();
   const currentUser = getPrimaryUser(state, role);
   const visibleProjects = getVisibleProjects(state, role);
   const project = getSelectedOrPrimaryProject(state, role);
@@ -43,6 +43,24 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages.length]);
+
+  // Al abrir el hilo (o cambiar de proyecto), marcamos como leídos los
+  // mensajes que el usuario actual recibió en ese proyecto. La campana del
+  // dashboard se alimenta del mismo estado, así desaparece su badge en cuanto
+  // entras a la sección de chat.
+  useEffect(() => {
+    if (!project || !currentUser) return;
+    const hasUnreadForMe = messages.some(
+      (m) => m.status === "unread" && m.recipientId === currentUser.id
+    );
+    if (!hasUnreadForMe) return;
+    void markProjectMessagesAsRead(project.id).catch(() => {
+      // El store ya revierte el estado si falla; nada que hacer aquí.
+    });
+    // No agregamos messages como dependencia para evitar bucles tras la
+    // actualización optimista — bastará con reaccionar al cambio de proyecto.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id, currentUser?.id]);
 
   if (!project) {
     return (

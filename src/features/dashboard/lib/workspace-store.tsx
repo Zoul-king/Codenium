@@ -84,10 +84,13 @@ interface DashboardWorkspaceContextValue {
   createProjectDirect: (input: CreateProjectDirectInput) => Promise<void>;
   completeMilestone: (milestoneId: string) => Promise<void>;
   saveMilestone: (input: UpsertMilestoneInput) => Promise<void>;
-  addChangeRequest: (request: Omit<ChangeRequestRecord, "id" | "requestedAt" | "status">) => void;
+  addChangeRequest: (request: Omit<ChangeRequestRecord, "id" | "requestedAt" | "status">) => Promise<void>;
+  updateChangeRequestStatus: (id: string, status: ChangeRequestRecord["status"]) => Promise<void>;
+  refreshChangeRequests: () => Promise<void>;
   addProjectMessage: (projectId: string, senderId: string, role: Role, preview: string) => Promise<void>;
-  markPaymentAsPaid: (paymentId: string) => void;
-  addProjectDocument: (input: AddProjectDocumentInput) => void;
+  markProjectMessagesAsRead: (projectId: string) => Promise<void>;
+  markPaymentAsPaid: (paymentId: string) => Promise<void>;
+  addProjectDocument: (input: AddProjectDocumentInput) => Promise<void>;
 }
 
 const initialWorkspaceState: DashboardWorkspaceState = createFallbackWorkspaceState();
@@ -208,6 +211,16 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
         nextMessages = [];
       }
 
+      let nextChangeRequests: ChangeRequestRecord[] = [];
+      try {
+        const resChanges = await fetch("/api/change-requests", { cache: "no-store" });
+        if (resChanges.ok) {
+          nextChangeRequests = (await resChanges.json()) as ChangeRequestRecord[];
+        }
+      } catch {
+        nextChangeRequests = [];
+      }
+
       setState((current) => {
         const firstActiveProject = nextProjects.find((p) => p.status !== "done") ?? nextProjects[0];
 
@@ -220,7 +233,7 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           milestones: nextMilestones.length > 0 ? nextMilestones : fallback.milestones,
           payments: nextPayments.length > 0 ? nextPayments : fallback.payments,
           documents: nextDocuments.length > 0 ? nextDocuments : fallback.documents,
-          changeRequests: fallback.changeRequests,
+          changeRequests: nextChangeRequests,
           currentUserId,
           selectedProjectIds: {
             client: firstActiveProject?.id,
@@ -483,19 +496,59 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           };
         });
       },
-      addChangeRequest: (request) => {
+      addChangeRequest: async (request) => {
+        const response = await fetch("/api/change-requests", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectId: request.projectId,
+            milestoneId: request.milestoneId ?? null,
+            title: request.title,
+            detail: request.detail,
+            priority: request.priority
+          })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo registrar el cambio.");
+        }
+
+        const created = (await response.json()) as ChangeRequestRecord;
+
         setState((current) => ({
           ...current,
-          changeRequests: [
-            {
-              id: `change-${current.changeRequests.length + 1}`,
-              requestedAt: "2026-04-09",
-              status: "new",
-              ...request
-            },
-            ...current.changeRequests
-          ]
+          changeRequests: [created, ...current.changeRequests.filter((c) => c.id !== created.id)]
         }));
+      },
+      updateChangeRequestStatus: async (id, status) => {
+        const response = await fetch(`/api/change-requests/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo actualizar la solicitud.");
+        }
+
+        const updated = (await response.json()) as ChangeRequestRecord;
+
+        setState((current) => ({
+          ...current,
+          changeRequests: current.changeRequests.map((c) => (c.id === updated.id ? updated : c))
+        }));
+      },
+      refreshChangeRequests: async () => {
+        try {
+          const response = await fetch("/api/change-requests", { cache: "no-store" });
+          if (!response.ok) return;
+          const next = (await response.json()) as ChangeRequestRecord[];
+          setState((current) => ({ ...current, changeRequests: next }));
+        } catch {
+          // silencioso — el siguiente intento volverá a probar
+        }
       },
       addProjectMessage: async (projectId, senderId, role, preview) => {
         const response = await fetch("/api/chat", {
@@ -522,39 +575,85 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           messages: upsertById(current.messages, message)
         }));
       },
-      markPaymentAsPaid: (paymentId) => {
+      markProjectMessagesAsRead: async (projectId) => {
+        // Optimista: marcamos en memoria primero para que la campana y los
+        // badges desaparezcan al instante; si el PATCH falla revertimos.
+        let snapshot: MessageRecord[] | null = null;
+        setState((current) => {
+          snapshot = current.messages;
+          const currentUserId = current.currentUserId;
+          if (!currentUserId) return current;
+          return {
+            ...current,
+            messages: current.messages.map((m) =>
+              m.projectId === projectId && m.recipientId === currentUserId && m.status === "unread"
+                ? { ...m, status: "read" as const }
+                : m
+            )
+          };
+        });
+
+        try {
+          const response = await fetch("/api/chat", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ projectId })
+          });
+          if (!response.ok) {
+            throw new Error("No se pudo marcar como leído.");
+          }
+        } catch (error) {
+          if (snapshot) {
+            const restore = snapshot;
+            setState((current) => ({ ...current, messages: restore }));
+          }
+          throw error;
+        }
+      },
+      markPaymentAsPaid: async (paymentId) => {
+        // Validamos el gate del hito en el cliente para evitar PATCH innecesario,
+        // pero la verdad la decide la DB (un admin/PM siempre puede marcar pagado).
+        let payment: PaymentRecord | undefined;
+        setState((current) => {
+          payment = current.payments.find((p) => p.id === paymentId);
+          return current;
+        });
+        if (!payment) return;
+
+        const response = await fetch(`/api/payments/${paymentId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "paid" })
+        });
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo marcar el pago.");
+        }
+
         setState((current) => ({
           ...current,
-          payments: current.payments.map((payment) => {
-            if (payment.id !== paymentId) {
-              return payment;
-            }
-
-            const milestone = current.milestones.find((item) => item.id === payment.milestoneId);
-
-            if (milestone && milestone.status !== "done") {
-              return payment;
-            }
-
-            return { ...payment, status: "paid" };
-          })
+          payments: current.payments.map((p) =>
+            p.id === paymentId ? { ...p, status: "paid" as const } : p
+          )
         }));
       },
-      addProjectDocument: ({ projectId, title, kind, href, audience = "client" }) => {
+      addProjectDocument: async ({ projectId, title, kind, href, audience = "client" }) => {
+        const response = await fetch("/api/documents", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ projectId, title, kind, href: href?.trim() || undefined })
+        });
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo registrar el documento.");
+        }
+
+        const created = await response.json();
+        const mapped = mapApiDocument(created);
+
         setState((current) => ({
           ...current,
-          documents: [
-            {
-              id: `doc-${current.documents.length + 1}`,
-              projectId,
-              title,
-              kind,
-              updatedAt: TODAY,
-              href: href?.trim() || `#document-${current.documents.length + 1}`,
-              audience
-            },
-            ...current.documents
-          ]
+          documents: [{ ...mapped, audience }, ...current.documents]
         }));
       }
     }),
