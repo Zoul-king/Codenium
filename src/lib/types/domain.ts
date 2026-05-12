@@ -201,6 +201,14 @@ export interface UserRecord {
   state: UserState;
 }
 
+export type ChangeRequestType =
+  | "visual"
+  | "funcional"
+  | "contenido"
+  | "tecnico"
+  | "bugfix"
+  | "otro";
+
 export interface ChangeRequestRecord {
   id: string;
   projectId: string;
@@ -209,6 +217,7 @@ export interface ChangeRequestRecord {
   title: string;
   detail: string;
   priority: "high" | "medium" | "low";
+  changeType?: ChangeRequestType;
   status: ChangeRequestStatus;
   requestedAt: string;
 }

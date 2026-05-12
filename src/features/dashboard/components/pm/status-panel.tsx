@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, Circle, Clock, MoreHorizontal, Pencil, Plus, Save, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,16 @@ import {
 } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { formatCurrency } from "@/features/quotes/lib/estimate";
-import type { ChangeRequestRecord, ProjectMilestoneRecord } from "@/lib/types/domain";
+import type { ChangeRequestRecord, ChangeRequestType, ProjectMilestoneRecord } from "@/lib/types/domain";
+
+const CHANGE_TYPE_OPTIONS: Array<{ value: ChangeRequestType; label: string }> = [
+  { value: "visual", label: "Visual" },
+  { value: "funcional", label: "Funcional" },
+  { value: "contenido", label: "Contenido" },
+  { value: "tecnico", label: "Técnico" },
+  { value: "bugfix", label: "Corrección" },
+  { value: "otro", label: "Otro" }
+];
 import { formatShortDate } from "@/lib/utils/presenters";
 import { cn } from "@/lib/utils";
 
@@ -45,19 +54,24 @@ export function PmStatusPanel() {
   const { state, completeMilestone, saveMilestone, selectProject, refreshChangeRequests } = useDashboardWorkspace();
 
   // Refresca las solicitudes del cliente periódicamente / al volver al tab
-  // para que el PM las vea sin tener que recargar la página.
+  // para que el PM las vea sin tener que recargar la página. Ref pattern para
+  // no atar el interval a la identidad de refreshChangeRequests, que cambia
+  // cada vez que el store recompone su value memoizado.
+  const refreshRef = useRef(refreshChangeRequests);
+  refreshRef.current = refreshChangeRequests;
+
   useEffect(() => {
-    refreshChangeRequests();
-    const interval = window.setInterval(refreshChangeRequests, 15000);
-    const onFocus = () => refreshChangeRequests();
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onFocus);
+    const run = () => refreshRef.current();
+    run();
+    const interval = window.setInterval(run, 15000);
+    window.addEventListener("focus", run);
+    document.addEventListener("visibilitychange", run);
     return () => {
       window.clearInterval(interval);
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onFocus);
+      window.removeEventListener("focus", run);
+      document.removeEventListener("visibilitychange", run);
     };
-  }, [refreshChangeRequests]);
+  }, []);
   const projects = getVisibleProjects(state, "pm");
 
   // El PM ve solo los clientes de los proyectos que tiene asignados.
@@ -388,7 +402,7 @@ export function PmStatusPanel() {
 }
 
 function ChangeRequestsBoard({ changes }: { changes: ChangeRequestRecord[] }) {
-  const { updateChangeRequestStatus } = useDashboardWorkspace();
+  const { updateChangeRequestStatus, updateChangeRequestType } = useDashboardWorkspace();
   const [pendingId, setPendingId] = useState<string | null>(null);
 
   async function setStatus(id: string, status: ChangeRequestRecord["status"]) {
@@ -405,6 +419,20 @@ function ChangeRequestsBoard({ changes }: { changes: ChangeRequestRecord[] }) {
       toast.success(`Cambio ${labels[status]}`);
     } catch (error) {
       toast.error("No se pudo actualizar el cambio", {
+        description: error instanceof Error ? error.message : undefined
+      });
+    } finally {
+      setPendingId(null);
+    }
+  }
+
+  async function setType(id: string, changeType: ChangeRequestType) {
+    setPendingId(id);
+    try {
+      await updateChangeRequestType(id, changeType);
+      toast.success("Tipo de cambio actualizado");
+    } catch (error) {
+      toast.error("No se pudo actualizar el tipo", {
         description: error instanceof Error ? error.message : undefined
       });
     } finally {
@@ -443,6 +471,29 @@ function ChangeRequestsBoard({ changes }: { changes: ChangeRequestRecord[] }) {
                 <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
                   <span className={changeStatusBadgeClass(c.status)}>{statusLabel}</span>
                 </div>
+
+                <div className="mt-3 space-y-1">
+                  <Label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Tipo de cambio
+                  </Label>
+                  <Select
+                    value={c.changeType ?? ""}
+                    onValueChange={(v) => setType(c.id, v as ChangeRequestType)}
+                    disabled={isBusy}
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Sin clasificar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CHANGE_TYPE_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {c.status === "new" ? (
                     <>

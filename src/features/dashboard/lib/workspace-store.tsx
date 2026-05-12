@@ -86,6 +86,7 @@ interface DashboardWorkspaceContextValue {
   saveMilestone: (input: UpsertMilestoneInput) => Promise<void>;
   addChangeRequest: (request: Omit<ChangeRequestRecord, "id" | "requestedAt" | "status">) => Promise<void>;
   updateChangeRequestStatus: (id: string, status: ChangeRequestRecord["status"]) => Promise<void>;
+  updateChangeRequestType: (id: string, changeType: NonNullable<ChangeRequestRecord["changeType"]>) => Promise<void>;
   refreshChangeRequests: () => Promise<void>;
   addProjectMessage: (projectId: string, senderId: string, role: Role, preview: string) => Promise<void>;
   markProjectMessagesAsRead: (projectId: string) => Promise<void>;
@@ -502,7 +503,6 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             projectId: request.projectId,
-            milestoneId: request.milestoneId ?? null,
             title: request.title,
             detail: request.detail,
             priority: request.priority
@@ -531,6 +531,25 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
         if (!response.ok) {
           const err = await response.json().catch(() => ({}));
           throw new Error((err as { error?: string }).error ?? "No se pudo actualizar la solicitud.");
+        }
+
+        const updated = (await response.json()) as ChangeRequestRecord;
+
+        setState((current) => ({
+          ...current,
+          changeRequests: current.changeRequests.map((c) => (c.id === updated.id ? updated : c))
+        }));
+      },
+      updateChangeRequestType: async (id, changeType) => {
+        const response = await fetch(`/api/change-requests/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ changeType })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo actualizar el tipo de cambio.");
         }
 
         const updated = (await response.json()) as ChangeRequestRecord;

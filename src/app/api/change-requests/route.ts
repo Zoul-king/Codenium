@@ -4,22 +4,7 @@ import { ChangeImpact, ChangeRequestStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/auth/session";
 
-// El esquema de ChangeRequest no tiene columna milestoneId. Para no requerir
-// migración, codificamos el hito asociado al inicio de la descripción con un
-// marcador [m:<id>]; al leer lo extraemos para devolver milestoneId al cliente.
-const MILESTONE_PREFIX = /^\[m:([^\]]+)\]\s*/;
-
-function encodeDescription(milestoneId: string | null, description: string) {
-  return milestoneId ? `[m:${milestoneId}] ${description}` : description;
-}
-
-function decodeDescription(raw: string): { milestoneId: string | null; description: string } {
-  const match = raw.match(MILESTONE_PREFIX);
-  if (match) {
-    return { milestoneId: match[1], description: raw.replace(MILESTONE_PREFIX, "") };
-  }
-  return { milestoneId: null, description: raw };
-}
+import { decodeDescription, encodeDescription, normalizeChangeType } from "./encoding";
 
 function impactToPriority(impact: ChangeImpact): "low" | "medium" | "high" {
   if (impact === "HIGH") return "high";
@@ -60,7 +45,7 @@ interface DbChangeRequest {
 }
 
 function toDomain(record: DbChangeRequest) {
-  const { milestoneId, description } = decodeDescription(record.description);
+  const { milestoneId, changeType, description } = decodeDescription(record.description);
   return {
     id: record.id,
     projectId: record.projectId,
@@ -69,9 +54,21 @@ function toDomain(record: DbChangeRequest) {
     title: record.title,
     detail: description,
     priority: impactToPriority(record.impact),
+    changeType: changeType ?? undefined,
     status: dbStatusToDomain(record.status),
     requestedAt: record.createdAt.toISOString().split("T")[0]
   };
+}
+
+// El cambio del cliente siempre se asocia visualmente al hito que esté en
+// progreso en ese momento. Si no hay ninguno, dejamos sin hito.
+async function resolveCurrentMilestoneId(projectId: string): Promise<string | null> {
+  const current = await db.milestone.findFirst({
+    where: { projectId, status: "IN_PROGRESS" },
+    select: { id: true },
+    orderBy: { dueDate: "asc" }
+  });
+  return current?.id ?? null;
 }
 
 export async function GET() {
@@ -111,10 +108,10 @@ export async function POST(request: Request) {
 
   let body: {
     projectId?: string;
-    milestoneId?: string | null;
     title?: string;
     detail?: string;
     priority?: string;
+    changeType?: string;
   };
   try {
     body = await request.json();
@@ -125,8 +122,7 @@ export async function POST(request: Request) {
   const projectId = typeof body.projectId === "string" ? body.projectId.trim() : "";
   const title = typeof body.title === "string" ? body.title.trim() : "";
   const detail = typeof body.detail === "string" ? body.detail.trim() : "";
-  const milestoneId =
-    typeof body.milestoneId === "string" && body.milestoneId.trim() ? body.milestoneId.trim() : null;
+  const changeType = normalizeChangeType(body.changeType);
 
   if (!projectId || !title || !detail) {
     return NextResponse.json({ error: "Faltan datos para registrar el cambio." }, { status: 400 });
@@ -148,15 +144,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Acceso restringido al proyecto." }, { status: 403 });
   }
 
-  if (milestoneId) {
-    const milestone = await db.milestone.findUnique({
-      where: { id: milestoneId },
-      select: { id: true, projectId: true }
-    });
-    if (!milestone || milestone.projectId !== projectId) {
-      return NextResponse.json({ error: "Hito inválido para este proyecto." }, { status: 400 });
-    }
-  }
+  // El cambio se ancla automáticamente al hito en progreso. El cliente no
+  // elige hito y el PM tampoco — el sistema lo decide a partir del estado
+  // actual del proyecto.
+  const milestoneId = await resolveCurrentMilestoneId(projectId);
 
   try {
     const created = await db.changeRequest.create({
@@ -164,7 +155,7 @@ export async function POST(request: Request) {
         projectId,
         requestedById: session.user.id,
         title,
-        description: encodeDescription(milestoneId, detail),
+        description: encodeDescription(milestoneId, changeType, detail),
         impact: priorityToImpact(body.priority)
       },
       include: { project: { select: { clientId: true } } }

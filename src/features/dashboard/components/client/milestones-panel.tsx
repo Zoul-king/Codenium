@@ -1,7 +1,7 @@
 "use client";
 
-import { CalendarDays, CheckCircle2, Circle, Clock, Plus, Send } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CalendarDays, CheckCircle2, Circle, Clock, Pencil, Plus, Send } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,18 @@ import {
 } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { sendDashboardNotification } from "@/lib/api/client";
-import type { ChangeRequestRecord, ProjectMilestoneRecord } from "@/lib/types/domain";
+import type { ChangeRequestRecord, ChangeRequestType, ProjectMilestoneRecord } from "@/lib/types/domain";
 import { formatShortDate } from "@/lib/utils/presenters";
 import { cn } from "@/lib/utils";
+
+const CHANGE_TYPE_LABEL: Record<ChangeRequestType, string> = {
+  visual: "Visual",
+  funcional: "Funcional",
+  contenido: "Contenido",
+  tecnico: "Técnico",
+  bugfix: "Corrección",
+  otro: "Otro"
+};
 
 export function ClientMilestonesPanel() {
   const { state, refreshChangeRequests } = useDashboardWorkspace();
@@ -32,18 +41,24 @@ export function ClientMilestonesPanel() {
 
   // Mantiene los cambios sincronizados con la DB: el PM puede aceptar/rechazar
   // desde su panel y necesitamos reflejarlo aquí sin recargar la página.
+  // Usamos un ref para que el interval no dependa de la identidad de
+  // refreshChangeRequests (que cambia cada vez que el store recompone su value
+  // memoizado por state), evitando un loop fetch → setState → re-render → fetch.
+  const refreshRef = useRef(refreshChangeRequests);
+  refreshRef.current = refreshChangeRequests;
+
   useEffect(() => {
-    refreshChangeRequests();
-    const interval = window.setInterval(refreshChangeRequests, 15000);
-    const onFocus = () => refreshChangeRequests();
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onFocus);
+    const run = () => refreshRef.current();
+    run();
+    const interval = window.setInterval(run, 15000);
+    window.addEventListener("focus", run);
+    document.addEventListener("visibilitychange", run);
     return () => {
       window.clearInterval(interval);
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onFocus);
+      window.removeEventListener("focus", run);
+      document.removeEventListener("visibilitychange", run);
     };
-  }, [refreshChangeRequests]);
+  }, []);
 
   if (!project) {
     return (
@@ -112,16 +127,9 @@ function MilestoneAndChangesTimeline({
     );
   }
 
-  // El cliente solo ve cambios que el PM ya procesó (aceptados, en progreso o
-  // implementados); los nuevos y rechazados se ocultan.
-  const isVisibleToClient = (c: ChangeRequestRecord) =>
-    c.status === "planned" || c.status === "in_review" || c.status === "done";
-
-  const visibleChanges = changes.filter(isVisibleToClient);
-  const milestoneIds = new Set(items.map((m) => m.id));
-  const generalChanges = visibleChanges.filter(
-    (c) => !c.milestoneId || !milestoneIds.has(c.milestoneId)
-  );
+  // El cliente ve todas sus solicitudes (incluso pendientes y rechazadas) para
+  // tener trazabilidad. La tarjeta refleja el estado actual.
+  const visibleChanges = changes;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_24px_minmax(0,1fr)] lg:gap-0">
@@ -133,10 +141,6 @@ function MilestoneAndChangesTimeline({
         Cambios solicitados
       </div>
 
-      {generalChanges.length > 0 ? (
-        <GeneralChangesRow changes={generalChanges} />
-      ) : null}
-
       {items.map((m) => {
         const milestoneChanges = visibleChanges.filter((c) => c.milestoneId === m.id);
         return (
@@ -144,46 +148,6 @@ function MilestoneAndChangesTimeline({
         );
       })}
     </div>
-  );
-}
-
-function GeneralChangesRow({ changes }: { changes: ChangeRequestRecord[] }) {
-  return (
-    <>
-      <div className="relative pl-14">
-        <span className="absolute left-[27px] inset-y-0 w-0.5 bg-slate-200" aria-hidden />
-        <span className="absolute left-2 top-1/2 -translate-y-1/2 grid size-10 place-items-center rounded-full bg-slate-400 ring-4 ring-slate-100 z-10">
-          <CalendarDays className="size-5 text-white" />
-        </span>
-        <div className="relative overflow-hidden rounded-[var(--radius-card-dense)] border border-slate-200 bg-white shadow-[var(--shadow-card-dense)]">
-          <span className="absolute inset-y-0 left-0 w-1.5 bg-slate-400" />
-          <div className="space-y-1.5 px-5 py-4 pl-6">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-700">
-                General
-              </span>
-            </div>
-            <p className="text-base font-semibold text-slate-950">Cambios sin hito específico</p>
-            <p className="text-sm leading-relaxed text-slate-600">
-              Solicitudes que no quedaron asociadas a un hito en particular.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="relative hidden lg:flex items-center justify-center">
-        <span className="h-0.5 w-full bg-slate-300" />
-      </div>
-
-      <div className="relative pl-9">
-        <span className="absolute left-[15px] inset-y-0 w-0.5 bg-slate-200" aria-hidden />
-        <div className="space-y-3">
-          {changes.map((change) => (
-            <ChangeRequestCard key={change.id} change={change} isCurrentMilestone={false} />
-          ))}
-        </div>
-      </div>
-    </>
   );
 }
 
@@ -197,8 +161,7 @@ function MilestoneRow({
   const tone =
     milestone.status === "done"
       ? {
-          node: "bg-success-500",
-          ring: "ring-success-100",
+          node: "bg-gradient-to-b from-success-400 to-success-600",
           card: "border-success-200 bg-success-50/40",
           accent: "bg-success-500",
           badge: "bg-success-100 text-success-700",
@@ -206,16 +169,14 @@ function MilestoneRow({
         }
       : milestone.status === "current"
         ? {
-            node: "bg-[var(--role-strong,#224a78)]",
-            ring: "ring-[var(--role,#5e92c2)]/30",
+            node: "bg-gradient-to-b from-[var(--role,#5e92c2)] to-[var(--role-strong,#224a78)]",
             card: "border-[var(--role,#5e92c2)]/40 bg-[var(--role-soft,#eff6fb)]",
             accent: "bg-[var(--role-strong,#224a78)]",
             badge: "bg-[var(--role,#5e92c2)]/20 text-[var(--role-strong,#224a78)]",
             connector: "bg-[var(--role,#5e92c2)]"
           }
         : {
-            node: "bg-slate-300",
-            ring: "ring-slate-100",
+            node: "bg-gradient-to-b from-slate-200 to-slate-400",
             card: "border-slate-200 bg-white",
             accent: "bg-slate-300",
             badge: "bg-slate-100 text-slate-600",
@@ -230,59 +191,82 @@ function MilestoneRow({
       {/* Columna izquierda: hito */}
       <div className="relative pl-14">
         <span className="absolute left-[27px] inset-y-0 w-0.5 bg-slate-200" aria-hidden />
-        <span
-          className={cn(
-            "absolute left-2 top-1/2 -translate-y-1/2 grid size-10 place-items-center rounded-full ring-4 z-10",
-            tone.node,
-            tone.ring
-          )}
-        >
-          {milestone.status === "done" ? (
-            <CheckCircle2 className="size-5 text-white" />
-          ) : milestone.status === "current" ? (
-            <Clock className="size-5 text-white" />
-          ) : (
-            <Circle className="size-4 text-white" />
-          )}
-        </span>
 
-        <div
-          className={cn(
-            "relative overflow-hidden rounded-[var(--radius-card-dense)] border bg-white shadow-[var(--shadow-card-dense)]",
-            tone.card
-          )}
-        >
-          <span className={cn("absolute inset-y-0 left-0 w-1.5", tone.accent)} />
-          <div className="space-y-1.5 px-5 py-4 pl-6">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider", tone.badge)}>
-                {statusLabel}
-              </span>
-            </div>
-            <p className="text-base font-semibold text-slate-950">{milestone.title}</p>
-            <p className="text-sm leading-relaxed text-slate-600">{milestone.summary}</p>
-            <div className="flex items-start gap-1.5 pt-1 text-slate-500">
-              <CalendarDays className="mt-0.5 size-3.5" />
-              <div className="leading-tight">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                  Aproximadamente
-                </p>
-                <p className="text-[12px] font-medium">{formatShortDate(milestone.date)}</p>
+        {/* Wrapper interno: dimensiona al alto del card para que circulo y
+            conector queden centrados con el card del hito, sin importar la
+            altura de la columna derecha. */}
+        <div className="relative">
+          <span
+            className={cn(
+              "absolute left-[-48px] top-1/2 -translate-y-1/2 grid size-10 place-items-center rounded-full z-10",
+              tone.node
+            )}
+          >
+            {milestone.status === "done" ? (
+              <CheckCircle2 className="size-5 text-white" />
+            ) : milestone.status === "current" ? (
+              <Clock className="size-5 text-white" />
+            ) : (
+              <Circle className="size-4 text-white" />
+            )}
+          </span>
+
+          {/* Tramo horizontal del card del hito hasta la columna de cambios
+              (lg+). Solo se dibuja cuando hay cambios para conectar. */}
+          {changes.length > 0 ? (
+            <span
+              className={cn(
+                "absolute top-1/2 -translate-y-1/2 right-[-12px] hidden lg:block h-0.5 w-3 z-0",
+                tone.connector
+              )}
+              aria-hidden
+            />
+          ) : null}
+
+          <div
+            className={cn(
+              "relative overflow-hidden rounded-[var(--radius-card-dense)] border bg-white shadow-[var(--shadow-card-dense)]",
+              tone.card
+            )}
+          >
+            <span className={cn("absolute inset-y-0 left-0 w-1.5", tone.accent)} />
+            <div className="space-y-1.5 px-5 py-4 pl-6">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider", tone.badge)}>
+                  {statusLabel}
+                </span>
+              </div>
+              <p className="text-base font-semibold text-slate-950">{milestone.title}</p>
+              <p className="text-sm leading-relaxed text-slate-600">{milestone.summary}</p>
+              <div className="flex items-start gap-1.5 pt-1 text-slate-500">
+                <CalendarDays className="mt-0.5 size-3.5" />
+                <div className="leading-tight">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                    Aproximadamente
+                  </p>
+                  <p className="text-[12px] font-medium">{formatShortDate(milestone.date)}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Conector horizontal (solo lg+) */}
-      <div className="relative hidden lg:flex items-center justify-center">
-        <span className={cn("h-0.5 w-full", changes.length > 0 ? tone.connector : "bg-slate-200")} />
-      </div>
+      {/* Conector (cell vacío del grid, ahora puramente espaciador) */}
+      <div className="hidden lg:block" aria-hidden />
 
       {/* Columna derecha: cambios del hito */}
       <div className="relative pl-9">
+        {/* Trunk vertical (lg+): cubre el alto de la fila y se divide hacia
+            cada cambio mediante sus branches horizontales. */}
         {changes.length > 0 ? (
-          <span className="absolute left-[15px] inset-y-0 w-0.5 bg-slate-200" aria-hidden />
+          <span
+            className={cn(
+              "absolute left-[-12px] inset-y-0 hidden lg:block w-0.5 z-0",
+              tone.connector
+            )}
+            aria-hidden
+          />
         ) : null}
 
         {changes.length === 0 ? (
@@ -292,7 +276,13 @@ function MilestoneRow({
         ) : (
           <div className="space-y-3">
             {changes.map((change) => (
-              <ChangeRequestCard key={change.id} change={change} isCurrentMilestone={milestone.status === "current"} />
+              <ChangeRequestCard
+                key={change.id}
+                change={change}
+                milestoneStatus={milestone.status}
+                connectorClass={tone.connector}
+                isCurrentMilestone={milestone.status === "current"}
+              />
             ))}
           </div>
         )}
@@ -301,30 +291,38 @@ function MilestoneRow({
   );
 }
 
-function ChangeRequestCard({ change, isCurrentMilestone }: { change: ChangeRequestRecord; isCurrentMilestone: boolean }) {
+function ChangeRequestCard({
+  change,
+  milestoneStatus,
+  connectorClass,
+  isCurrentMilestone
+}: {
+  change: ChangeRequestRecord;
+  milestoneStatus: ProjectMilestoneRecord["status"];
+  connectorClass: string;
+  isCurrentMilestone: boolean;
+}) {
   const inProgress = change.status === "in_review";
   const highlight = inProgress && isCurrentMilestone;
-  const tone =
+
+  // El gradiente del círculo del cambio espeja al del hito al que pertenece,
+  // así ambos comparten color y se actualizan juntos cuando el hito cambia
+  // de estado.
+  const nodeGradient =
+    milestoneStatus === "done"
+      ? "bg-gradient-to-b from-success-400 to-success-600"
+      : milestoneStatus === "current"
+        ? "bg-gradient-to-b from-[var(--role,#5e92c2)] to-[var(--role-strong,#224a78)]"
+        : "bg-gradient-to-b from-slate-200 to-slate-400";
+
+  // La prioridad sólo afecta el color del texto "Prioridad para modificar".
+  // Baja se muestra en verde (criterio visual del cliente).
+  const priorityValueClass =
     change.priority === "high"
-      ? {
-          node: "bg-error-500",
-          ring: "ring-error-100",
-          accent: "bg-error-500",
-          badge: "bg-error-50 text-error-700"
-        }
+      ? "text-error-700"
       : change.priority === "medium"
-        ? {
-            node: "bg-warning-500",
-            ring: "ring-warning-100",
-            accent: "bg-warning-500",
-            badge: "bg-warning-50 text-warning-700"
-          }
-        : {
-            node: "bg-[var(--role-strong,#224a78)]",
-            ring: "ring-[var(--role,#5e92c2)]/20",
-            accent: "bg-[var(--role-strong,#224a78)]",
-            badge: "bg-[var(--role,#5e92c2)]/15 text-[var(--role-strong,#224a78)]"
-          };
+        ? "text-warning-700"
+        : "text-success-700";
 
   const priorityLabel =
     change.priority === "high" ? "Alta" : change.priority === "medium" ? "Media" : "Baja";
@@ -336,49 +334,76 @@ function ChangeRequestCard({ change, isCurrentMilestone }: { change: ChangeReque
         ? "En progreso"
         : change.status === "done"
           ? "Implementado"
-          : change.status;
-  const statusBadge =
+          : change.status === "rejected"
+            ? "Rechazado"
+            : "Pendiente";
+  const statusValueClass =
     change.status === "planned"
-      ? "bg-success-50 text-success-700"
+      ? "text-success-700"
       : change.status === "in_review"
-        ? "bg-[var(--role,#5e92c2)]/15 text-[var(--role-strong,#224a78)]"
-        : "bg-slate-100 text-slate-600";
+        ? "text-[var(--role-strong,#224a78)]"
+        : change.status === "done"
+          ? "text-slate-600"
+          : change.status === "rejected"
+            ? "text-error-700"
+            : "text-warning-700";
+
+  const typeLabel = change.changeType ? CHANGE_TYPE_LABEL[change.changeType] : "Por identificar";
+  const typeValueClass = change.changeType ? "text-slate-900" : "text-slate-500 italic";
 
   return (
     <div className="relative">
+      {/* Branch horizontal (lg+): conecta el trunk al círculo del cambio. */}
       <span
         className={cn(
-          "absolute -left-7 top-3 grid size-6 place-items-center rounded-full ring-4 z-10",
-          tone.node,
-          tone.ring
+          "absolute left-[-48px] top-1/2 -translate-y-1/2 hidden lg:block h-0.5 w-5 z-0",
+          connectorClass
+        )}
+        aria-hidden
+      />
+
+      <span
+        className={cn(
+          "absolute -left-7 top-1/2 -translate-y-1/2 grid size-6 place-items-center rounded-full z-10",
+          nodeGradient
         )}
       >
-        <span className="size-1.5 rounded-full bg-white" />
+        <Pencil className="size-3 text-white" strokeWidth={2.2} />
       </span>
 
       <div
         className={cn(
-          "relative overflow-hidden rounded-[var(--radius-card-dense)] border bg-white",
-          highlight ? "border-[var(--role,#5e92c2)] ring-2 ring-[var(--role,#5e92c2)]/25" : "border-slate-200"
+          "rounded-[var(--radius-card-dense)] border bg-white",
+          highlight ? "border-[var(--role,#5e92c2)]" : "border-slate-200"
         )}
       >
-        <span className={cn("absolute inset-y-0 left-0 w-1", tone.accent)} />
-        <div className="space-y-1.5 px-4 py-3 pl-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider", tone.badge)}>
-              {priorityLabel}
-            </span>
-            <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider", statusBadge)}>
-              {statusLabel}
-            </span>
+        <div className="grid gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+          <div className="space-y-1.5">
+            <p className="text-sm font-semibold text-slate-950">{change.title}</p>
+            <p className="line-clamp-3 text-xs leading-relaxed text-slate-600">{change.detail}</p>
             {highlight ? (
-              <span className="rounded-full bg-[var(--role-strong,#224a78)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
+              <span className="inline-flex w-fit rounded-full bg-[var(--role-strong,#224a78)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
                 En este hito
               </span>
             ) : null}
           </div>
-          <p className="text-sm font-semibold text-slate-950">{change.title}</p>
-          <p className="line-clamp-3 text-xs leading-relaxed text-slate-600">{change.detail}</p>
+
+          <dl className="flex flex-col gap-1 text-[11px] sm:text-right">
+            <div className="flex items-baseline justify-end gap-1.5">
+              <dt className="font-semibold uppercase tracking-[0.1em] text-slate-400">
+                Prioridad para modificar:
+              </dt>
+              <dd className={cn("font-semibold", priorityValueClass)}>{priorityLabel}</dd>
+            </div>
+            <div className="flex items-baseline justify-end gap-1.5">
+              <dt className="font-semibold uppercase tracking-[0.1em] text-slate-400">Estado:</dt>
+              <dd className={cn("font-semibold", statusValueClass)}>{statusLabel}</dd>
+            </div>
+            <div className="flex items-baseline justify-end gap-1.5">
+              <dt className="font-semibold uppercase tracking-[0.1em] text-slate-400">Tipo:</dt>
+              <dd className={cn("font-semibold", typeValueClass)}>{typeLabel}</dd>
+            </div>
+          </dl>
         </div>
       </div>
     </div>
@@ -392,33 +417,18 @@ function NewChangeRequestDialog({
   project: { id: string; name: string; clientId: string; clientName: string; pmId: string };
   milestones: ProjectMilestoneRecord[];
 }) {
-  const { state, addChangeRequest } = useDashboardWorkspace();
+  const { addChangeRequest } = useDashboardWorkspace();
   const [open, setOpen] = useState(false);
-  // El cambio siempre se ata a un hito. Por defecto sugerimos el hito en curso
-  // o el primero disponible.
-  const defaultMilestoneId =
-    milestones.find((m) => m.status === "current")?.id ?? milestones[0]?.id ?? "";
-  const [milestoneId, setMilestoneId] = useState(defaultMilestoneId);
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [priority, setPriority] = useState<"high" | "medium" | "low">("medium");
   const [submitting, setSubmitting] = useState(false);
 
-  // Mantener la sugerencia inicial sincronizada si los hitos llegan después
-  // del render inicial.
-  useEffect(() => {
-    if (!milestoneId && defaultMilestoneId) {
-      setMilestoneId(defaultMilestoneId);
-    }
-  }, [defaultMilestoneId, milestoneId]);
+  const currentMilestone = milestones.find((m) => m.status === "current");
 
   async function handleSubmit() {
     if (!title.trim() || !detail.trim()) {
       toast.error("Faltan datos", { description: "Necesitamos título y descripción." });
-      return;
-    }
-    if (!milestoneId) {
-      toast.error("Falta el hito", { description: "Selecciona el hito al que pertenece el cambio." });
       return;
     }
 
@@ -428,7 +438,6 @@ function NewChangeRequestDialog({
       await addChangeRequest({
         projectId: project.id,
         clientId: project.clientId,
-        milestoneId,
         title: title.trim(),
         detail: detail.trim(),
         priority
@@ -461,7 +470,6 @@ function NewChangeRequestDialog({
       setOpen(false);
       setTitle("");
       setDetail("");
-      setMilestoneId(defaultMilestoneId);
       setSubmitting(false);
     }
   }
@@ -483,26 +491,14 @@ function NewChangeRequestDialog({
         </DialogHeader>
 
         <div className="grid gap-4">
-          <div className="space-y-2">
-            <Label>Hito relacionado</Label>
-            <Select value={milestoneId} onValueChange={setMilestoneId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona el hito" />
-              </SelectTrigger>
-              <SelectContent>
-                {milestones.length === 0 ? (
-                  <div className="px-2 py-1.5 text-xs text-slate-500">
-                    Aún no hay hitos definidos en el proyecto.
-                  </div>
-                ) : (
-                  milestones.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      {m.title}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+          <div className="rounded-[12px] bg-slate-50 px-3 py-2 text-xs text-slate-600">
+            {currentMilestone ? (
+              <>
+                Se asignará al hito en curso: <span className="font-semibold text-slate-900">{currentMilestone.title}</span>
+              </>
+            ) : (
+              "No hay un hito en curso ahora mismo. El cambio quedará registrado y tu PM lo asignará al aceptarlo."
+            )}
           </div>
 
           <TextField label="Título" placeholder="Ej. Ajustar prioridad del bloque comercial" value={title} onChange={setTitle} />

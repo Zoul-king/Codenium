@@ -17,7 +17,7 @@ import {
   Users
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -78,6 +78,15 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const commandPalette = useCommandPaletteState();
 
+  // Diferimos el Sheet móvil hasta después del mount para evitar el mismatch de
+  // IDs de Radix (useId) entre SSR y cliente: el sidebar se renderiza tanto en
+  // el aside desktop como dentro del Sheet, y el portal de Radix puede asignar
+  // ids distintos según el orden de montaje.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const unreadMessages = getPendingMessages(state, role).length;
   const sessionUser = getPrimaryUser(state, role);
   const user = sessionUser
@@ -125,13 +134,34 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
             {sidebar}
           </aside>
 
-          {/* Mobile sidebar */}
-          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetContent side="left" className="w-[300px] p-0 sm:w-[320px]">
-              <SheetTitle className="sr-only">Menú lateral</SheetTitle>
-              {sidebar}
-            </SheetContent>
-          </Sheet>
+          {/* Mobile sidebar — montado sólo después del hydration. */}
+          {mounted ? (
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+              <SheetContent side="left" className="w-[300px] p-0 sm:w-[320px]">
+                <SheetTitle className="sr-only">Menú lateral</SheetTitle>
+                <SidebarContent
+                  role={role}
+                  activeKey={activeKey}
+                  unreadMessages={unreadMessages}
+                  onNavigate={() => setSidebarOpen(false)}
+                  onOpenSearch={() => {
+                    setSidebarOpen(false);
+                    commandPalette.setOpen(true);
+                  }}
+                  onLogout={handleLogout}
+                  user={user}
+                  onProfile={() => {
+                    setSidebarOpen(false);
+                    router.push(`/dashboard/${role}/profile`);
+                  }}
+                  onHome={() => {
+                    setSidebarOpen(false);
+                    router.push("/");
+                  }}
+                />
+              </SheetContent>
+            </Sheet>
+          ) : null}
 
           <main className="relative flex min-w-0 flex-col overflow-hidden">
             {/* Mobile-only floating menu trigger (replaces the removed topbar) */}
