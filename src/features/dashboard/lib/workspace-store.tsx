@@ -84,6 +84,7 @@ interface DashboardWorkspaceContextValue {
   createProjectDirect: (input: CreateProjectDirectInput) => Promise<void>;
   completeMilestone: (milestoneId: string) => Promise<void>;
   saveMilestone: (input: UpsertMilestoneInput) => Promise<void>;
+  setMilestonePhase: (milestoneId: string, phase: NonNullable<ProjectMilestoneRecord["phase"]>) => Promise<void>;
   addChangeRequest: (request: Omit<ChangeRequestRecord, "id" | "requestedAt" | "status">) => Promise<void>;
   updateChangeRequestStatus: (id: string, status: ChangeRequestRecord["status"]) => Promise<void>;
   updateChangeRequestType: (id: string, changeType: NonNullable<ChangeRequestRecord["changeType"]>) => Promise<void>;
@@ -497,6 +498,28 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           };
         });
       },
+      setMilestonePhase: async (milestoneId, phase) => {
+        const response = await fetch("/api/milestones", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: milestoneId, phase })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error ?? "No se pudo mover el hito.");
+        }
+
+        const persisted = await response.json();
+        const record = mapApiMilestone(persisted);
+
+        setState((current) => ({
+          ...current,
+          milestones: current.milestones.map((m) =>
+            m.id === record.id ? { ...m, ...record, unlocksPaymentId: m.unlocksPaymentId } : m
+          )
+        }));
+      },
       addChangeRequest: async (request) => {
         const response = await fetch("/api/change-requests", {
           method: "POST",
@@ -861,13 +884,23 @@ function mapMilestoneStatus(status: unknown): ProjectMilestoneRecord["status"] {
 
 function mapApiMilestone(milestone: any): ProjectMilestoneRecord {
   const date = milestone.completedAt ?? milestone.dueDate ?? milestone.createdAt;
+  const raw: string = milestone.description ?? "";
+  // Extrae el marcador [p:<fase>] si está presente para no contaminarlo dentro
+  // del summary que se muestra al cliente.
+  const match = raw.match(/^\[p:([^\]]+)\]\s*/);
+  const phase = match && ["discovery", "design", "build", "qa", "done"].includes(match[1])
+    ? (match[1] as ProjectMilestoneRecord["phase"])
+    : undefined;
+  const summary = match ? raw.replace(/^\[p:([^\]]+)\]\s*/, "") : raw;
+
   return {
     id: milestone.id,
     projectId: milestone.projectId,
     title: milestone.title,
-    summary: milestone.description ?? "",
+    summary,
     date: date ? String(date).split("T")[0] : TODAY,
-    status: mapMilestoneStatus(milestone.status)
+    status: mapMilestoneStatus(milestone.status),
+    phase
   };
 }
 

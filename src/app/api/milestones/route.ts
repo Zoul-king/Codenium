@@ -3,6 +3,12 @@ import { MilestoneStatus as PrismaMilestoneStatus } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/auth/session";
+import {
+  decodeMilestoneDescription,
+  encodeMilestoneDescription,
+  isValidPhase
+} from "./encoding";
+import type { ProjectStatus } from "@/lib/types/domain";
 
 type ClientStatus = "next" | "current" | "done";
 
@@ -38,6 +44,7 @@ export async function POST(request: Request) {
     summary?: string;
     date?: string;
     status?: ClientStatus;
+    phase?: ProjectStatus;
   };
   try {
     body = await request.json();
@@ -49,6 +56,7 @@ export async function POST(request: Request) {
   const title = typeof body.title === "string" ? body.title.trim() : "";
   const summary = typeof body.summary === "string" ? body.summary.trim() : "";
   const date = typeof body.date === "string" && body.date ? new Date(body.date) : null;
+  const phase = isValidPhase(body.phase) ? body.phase : null;
 
   if (!projectId || !title || !summary || !date) {
     return NextResponse.json({ error: "Faltan datos para crear el hito." }, { status: 400 });
@@ -69,7 +77,7 @@ export async function POST(request: Request) {
       data: {
         projectId,
         title,
-        description: summary,
+        description: encodeMilestoneDescription(phase, summary),
         dueDate: date,
         status: toDbStatus(body.status ?? "next"),
         order: (last?.order ?? 0) + 1,
@@ -99,6 +107,7 @@ export async function PATCH(request: Request) {
     summary?: string;
     date?: string;
     status?: ClientStatus;
+    phase?: ProjectStatus;
   };
   try {
     body = await request.json();
@@ -113,7 +122,7 @@ export async function PATCH(request: Request) {
 
   const existing = await db.milestone.findUnique({
     where: { id },
-    select: { projectId: true }
+    select: { projectId: true, description: true }
   });
   if (!existing) {
     return NextResponse.json({ error: "Hito no encontrado." }, { status: 404 });
@@ -123,9 +132,20 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Acceso restringido al proyecto." }, { status: 403 });
   }
 
+  const decoded = decodeMilestoneDescription(existing.description);
+  // Si el body actualiza summary y/o phase, reconstruimos el description.
+  // - summary nuevo o el actual decodificado.
+  // - phase nueva (si vino válida) o la actual.
+  const hasSummary = typeof body.summary === "string";
+  const hasPhase = body.phase !== undefined;
+  const nextPhase = hasPhase && isValidPhase(body.phase) ? body.phase : decoded.phase;
+  const nextSummary = hasSummary ? body.summary!.trim() : decoded.description;
+
   const data: Record<string, unknown> = {};
   if (typeof body.title === "string" && body.title.trim()) data.title = body.title.trim();
-  if (typeof body.summary === "string") data.description = body.summary.trim();
+  if (hasSummary || hasPhase) {
+    data.description = encodeMilestoneDescription(nextPhase, nextSummary);
+  }
   if (typeof body.date === "string" && body.date) data.dueDate = new Date(body.date);
   if (body.status) {
     data.status = toDbStatus(body.status);

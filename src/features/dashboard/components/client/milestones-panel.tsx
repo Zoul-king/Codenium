@@ -18,7 +18,48 @@ import {
 } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { sendDashboardNotification } from "@/lib/api/client";
-import type { ChangeRequestRecord, ChangeRequestType, ProjectMilestoneRecord } from "@/lib/types/domain";
+import type { ChangeRequestRecord, ChangeRequestType, ProjectMilestoneRecord, ProjectStatus } from "@/lib/types/domain";
+
+// Paleta del kanban: mantenida sincronizada con pm/overview-panel para que el
+// color del círculo del hito (y sus cambios) sea idéntico al de la columna en
+// la que vive ese hito.
+// Paleta sincronizada con KANBAN_COLUMNS de pm/overview-panel: el color base
+// del kanban es <hue>-600 (#a4322d para build), así que el gradiente del
+// círculo va de <hue>-500 a <hue>-700 para que el centro visual coincida
+// exactamente con el color sólido de la columna. Connectors y badges usan
+// directamente el color base.
+const PHASE_THEME: Record<ProjectStatus, { node: string; connector: string; card: string; badge: string }> = {
+  discovery: {
+    node: "bg-gradient-to-b from-sky-500 to-sky-700",
+    connector: "bg-sky-600",
+    card: "border-sky-300 bg-sky-50/50",
+    badge: "bg-sky-100 text-sky-700"
+  },
+  design: {
+    node: "bg-gradient-to-b from-amber-500 to-amber-700",
+    connector: "bg-amber-600",
+    card: "border-amber-300 bg-amber-50/50",
+    badge: "bg-amber-100 text-amber-800"
+  },
+  build: {
+    node: "bg-gradient-to-b from-[#c4564f] to-[#7a241e]",
+    connector: "bg-[#a4322d]",
+    card: "border-[#a4322d]/40 bg-[#a4322d]/5",
+    badge: "bg-[#a4322d]/15 text-[#a4322d]"
+  },
+  qa: {
+    node: "bg-gradient-to-b from-violet-500 to-violet-700",
+    connector: "bg-violet-600",
+    card: "border-violet-300 bg-violet-50/50",
+    badge: "bg-violet-100 text-violet-700"
+  },
+  done: {
+    node: "bg-gradient-to-b from-emerald-500 to-emerald-700",
+    connector: "bg-emerald-600",
+    card: "border-emerald-300 bg-emerald-50/50",
+    badge: "bg-emerald-100 text-emerald-700"
+  }
+};
 import { formatShortDate } from "@/lib/utils/presenters";
 import { cn } from "@/lib/utils";
 
@@ -98,13 +139,13 @@ export function ClientMilestonesPanel() {
         </TabsList>
 
         <TabsContent value="all" className="mt-6">
-          <MilestoneAndChangesTimeline items={milestones} changes={changes} />
+          <MilestoneAndChangesTimeline items={milestones} changes={changes} defaultPhase={project.status} />
         </TabsContent>
         <TabsContent value="current" className="mt-6">
-          <MilestoneAndChangesTimeline items={current} changes={changes} />
+          <MilestoneAndChangesTimeline items={current} changes={changes} defaultPhase={project.status} />
         </TabsContent>
         <TabsContent value="done" className="mt-6">
-          <MilestoneAndChangesTimeline items={done} changes={changes} />
+          <MilestoneAndChangesTimeline items={done} changes={changes} defaultPhase={project.status} />
         </TabsContent>
       </Tabs>
     </div>
@@ -113,10 +154,12 @@ export function ClientMilestonesPanel() {
 
 function MilestoneAndChangesTimeline({
   items,
-  changes
+  changes,
+  defaultPhase
 }: {
   items: ProjectMilestoneRecord[];
   changes: ChangeRequestRecord[];
+  defaultPhase: ProjectStatus;
 }) {
   if (items.length === 0) {
     return (
@@ -144,7 +187,12 @@ function MilestoneAndChangesTimeline({
       {items.map((m) => {
         const milestoneChanges = visibleChanges.filter((c) => c.milestoneId === m.id);
         return (
-          <MilestoneRow key={m.id} milestone={m} changes={milestoneChanges} />
+          <MilestoneRow
+            key={m.id}
+            milestone={m}
+            changes={milestoneChanges}
+            defaultPhase={defaultPhase}
+          />
         );
       })}
     </div>
@@ -153,35 +201,25 @@ function MilestoneAndChangesTimeline({
 
 function MilestoneRow({
   milestone,
-  changes
+  changes,
+  defaultPhase
 }: {
   milestone: ProjectMilestoneRecord;
   changes: ChangeRequestRecord[];
+  defaultPhase: ProjectStatus;
 }) {
-  const tone =
-    milestone.status === "done"
-      ? {
-          node: "bg-gradient-to-b from-success-400 to-success-600",
-          card: "border-success-200 bg-success-50/40",
-          accent: "bg-success-500",
-          badge: "bg-success-100 text-success-700",
-          connector: "bg-success-300"
-        }
-      : milestone.status === "current"
-        ? {
-            node: "bg-gradient-to-b from-[var(--role,#5e92c2)] to-[var(--role-strong,#224a78)]",
-            card: "border-[var(--role,#5e92c2)]/40 bg-[var(--role-soft,#eff6fb)]",
-            accent: "bg-[var(--role-strong,#224a78)]",
-            badge: "bg-[var(--role,#5e92c2)]/20 text-[var(--role-strong,#224a78)]",
-            connector: "bg-[var(--role,#5e92c2)]"
-          }
-        : {
-            node: "bg-gradient-to-b from-slate-200 to-slate-400",
-            card: "border-slate-200 bg-white",
-            accent: "bg-slate-300",
-            badge: "bg-slate-100 text-slate-600",
-            connector: "bg-slate-300"
-          };
+  // El color del círculo del hito (y de sus cambios) es el color de la columna
+  // del kanban en la que está. Si el PM aún no le asignó fase, se usa la fase
+  // del proyecto padre como default.
+  const phase: ProjectStatus = milestone.phase ?? defaultPhase;
+  const theme = PHASE_THEME[phase];
+  const tone = {
+    node: theme.node,
+    card: theme.card,
+    accent: theme.connector,
+    badge: theme.badge,
+    connector: theme.connector
+  };
 
   const statusLabel =
     milestone.status === "done" ? "Completado" : milestone.status === "current" ? "En curso" : "Pendiente";
@@ -279,7 +317,7 @@ function MilestoneRow({
               <ChangeRequestCard
                 key={change.id}
                 change={change}
-                milestoneStatus={milestone.status}
+                phase={phase}
                 connectorClass={tone.connector}
                 isCurrentMilestone={milestone.status === "current"}
               />
@@ -293,27 +331,22 @@ function MilestoneRow({
 
 function ChangeRequestCard({
   change,
-  milestoneStatus,
+  phase,
   connectorClass,
   isCurrentMilestone
 }: {
   change: ChangeRequestRecord;
-  milestoneStatus: ProjectMilestoneRecord["status"];
+  phase: ProjectStatus;
   connectorClass: string;
   isCurrentMilestone: boolean;
 }) {
   const inProgress = change.status === "in_review";
   const highlight = inProgress && isCurrentMilestone;
 
-  // El gradiente del círculo del cambio espeja al del hito al que pertenece,
-  // así ambos comparten color y se actualizan juntos cuando el hito cambia
-  // de estado.
-  const nodeGradient =
-    milestoneStatus === "done"
-      ? "bg-gradient-to-b from-success-400 to-success-600"
-      : milestoneStatus === "current"
-        ? "bg-gradient-to-b from-[var(--role,#5e92c2)] to-[var(--role-strong,#224a78)]"
-        : "bg-gradient-to-b from-slate-200 to-slate-400";
+  // El gradiente del círculo del cambio espeja la fase (columna del kanban)
+  // del hito al que pertenece, así ambos comparten color y se actualizan
+  // juntos cuando el PM mueve el hito a otra columna.
+  const nodeGradient = PHASE_THEME[phase].node;
 
   // La prioridad sólo afecta el color del texto "Prioridad para modificar".
   // Baja se muestra en verde (criterio visual del cliente).
@@ -321,7 +354,7 @@ function ChangeRequestCard({
     change.priority === "high"
       ? "text-error-700"
       : change.priority === "medium"
-        ? "text-warning-700"
+        ? "text-yellow-700"
         : "text-success-700";
 
   const priorityLabel =

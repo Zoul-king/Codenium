@@ -161,6 +161,9 @@ export interface ProjectMilestoneRecord {
   summary: string;
   date: string;
   status: MilestoneStatus;
+  // Fase del kanban a la que pertenece. Si no está definida, el cliente
+  // que la consume debe asumir la fase del proyecto padre.
+  phase?: ProjectStatus;
   unlocksPaymentId?: string;
 }
 

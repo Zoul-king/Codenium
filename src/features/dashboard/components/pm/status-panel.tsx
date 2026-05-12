@@ -51,7 +51,7 @@ const EMPTY_FORM = {
 };
 
 export function PmStatusPanel() {
-  const { state, completeMilestone, saveMilestone, selectProject, refreshChangeRequests } = useDashboardWorkspace();
+  const { state, completeMilestone, saveMilestone, refreshChangeRequests } = useDashboardWorkspace();
 
   // Refresca las solicitudes del cliente periódicamente / al volver al tab
   // para que el PM las vea sin tener que recargar la página. Ref pattern para
@@ -74,35 +74,10 @@ export function PmStatusPanel() {
   }, []);
   const projects = getVisibleProjects(state, "pm");
 
-  // El PM ve solo los clientes de los proyectos que tiene asignados.
-  const clientsForPm = useMemo(() => {
-    const byId = new Map<string, { id: string; name: string }>();
-    for (const p of projects) {
-      if (!byId.has(p.clientId)) byId.set(p.clientId, { id: p.clientId, name: p.clientName });
-    }
-    return Array.from(byId.values());
-  }, [projects]);
-
-  const autoProject = getSelectedOrPrimaryProject(state, "pm");
-  const [selectedClientId, setSelectedClientId] = useState<string>(autoProject?.clientId ?? "");
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(autoProject?.id ?? "");
-
-  const projectsForClient = useMemo(
-    () => projects.filter((p) => p.clientId === selectedClientId),
-    [projects, selectedClientId]
-  );
-
-  const project = projects.find((p) => p.id === selectedProjectId);
-
-  function handleSelectClient(clientId: string) {
-    setSelectedClientId(clientId);
-    setSelectedProjectId("");
-  }
-
-  function handleSelectProject(projectId: string) {
-    setSelectedProjectId(projectId);
-    selectProject("pm", projectId);
-  }
+  // La selección de cliente/proyecto vive ahora en el store (compartida con la
+  // pantalla de Proyectos del PM). Aquí solo mostramos como texto qué fue
+  // seleccionado — sin selectores duplicados.
+  const project = getSelectedOrPrimaryProject(state, "pm");
 
   const milestones = useMemo(
     () =>
@@ -117,6 +92,20 @@ export function PmStatusPanel() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [formProjectId, setFormProjectId] = useState(project?.id ?? "");
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
+
+  // Cuando cambian los hitos del proyecto, asegúrate de que el seleccionado
+  // siga siendo válido.
+  useEffect(() => {
+    if (selectedMilestoneId && !milestones.some((m) => m.id === selectedMilestoneId)) {
+      setSelectedMilestoneId(null);
+    }
+  }, [milestones, selectedMilestoneId]);
+
+  const selectedMilestone = milestones.find((m) => m.id === selectedMilestoneId) ?? null;
+  const changesForSelected = selectedMilestoneId
+    ? changes.filter((c) => c.milestoneId === selectedMilestoneId)
+    : [];
 
   function openCreate() {
     setEditingId(null);
@@ -160,48 +149,22 @@ export function PmStatusPanel() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-card)] border border-slate-200 bg-white p-5 shadow-[var(--shadow-card)]">
-        <div className="flex flex-1 flex-wrap items-center gap-x-6 gap-y-3">
-          <div className="flex flex-1 min-w-[220px] items-center gap-3">
-            <Label className="whitespace-nowrap">Cliente</Label>
-            <Select value={selectedClientId} onValueChange={handleSelectClient}>
-              <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Selecciona un cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                {clientsForPm.length === 0 ? (
-                  <div className="px-2 py-1.5 text-xs text-slate-500">Aún no tienes proyectos asignados.</div>
-                ) : (
-                  clientsForPm.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+        <div className="flex flex-1 flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+          <div className="flex items-baseline gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Cliente:
+            </span>
+            <span className="font-semibold text-slate-900">
+              {project?.clientName ?? "Sin selección"}
+            </span>
           </div>
-          <div className="flex flex-1 min-w-[260px] items-center gap-3">
-            <Label className="whitespace-nowrap">Nombre del Proyecto</Label>
-            <Select
-              value={selectedProjectId}
-              onValueChange={handleSelectProject}
-              disabled={!selectedClientId}
-            >
-              <SelectTrigger className="flex-1">
-                <SelectValue placeholder={selectedClientId ? "Selecciona un proyecto" : "Primero elige un cliente"} />
-              </SelectTrigger>
-              <SelectContent>
-                {projectsForClient.length === 0 ? (
-                  <div className="px-2 py-1.5 text-xs text-slate-500">Sin proyectos para este cliente.</div>
-                ) : (
-                  projectsForClient.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+          <div className="flex items-baseline gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Proyecto:
+            </span>
+            <span className="font-semibold text-slate-900">
+              {project?.name ?? "Sin selección"}
+            </span>
           </div>
         </div>
         {project ? (
@@ -218,8 +181,8 @@ export function PmStatusPanel() {
           body="Una vez elegidos verás los hitos, su estado y las solicitudes de cambio."
         />
       ) : (
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <section className="space-y-3">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)]">
+        <section className="space-y-2">
           {milestones.length === 0 ? (
             <DashboardEmptyState
               title="Sin hitos"
@@ -227,97 +190,108 @@ export function PmStatusPanel() {
             />
           ) : (
             milestones.map((m) => {
-              const payment = getMilestonePayment(state, m.id);
-              const paymentState = resolvePaymentMilestoneState(m.status, payment?.status);
+              const isSelected = m.id === selectedMilestoneId;
               return (
-                <article
-                  key={m.id}
-                  className={cn(
-                    "rounded-[var(--radius-card-dense)] border bg-white p-5 shadow-[var(--shadow-card-dense)]",
-                    m.status === "current" && "border-[var(--role,#68b8b2)]/40"
-                  )}
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      <span
-                        className={cn(
-                          "mt-0.5 grid size-8 place-items-center rounded-full",
-                          m.status === "done"
-                            ? "bg-success-50 text-success-600"
-                            : m.status === "current"
-                              ? "bg-[var(--role-soft,#eafaf7)] text-[var(--role-strong,#4f9792)]"
-                              : "bg-slate-100 text-slate-400"
-                        )}
-                      >
-                        {m.status === "done" ? (
-                          <CheckCircle2 className="size-4" />
-                        ) : m.status === "current" ? (
-                          <Clock className="size-4" />
-                        ) : (
-                          <Circle className="size-4" />
-                        )}
-                      </span>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-semibold text-slate-950">{m.title}</p>
-                          <Badge variant="outline" className="text-[10px]">
-                            {m.status === "done" ? "Completado" : m.status === "current" ? "En curso" : "Pendiente"}
-                          </Badge>
-                        </div>
-                        <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{m.summary}</p>
-                        <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-slate-500">
-                          <span>{formatShortDate(m.date)}</span>
-                          {payment ? (
-                            <>
-                              <span>·</span>
-                              <span>
-                                {payment.label}: {formatCurrency(payment.amount)} ({paymentState.label})
-                              </span>
-                            </>
-                          ) : null}
-                        </div>
-                      </div>
+                <div key={m.id} className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMilestoneId(isSelected ? null : m.id)}
+                    className={cn(
+                      "flex flex-1 items-center gap-3 rounded-[var(--radius-card-dense)] border bg-white px-3 py-2.5 text-left shadow-[var(--shadow-card-dense)] transition",
+                      isSelected
+                        ? "border-[var(--role-strong,#4f9792)] ring-1 ring-[var(--role,#68b8b2)]"
+                        : "border-slate-200 hover:border-[var(--role,#68b8b2)]/50"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "grid size-7 shrink-0 place-items-center rounded-full",
+                        m.status === "done"
+                          ? "bg-success-50 text-success-600"
+                          : m.status === "current"
+                            ? "bg-[var(--role-soft,#eafaf7)] text-[var(--role-strong,#4f9792)]"
+                            : "bg-slate-100 text-slate-400"
+                      )}
+                    >
+                      {m.status === "done" ? (
+                        <CheckCircle2 className="size-3.5" />
+                      ) : m.status === "current" ? (
+                        <Clock className="size-3.5" />
+                      ) : (
+                        <Circle className="size-3.5" />
+                      )}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-semibold text-slate-950">{m.title}</p>
+                      <p className="mt-0.5 text-[10px] text-slate-500">
+                        Entrega aprox.: {formatShortDate(m.date)}
+                      </p>
                     </div>
+                  </button>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon-sm">
-                          <MoreHorizontal className="size-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {m.status !== "done" ? (
-                          <DropdownMenuItem
-                            onClick={async () => {
-                              try {
-                                await completeMilestone(m.id);
-                                toast.success("Hito completado");
-                              } catch (error) {
-                                toast.error("No se pudo completar el hito", {
-                                  description: error instanceof Error ? error.message : undefined
-                                });
-                              }
-                            }}
-                          >
-                            <CheckCircle2 className="size-4" />
-                            Marcar completado
-                          </DropdownMenuItem>
-                        ) : null}
-                        <DropdownMenuItem onClick={() => openEdit(m)}>
-                          <Pencil className="size-4" />
-                          Editar
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon-sm" className="shrink-0">
+                        <MoreHorizontal className="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {m.status !== "done" ? (
+                        <DropdownMenuItem
+                          onClick={async () => {
+                            try {
+                              await completeMilestone(m.id);
+                              toast.success("Hito completado");
+                            } catch (error) {
+                              toast.error("No se pudo completar el hito", {
+                                description: error instanceof Error ? error.message : undefined
+                              });
+                            }
+                          }}
+                        >
+                          <CheckCircle2 className="size-4" />
+                          Marcar completado
                         </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </article>
+                      ) : null}
+                      <DropdownMenuItem onClick={() => openEdit(m)}>
+                        <Pencil className="size-4" />
+                        Editar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               );
             })
           )}
         </section>
 
         <aside className="space-y-3">
-          <ChangeRequestsBoard changes={changes} />
+          {selectedMilestone ? (
+            <>
+              <div className="rounded-[var(--radius-card-dense)] border border-slate-200 bg-white p-4 shadow-[var(--shadow-card-dense)]">
+                <p className="kpi-label">Información del hito</p>
+                {selectedMilestone.summary ? (
+                  <p className="mt-2 text-xs leading-relaxed text-slate-600">{selectedMilestone.summary}</p>
+                ) : (
+                  <p className="mt-2 text-xs italic text-slate-400">Sin descripción.</p>
+                )}
+                {(() => {
+                  const payment = getMilestonePayment(state, selectedMilestone.id);
+                  const paymentState = resolvePaymentMilestoneState(selectedMilestone.status, payment?.status);
+                  return payment ? (
+                    <p className="mt-2 text-[11px] text-slate-500">
+                      {payment.label}: {formatCurrency(payment.amount)} ({paymentState.label})
+                    </p>
+                  ) : null;
+                })()}
+              </div>
+              <ChangeRequestsBoard changes={changesForSelected} />
+            </>
+          ) : (
+            <div className="rounded-[var(--radius-card-dense)] border border-dashed border-slate-200 bg-white/40 px-4 py-8 text-center text-xs text-slate-500">
+              Selecciona un hito para ver sus cambios asociados.
+            </div>
+          )}
         </aside>
       </div>
       )}

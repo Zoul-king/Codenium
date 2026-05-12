@@ -71,23 +71,10 @@ export function ClientOverviewPanel() {
                 </div>
               </div>
 
-              <div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-slate-600">Avance</span>
-                  <span className="font-semibold text-slate-950">{project.progress}%</span>
-                </div>
-                <div className="mt-1.5 h-1.5 rounded-full bg-slate-100">
-                  <div
-                    className="h-full rounded-full bg-[var(--role-strong,#224a78)] transition-all"
-                    style={{ width: `${Math.max(0, Math.min(100, project.progress))}%` }}
-                  />
-                </div>
-              </div>
-
               <ul className="grid gap-1.5 text-xs text-slate-600">
                 <li className="flex items-center gap-2">
                   <Calendar className="size-3.5 text-slate-400" />
-                  Entrega: {formatLongDate(project.dueDate)}
+                  Entrega aproximada: {formatLongDate(project.dueDate)}
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="size-3.5 text-slate-400" />
