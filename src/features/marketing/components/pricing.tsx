@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { PlanCatalog } from "@/features/marketing/types";
 import { buildManagedPlanCatalog, fetchManagedPlanCatalog } from "@/features/marketing/lib/plan-catalog";
@@ -38,6 +38,7 @@ export function Pricing({
 }: PricingProps) {
   const [activeProfile, setActiveProfile] = useState<PlanProfile>(defaultProfile);
   const [resolvedPlans, setResolvedPlans] = useState<PlanCatalog>(plans);
+  const gridRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!persistPreference) {
@@ -62,6 +63,14 @@ export function Pricing({
   }
 
   const activePlans = resolvedPlans[activeProfile];
+
+  useEffect(() => {
+    const node = gridRef.current;
+    if (!node) return;
+    node.querySelectorAll<HTMLElement>("[data-animate]").forEach((el) => {
+      el.setAttribute("data-revealed", "true");
+    });
+  }, [activeProfile, activePlans]);
 
   return (
     <section className="soft-section relative">
@@ -93,7 +102,7 @@ export function Pricing({
           ) : null}
         </div>
 
-        <div className={cn("items grid grid-cols-1 gap-[22px]", layout === "stacked" ? "md:grid-cols-2 xl:grid-cols-3" : "md:grid-cols-2 xl:grid-cols-4")}>
+        <div ref={gridRef} className={cn("items grid grid-cols-1 gap-[22px]", layout === "stacked" ? "md:grid-cols-2 xl:grid-cols-3" : "md:grid-cols-2 xl:grid-cols-4")}>
           {activePlans.map((plan, index) => (
             <article
               key={`${activeProfile}-${plan.title}`}

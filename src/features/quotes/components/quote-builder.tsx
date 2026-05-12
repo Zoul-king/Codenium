@@ -111,7 +111,6 @@ export function QuoteBuilder() {
                 title=""
                 description=""
                 submitLabel="Continuar"
-                successMessage="Recibimos tu solicitud. El siguiente paso es revisar el alcance contigo y preparar una propuesta mas precisa."
                 reverseColumns
                 hideContactInfo
                 formCard={false}

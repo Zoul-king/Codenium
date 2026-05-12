@@ -7,7 +7,7 @@ import { useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Mail, MapPin, Phone } from "lucide-react";
+import { CheckCircle2, Mail, MapPin, Phone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -49,6 +49,8 @@ interface ContactFormProps {
   description?: string;
   submitLabel?: string;
   summary?: ReactNode;
+  successTitle?: string;
+  successKicker?: string;
   successMessage?: string;
   initialValues?: Partial<ContactValues>;
   reverseColumns?: boolean;
@@ -74,7 +76,9 @@ export function ContactForm({
   description = "Compartenos el contexto y te ayudaremos a aterrizar el siguiente paso.",
   submitLabel = "Enviar mensaje",
   summary,
-  successMessage = "Recibimos tu mensaje. Muy pronto daremos seguimiento para continuar contigo.",
+  successKicker = "Solicitud enviada",
+  successTitle = source === "quote" ? "Precotización enviada con éxito" : "Correo enviado con éxito",
+  successMessage = "Revisa tu correo para comprobar el envío, te recomendamos crear una cuenta para agilizar el proceso. En un periodo de 1 - 3 días tendrás una respuesta.",
   initialValues,
   reverseColumns = false,
   hideContactInfo = false,
@@ -133,10 +137,20 @@ export function ContactForm({
         ) : null}
 
         {submitted ? (
-          <div className="rounded-[24px] bg-white p-8 shadow-[0_16px_40px_rgba(14,20,36,0.08)]" data-animate="fadeIn">
-            <span className="type-kicker">Solicitud enviada</span>
-            <h3 className="mt-4 text-2xl font-bold text-body-color">Gracias por compartir tu información</h3>
-            <p className="type-body mt-4">{successMessage}</p>
+          <div
+            className="flex flex-col items-start gap-4 rounded-[20px] border border-emerald-100 bg-white p-5 shadow-[0_16px_40px_rgba(14,20,36,0.08)] sm:gap-5 sm:rounded-[24px] sm:p-8"
+            data-animate="fadeIn"
+            role="status"
+            aria-live="polite"
+          >
+            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 sm:size-12">
+              <CheckCircle2 className="size-6" strokeWidth={1.8} />
+            </span>
+            <div className="flex w-full flex-col gap-2 sm:gap-3">
+              <span className="type-kicker-accent text-[11px]">{successKicker}</span>
+              <h3 className="text-xl font-bold leading-tight text-body-color sm:text-2xl">{successTitle}</h3>
+              <p className="text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">{successMessage}</p>
+            </div>
           </div>
         ) : (
           <div className={wrapperClassName}>
