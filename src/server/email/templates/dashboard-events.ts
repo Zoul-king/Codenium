@@ -1,4 +1,4 @@
-import { buildCtaButton, escapeHtml, formatKeyValueHtml, formatKeyValueText, wrapEmailHtml } from "@/server/email/templates/shared";
+import { buildCtaButton, escapeHtml, formatKeyValueHtml, formatKeyValueText, lucideIcon, wrapEmailHtml } from "@/server/email/templates/shared";
 import type { QuoteStatus } from "@/lib/types/domain";
 
 interface TemplateResult {
@@ -55,7 +55,7 @@ export function buildDashboardMessageEmail(input: {
     `
       ${p(`Hola ${strong(input.recipientName)},`)}
       ${p(`${strong(input.senderName)} te escribió sobre el proyecto ${strong(input.projectName)}:`)}
-      <blockquote style="margin:16px 0;padding:14px 20px;background:#f8fafc;border-left:3px solid #4f2f96;border-radius:0 8px 8px 0;font-size:14px;color:#374151;font-style:italic;">
+      <blockquote style="margin:16px 0;padding:14px 20px;background:#f8fafc;border-left:3px solid #224a78;border-radius:0 8px 8px 0;font-size:14px;color:#374151;font-style:italic;">
         "${escapeHtml(input.message)}"
       </blockquote>
       ${buildCtaButton("Responder en el dashboard", "#")}
@@ -280,7 +280,7 @@ export function buildClientWelcomeEmail(input: {
         </ol>
       </div>
       ${buildCtaButton("Empezar mi cotización", input.quoteUrl)}
-      <p style="margin:0;font-size:13px;color:#6b7280;">¿Prefieres explorar primero? Entra a tu <a href="${escapeHtml(input.dashboardUrl)}" style="color:#4f2f96;font-weight:600;">dashboard</a>.</p>
+      <p style="margin:0;font-size:13px;color:#6b7280;">¿Prefieres explorar primero? Entra a tu <a href="${escapeHtml(input.dashboardUrl)}" style="color:#224a78;font-weight:600;">dashboard</a>.</p>
     `
   );
 
@@ -461,11 +461,13 @@ export function buildMeetingScheduledEmail(input: {
       ${p(`Hola ${strong(input.recipientName)},`)}
       ${p(`${strong(input.hostName)} agendó una reunión relacionada al proyecto ${strong(input.projectName)}.`)}
 
-      <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:24px;margin:20px 0;">
+      <div style="background:#eff6fb;border:1px solid #bedcee;border-radius:12px;padding:20px 24px;margin:20px 0;">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
           <tr>
-            <td style="width:36px;vertical-align:top;padding-right:12px;padding-top:2px;">
-              <div style="width:36px;height:36px;border-radius:8px;background:#4f2f96;display:flex;align-items:center;justify-content:center;text-align:center;line-height:36px;font-size:18px;">📅</div>
+            <td style="width:44px;vertical-align:top;padding-right:14px;padding-top:2px;">
+              <div style="width:44px;height:44px;border-radius:10px;background:#224a78;text-align:center;line-height:44px;">
+                ${lucideIcon("calendar", 22, "#ffffff")}
+              </div>
             </td>
             <td style="vertical-align:top;">
               <p style="margin:0 0 4px;font-size:16px;font-weight:700;color:#0f172a;">${escapeHtml(input.date)}</p>

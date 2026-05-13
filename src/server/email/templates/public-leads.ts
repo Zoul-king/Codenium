@@ -51,9 +51,8 @@ export function buildCompanyLeadEmail({ lead, receivedAt }: PublicLeadTemplateIn
           ${formatKeyValueHtml(coreFields)}
         </table>
       </div>
-      <p style="margin:0;font-size:12px;color:#94a3b8;">Ya se envió confirmación automática al contacto. Responde a <a href="mailto:${escapeHtml(lead.email)}" style="color:#4f2f96;">${escapeHtml(lead.email)}</a> para continuar.</p>
-    `,
-    "#1e293b"
+      <p style="margin:0;font-size:12px;color:#94a3b8;">Ya se envió confirmación automática al contacto. Responde a <a href="mailto:${escapeHtml(lead.email)}" style="color:#224a78;">${escapeHtml(lead.email)}</a> para continuar.</p>
+    `
   );
 
   return { subject, text, html };
@@ -88,7 +87,7 @@ export function buildLeadConfirmationEmail({ lead, receivedAt }: PublicLeadTempl
         : p("Gracias por escribirnos. Revisaremos tu mensaje y te responderemos pronto.")
       }
 
-      <div style="background:#f8fafc;border-left:3px solid #4f2f96;border-radius:0 8px 8px 0;padding:16px 20px;margin:20px 0;">
+      <div style="background:#f8fafc;border-left:3px solid #224a78;border-radius:0 8px 8px 0;padding:16px 20px;margin:20px 0;">
         <p style="margin:0 0 6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;">Tu mensaje</p>
         <p style="margin:0;font-size:14px;color:#374151;font-style:italic;">"${escapeHtml(lead.message)}"</p>
       </div>

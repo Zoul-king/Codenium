@@ -18,7 +18,7 @@ import {
 } from "@/features/dashboard/lib/selectors";
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { sendDashboardNotification } from "@/lib/api/client";
-import type { ChangeRequestRecord, ChangeRequestType, ProjectMilestoneRecord, ProjectStatus } from "@/lib/types/domain";
+import type { ChangeRequestRecord, ChangeRequestType, MilestonePhase, ProjectMilestoneRecord, ProjectStatus } from "@/lib/types/domain";
 
 // Paleta del kanban: mantenida sincronizada con pm/overview-panel para que el
 // color del círculo del hito (y sus cambios) sea idéntico al de la columna en
@@ -28,7 +28,7 @@ import type { ChangeRequestRecord, ChangeRequestType, ProjectMilestoneRecord, Pr
 // círculo va de <hue>-500 a <hue>-700 para que el centro visual coincida
 // exactamente con el color sólido de la columna. Connectors y badges usan
 // directamente el color base.
-const PHASE_THEME: Record<ProjectStatus, { node: string; connector: string; card: string; badge: string }> = {
+const PHASE_THEME: Record<MilestonePhase, { node: string; connector: string; card: string; badge: string }> = {
   discovery: {
     node: "bg-gradient-to-b from-sky-500 to-sky-700",
     connector: "bg-sky-600",
@@ -58,6 +58,12 @@ const PHASE_THEME: Record<ProjectStatus, { node: string; connector: string; card
     connector: "bg-emerald-600",
     card: "border-emerald-300 bg-emerald-50/50",
     badge: "bg-emerald-100 text-emerald-700"
+  },
+  blocked: {
+    node: "bg-gradient-to-b from-slate-400 to-slate-600",
+    connector: "bg-slate-500",
+    card: "border-slate-300 bg-slate-50/50",
+    badge: "bg-slate-200 text-slate-700"
   }
 };
 import { formatShortDate } from "@/lib/utils/presenters";
@@ -211,7 +217,7 @@ function MilestoneRow({
   // El color del círculo del hito (y de sus cambios) es el color de la columna
   // del kanban en la que está. Si el PM aún no le asignó fase, se usa la fase
   // del proyecto padre como default.
-  const phase: ProjectStatus = milestone.phase ?? defaultPhase;
+  const phase: MilestonePhase = milestone.phase ?? defaultPhase;
   const theme = PHASE_THEME[phase];
   const tone = {
     node: theme.node,
@@ -336,7 +342,7 @@ function ChangeRequestCard({
   isCurrentMilestone
 }: {
   change: ChangeRequestRecord;
-  phase: ProjectStatus;
+  phase: MilestonePhase;
   connectorClass: string;
   isCurrentMilestone: boolean;
 }) {

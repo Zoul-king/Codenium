@@ -8,7 +8,7 @@ import {
   encodeMilestoneDescription,
   isValidPhase
 } from "./encoding";
-import type { ProjectStatus } from "@/lib/types/domain";
+import type { MilestonePhase } from "@/lib/types/domain";
 
 type ClientStatus = "next" | "current" | "done";
 
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     summary?: string;
     date?: string;
     status?: ClientStatus;
-    phase?: ProjectStatus;
+    phase?: MilestonePhase;
   };
   try {
     body = await request.json();
@@ -107,7 +107,7 @@ export async function PATCH(request: Request) {
     summary?: string;
     date?: string;
     status?: ClientStatus;
-    phase?: ProjectStatus;
+    phase?: MilestonePhase;
   };
   try {
     body = await request.json();

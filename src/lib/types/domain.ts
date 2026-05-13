@@ -45,6 +45,11 @@ export type QuoteKind = "prequote" | "formal";
 
 export type ProjectStatus = "discovery" | "design" | "build" | "qa" | "done";
 
+// Fase del kanban a la que pertenece un hito. Incluye "blocked" como sexta
+// fase oculta (no aparece como columna del tablero, pero el PM puede mover
+// hitos ahí desde el menú "Mover a"; viven en la pestaña "Bloqueados").
+export type MilestonePhase = ProjectStatus | "blocked";
+
 export type MessageStatus = "unread" | "read";
 
 export type MilestoneStatus = "done" | "current" | "next";
@@ -163,7 +168,7 @@ export interface ProjectMilestoneRecord {
   status: MilestoneStatus;
   // Fase del kanban a la que pertenece. Si no está definida, el cliente
   // que la consume debe asumir la fase del proyecto padre.
-  phase?: ProjectStatus;
+  phase?: MilestonePhase;
   unlocksPaymentId?: string;
 }
 

@@ -22,8 +22,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
-  CommandShortcut
+  CommandSeparator
 } from "@/components/ui/command";
 import { logout } from "@/features/auth/lib/session-store";
 import { dashboardNav } from "@/lib/config/catalogs";
@@ -90,7 +89,6 @@ export function CommandPalette({ role, open, onOpenChange }: CommandPaletteProps
           <CommandItem value="cerrar sesión" onSelect={handleLogout}>
             <LogOut className="size-4" />
             <span>Cerrar sesión</span>
-            <CommandShortcut>⇧⌘Q</CommandShortcut>
           </CommandItem>
         </CommandGroup>
       </CommandList>

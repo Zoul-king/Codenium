@@ -257,7 +257,6 @@ export function ProjectChatPanel({ role }: ProjectChatPanelProps) {
               {sending ? "…" : "Enviar"}
             </Button>
           </div>
-          <p className="mt-2 text-[10px] text-slate-400">⌘ + ↵ para enviar rápido</p>
         </div>
       </section>
     </div>

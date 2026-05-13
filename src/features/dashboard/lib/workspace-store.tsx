@@ -91,6 +91,7 @@ interface DashboardWorkspaceContextValue {
   refreshChangeRequests: () => Promise<void>;
   addProjectMessage: (projectId: string, senderId: string, role: Role, preview: string) => Promise<void>;
   markProjectMessagesAsRead: (projectId: string) => Promise<void>;
+  refreshMessages: () => Promise<void>;
   markPaymentAsPaid: (paymentId: string) => Promise<void>;
   addProjectDocument: (input: AddProjectDocumentInput) => Promise<void>;
 }
@@ -617,6 +618,16 @@ export function DashboardWorkspaceProvider({ children }: { children: ReactNode }
           messages: upsertById(current.messages, message)
         }));
       },
+      refreshMessages: async () => {
+        try {
+          const response = await fetch("/api/chat?scope=dashboard", { cache: "no-store" });
+          if (!response.ok) return;
+          const next = (await response.json()) as MessageRecord[];
+          setState((current) => ({ ...current, messages: next }));
+        } catch {
+          // silencioso — siguiente intento volverá a probar
+        }
+      },
       markProjectMessagesAsRead: async (projectId) => {
         // Optimista: marcamos en memoria primero para que la campana y los
         // badges desaparezcan al instante; si el PATCH falla revertimos.
@@ -888,7 +899,7 @@ function mapApiMilestone(milestone: any): ProjectMilestoneRecord {
   // Extrae el marcador [p:<fase>] si está presente para no contaminarlo dentro
   // del summary que se muestra al cliente.
   const match = raw.match(/^\[p:([^\]]+)\]\s*/);
-  const phase = match && ["discovery", "design", "build", "qa", "done"].includes(match[1])
+  const phase = match && ["discovery", "design", "build", "qa", "done", "blocked"].includes(match[1])
     ? (match[1] as ProjectMilestoneRecord["phase"])
     : undefined;
   const summary = match ? raw.replace(/^\[p:([^\]]+)\]\s*/, "") : raw;

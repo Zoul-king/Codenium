@@ -17,7 +17,7 @@ import {
   Users
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +39,7 @@ import { getPendingMessages, getPrimaryUser } from "@/features/dashboard/lib/sel
 import { useDashboardWorkspace } from "@/features/dashboard/lib/workspace-store";
 import { logout } from "@/features/auth/lib/session-store";
 import { dashboardNav } from "@/lib/config/catalogs";
-import type { Role } from "@/lib/types/domain";
+import type { MessageRecord, Role } from "@/lib/types/domain";
 import { cn } from "@/lib/utils";
 
 interface DashboardShellProps {
@@ -74,9 +74,31 @@ function deriveInitials(name: string): string {
 
 export function DashboardShell({ role, activeKey, children }: DashboardShellProps) {
   const router = useRouter();
-  const { state } = useDashboardWorkspace();
+  const { state, refreshMessages } = useDashboardWorkspace();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const commandPalette = useCommandPaletteState();
+
+  // Polling de mensajes para mantener la campana de notificaciones al día
+  // mientras la sesión está abierta. Al cerrar la sesión el shell se
+  // desmonta, así que el intervalo se limpia y no llegan más notificaciones.
+  // Usamos un ref para no depender de la identidad de refreshMessages (cambia
+  // cada vez que el store recompone su value memoizado por state), evitando
+  // un loop fetch → setState → re-render → fetch.
+  const refreshRef = useRef(refreshMessages);
+  refreshRef.current = refreshMessages;
+  useEffect(() => {
+    const run = () => refreshRef.current();
+    run();
+    const interval = window.setInterval(run, 10000);
+    const onFocus = () => run();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, []);
 
   // Diferimos el Sheet móvil hasta después del mount para evitar el mismatch de
   // IDs de Radix (useId) entre SSR y cliente: el sidebar se renderiza tanto en
@@ -87,7 +109,8 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
     setMounted(true);
   }, []);
 
-  const unreadMessages = getPendingMessages(state, role).length;
+  const pendingMessages = getPendingMessages(state, role);
+  const unreadMessages = pendingMessages.length;
   const sessionUser = getPrimaryUser(state, role);
   const user = sessionUser
     ? {
@@ -102,11 +125,18 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
     router.push("/");
   }
 
+  const goToChat = () => {
+    setSidebarOpen(false);
+    router.push(`/dashboard/${role}/chat`);
+  };
+
   const sidebar = (
     <SidebarContent
       role={role}
       activeKey={activeKey}
       unreadMessages={unreadMessages}
+      pendingMessages={pendingMessages}
+      onOpenChat={goToChat}
       onNavigate={() => setSidebarOpen(false)}
       onOpenSearch={() => {
         setSidebarOpen(false);
@@ -143,6 +173,8 @@ export function DashboardShell({ role, activeKey, children }: DashboardShellProp
                   role={role}
                   activeKey={activeKey}
                   unreadMessages={unreadMessages}
+                  pendingMessages={pendingMessages}
+                  onOpenChat={goToChat}
                   onNavigate={() => setSidebarOpen(false)}
                   onOpenSearch={() => {
                     setSidebarOpen(false);
@@ -191,6 +223,8 @@ interface SidebarContentProps {
   role: Role;
   activeKey: string;
   unreadMessages: number;
+  pendingMessages: MessageRecord[];
+  onOpenChat: () => void;
   onNavigate: () => void;
   onOpenSearch: () => void;
   onLogout: () => void;
@@ -203,6 +237,8 @@ function SidebarContent({
   role,
   activeKey,
   unreadMessages,
+  pendingMessages,
+  onOpenChat,
   onNavigate,
   onOpenSearch,
   onLogout,
@@ -223,7 +259,11 @@ function SidebarContent({
               <p className="truncate text-[11px] font-medium text-slate-500">{panelLabelByRole[role]}</p>
             </div>
           </div>
-          <NotificationsBell unreadMessages={unreadMessages} />
+          <NotificationsBell
+            unreadMessages={unreadMessages}
+            pendingMessages={pendingMessages}
+            onOpenChat={onOpenChat}
+          />
         </div>
 
         <button
@@ -233,9 +273,6 @@ function SidebarContent({
         >
           <Search className="size-3.5" />
           Buscar
-          <span className="ml-auto inline-flex items-center gap-0.5 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
-            ⌘K
-          </span>
         </button>
       </div>
 
@@ -324,7 +361,15 @@ function SidebarContent({
   );
 }
 
-function NotificationsBell({ unreadMessages }: { unreadMessages: number }) {
+function NotificationsBell({
+  unreadMessages,
+  pendingMessages,
+  onOpenChat
+}: {
+  unreadMessages: number;
+  pendingMessages: MessageRecord[];
+  onOpenChat: () => void;
+}) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -344,11 +389,28 @@ function NotificationsBell({ unreadMessages }: { unreadMessages: number }) {
             </Badge>
           ) : null}
         </div>
-        {unreadMessages > 0 ? (
-          <div className="rounded-[12px] border border-slate-200 bg-white p-3 text-sm">
-            <p className="font-medium text-slate-950">Tienes {unreadMessages} mensajes nuevos</p>
-            <p className="mt-1 text-xs text-slate-500">Revisa la sección de chat para ponerte al día.</p>
-          </div>
+        {pendingMessages.length > 0 ? (
+          <ul className="max-h-80 space-y-1.5 overflow-y-auto">
+            {pendingMessages
+              .slice()
+              .reverse()
+              .map((message) => (
+                <li key={message.id}>
+                  <button
+                    type="button"
+                    onClick={onOpenChat}
+                    className="block w-full rounded-[12px] border border-slate-200 bg-white p-3 text-left transition hover:border-[var(--role,#68b8b2)]/50 hover:bg-slate-50"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="truncate text-xs font-semibold text-slate-950">{message.senderName}</p>
+                      <span className="shrink-0 text-[10px] text-slate-400">{message.sentAt}</span>
+                    </div>
+                    <p className="mt-0.5 truncate text-[11px] text-slate-500">{message.thread}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-slate-700">{message.preview}</p>
+                  </button>
+                </li>
+              ))}
+          </ul>
         ) : (
           <p className="rounded-[12px] bg-slate-50 p-3 text-xs text-slate-500">
             No tienes notificaciones pendientes.
