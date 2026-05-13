@@ -1,0 +1,19 @@
+# ============================================================
+# PRODUCCIÓN: La base de datos es Neon (externa), NO corre
+# un contenedor PostgreSQL local. Todas las variables
+# sensibles se leen desde el archivo .env.production en el
+# servidor. NUNCA subas ese archivo al repositorio.
+# ============================================================
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codenium_app_prod
+    ports:
+      - "23000:3000"
+    env_file:
+      # El servidor debe tener este archivo con las credenciales reales.
+      # Ver .env.example para saber qué variables se necesitan.
+      - .env.production
+    restart: always

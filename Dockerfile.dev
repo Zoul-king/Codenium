@@ -1,0 +1,25 @@
+FROM node:20-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies required by native packages
+RUN apk add --no-cache libc6-compat openssl
+
+# Install dependencies first (for better caching)
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy the rest of the application files
+# Note: we will override this via docker-compose volumes, but it's good to copy anyway
+COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
+
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Start the application in development mode
+CMD ["npm", "run", "dev"]

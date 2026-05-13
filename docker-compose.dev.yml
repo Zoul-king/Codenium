@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: codenium_db_dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: codenium_dev
+    ports:
+      - "15432:5432"
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: codenium_app_dev
+    ports:
+      - "13000:3000"
+    environment:
+      - NODE_ENV=development
+      # Conexión al db container, notar el host "db" en lugar de "localhost"
+      - DATABASE_URL=postgresql://postgres:postgrespassword@db:5432/codenium_dev?schema=public
+      - APP_URL=http://localhost:13000
+    volumes:
+      # Monta el directorio local al contenedor para reflejar los cambios de código
+      - .:/app
+      # Excepto los módulos instalados dentro del contenedor
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  pgdata_dev:
