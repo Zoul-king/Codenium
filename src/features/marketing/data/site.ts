@@ -40,7 +40,7 @@ export const site: SiteConfig = {
   ],
   footer: {
     body: "Diseñamos software, dashboards y productos digitales con una estructura clara, sobria y orientada a resolver procesos reales.",
-    legal: "© 2026 Codenium. Todos los derechos reservados."
+    legal: "© 2026 Techina. Todos los derechos reservados."
   },
   sticky: {
     message: "Canales de contacto",

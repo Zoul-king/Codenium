@@ -23,6 +23,8 @@ export const env = {
   EMAIL_TO_CONTACT: process.env.EMAIL_TO_CONTACT ?? "",
   EMAIL_TO_QUOTES: process.env.EMAIL_TO_QUOTES ?? "",
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",
+  LICENSE_KEY: process.env.LICENSE_KEY ?? "",
+  LICENSE_EXPIRES_AT: process.env.LICENSE_EXPIRES_AT ?? "",
   NODE_ENV: readNodeEnv()
 } as const;
 
