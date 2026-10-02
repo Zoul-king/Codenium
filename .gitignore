@@ -3,6 +3,7 @@ node_modules/
 .next/
 .next-build/
 .next-dev/
+.gitignore
 dist/
 build/
 out/
@@ -16,7 +17,7 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Variables de entorno (no versionar)
+# Variables de entorno
 .env
 .env.local
 .env.production
