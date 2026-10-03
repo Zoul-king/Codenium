@@ -3,7 +3,6 @@ node_modules/
 .next/
 .next-build/
 .next-dev/
-.gitignore
 dist/
 build/
 out/
@@ -21,7 +20,7 @@ Thumbs.db
 .env
 .env.local
 .env.production
-.env.example
+
 
 # Material interno no destinado a revisión pública
 agents/
